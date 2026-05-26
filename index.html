@@ -40,8 +40,8 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .cal td.other.sun .date-num,.cal td.other.sat .date-num{color:#eee}
 .date-num{font-size:20px;margin-bottom:3px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-family:'Caveat Brush',cursive}
 .dot-row{display:flex;gap:4px;flex-wrap:wrap}
-.dot{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center}
-.dot svg{width:20px;height:20px;flex-shrink:0}
+.dot{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.dot svg{width:20px;height:20px;flex-shrink:0;pointer-events:none}
 .dot-cake{background:#FDE8E8;color:#c02025}
 .dot-crepe{background:#FFF3E0;color:#b85c00}
 .dot-muffin{background:#FFF8E1;color:#8a6000}
@@ -55,12 +55,24 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .leg{display:flex;align-items:center;gap:5px;font-size:12px;color:#432f2f;font-family:'Yomogi',cursive}
 .leg-dot{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .leg-dot svg{width:20px;height:20px}
+.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.25);z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;visibility:hidden;transition:opacity 0.15s,visibility 0.15s}
+.popup-overlay.is-open{opacity:1;visibility:visible}
+.popup-card{position:relative;background:#fff;border-radius:12px;padding:10px 12px 12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);font-family:'Yomogi',cursive;transform:scale(0.96);transition:transform 0.15s;width:max-content;max-width:min(260px,calc(100vw - 2rem))}
+.popup-overlay.is-open .popup-card{transform:scale(1)}
+.popup-close{position:absolute;top:2px;right:2px;width:26px;height:26px;border:none;background:none;color:#ccc;font-size:20px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;font-family:sans-serif}
+.popup-close:hover{color:#e8383d}
+.popup-body{display:flex;align-items:center;gap:10px;padding-right:18px}
+.popup-icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.popup-icon svg{width:18px;height:18px}
+.popup-text{min-width:0}
+.popup-name{font-size:17px;color:#432f2f;line-height:1.2;font-family:'Caveat Brush',cursive;white-space:nowrap}
+.popup-hours{font-size:13px;color:#432f2f;opacity:0.7;margin-top:2px;letter-spacing:0.04em;line-height:1.3}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="header">
-    <img src="logo.png" alt="sugar logo">
+    <img src="ロゴ.png" alt="sugar logo">
     <p>営業カレンダー</p>
   </div>
   <div class="tabs">
@@ -78,6 +90,18 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
     <table class="cal" id="cal"></table>
   </div>
   <div class="legend-wrap"><div class="legend" id="legend"></div></div>
+</div>
+<div class="popup-overlay" id="popup-overlay" aria-hidden="true">
+  <div class="popup-card" id="popup-card" role="dialog" aria-modal="true" aria-labelledby="popup-name">
+    <button type="button" class="popup-close" id="popup-close" aria-label="閉じる">&times;</button>
+    <div class="popup-body">
+      <div class="popup-icon" id="popup-icon"></div>
+      <div class="popup-text">
+        <div class="popup-name" id="popup-name"></div>
+        <div class="popup-hours" id="popup-hours"></div>
+      </div>
+    </div>
+  </div>
 </div>
 <script>
 var shop = 'sagisu';
@@ -119,12 +143,21 @@ var DOTCLS = {
   takeout:'dot-takeout', cafe:'dot-cafe', cafe2:'dot-cafe2'
 };
 
+var TYPE_INFO = {
+  cake:   { name: 'ホールケーキ', hours: '12:00–17:00' },
+  crepe:  { name: 'クレープ',     hours: '12:00–16:00' },
+  takeout:{ name: 'テイクアウト', hours: '12:00–18:00' },
+  cafe:   { name: 'イートイン',   hours: '13:00–17:30' },
+  cafe2:  { name: '気まぐれ',     hours: '12:00–16:30' },
+  muffin: { name: 'マフィン',     hours: '変動あり' }
+};
+
 var shops = {
   sagisu: {
     getInfoRows: function() {
       return [
-        {type:'cake', text:'ホールケーキ　<b>金-火</b> / 12:00–17:00'},
-        {type:'crepe', text:'クレープ　<b>火-土</b> / 12:00–16:00'}
+        {type:'cake', text:'ホールケーキ　<b>金〜火</b> ' + TYPE_INFO.cake.hours},
+        {type:'crepe', text:'クレープ　<b>火〜土</b> ' + TYPE_INFO.crepe.hours}
       ];
     },
     getLegend: function() {
@@ -146,17 +179,17 @@ var shops = {
   ebie: {
     getInfoRows: function() {
       return [
-        {type:'takeout', text:'テイクアウト　<b>金-火</b> / 12:00–18:00'},
-        {type:'cafe', text:'イートイン　<b>金-火</b> / 13:00–18:00(L.O.17:30)'},
-        {type:'cafe2', text:'気まぐれカフェ(テイクアウト)　<b>水・木</b> / 12:00–16:30'},
-        {type:'muffin', text:'マフィン　<b>月・火・金</b> / 12:00-18:00'}
+        {type:'takeout', text:'テイクアウト　<b>金〜火</b> ' + TYPE_INFO.takeout.hours},
+        {type:'cafe', text:'イートイン　<b>金〜火</b> ' + TYPE_INFO.cafe.hours},
+        {type:'cafe2', text:'気まぐれ　<b>水・木</b> ' + TYPE_INFO.cafe2.hours},
+        {type:'muffin', text:'マフィン　<b>月・火・金</b>（' + TYPE_INFO.muffin.hours + '）'}
       ];
     },
     getLegend: function() {
       return [
         {cls:'dot-takeout', svg:SVG.takeout, label:'テイクアウト'},
         {cls:'dot-cafe', svg:SVG.cafe, label:'イートイン'},
-        {cls:'dot-cafe2', svg:SVG.cafe2, label:'気まぐれカフェ(テイクアウト)'},
+        {cls:'dot-cafe2', svg:SVG.cafe2, label:'気まぐれ'},
         {cls:'dot-muffin', svg:SVG.muffin, label:'マフィン'},
         {pill:'#e8383d', label:'臨時休業'},
         {pill:'#00533f', label:'イベント'}
@@ -272,7 +305,9 @@ function render() {
         } else {
           html += '<div class="dot-row">';
           evs.forEach(function(e) {
-            html += '<div class="dot ' + (DOTCLS[e.type] || '') + '">' + (SVG[e.type] || '') + '</div>';
+            if (TYPE_INFO[e.type]) {
+              html += '<div class="dot ' + (DOTCLS[e.type] || '') + '" data-type="' + e.type + '" role="button" tabindex="0" aria-label="' + TYPE_INFO[e.type].name + '">' + (SVG[e.type] || '') + '</div>';
+            }
           });
           html += '</div>';
         }
@@ -286,6 +321,50 @@ function render() {
   document.getElementById('cal').innerHTML = html;
   setTimeout(drawRowLines, 100);
 }
+
+function showTypePopup(type) {
+  var info = TYPE_INFO[type];
+  if (!info) return;
+  var overlay = document.getElementById('popup-overlay');
+  var iconEl = document.getElementById('popup-icon');
+  iconEl.className = 'popup-icon ' + (DOTCLS[type] || '');
+  iconEl.innerHTML = SVG[type] || '';
+  document.getElementById('popup-name').textContent = info.name;
+  document.getElementById('popup-hours').textContent = info.hours;
+  overlay.classList.add('is-open');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+
+function hideTypePopup() {
+  var overlay = document.getElementById('popup-overlay');
+  overlay.classList.remove('is-open');
+  overlay.setAttribute('aria-hidden', 'true');
+}
+
+document.getElementById('popup-overlay').addEventListener('click', function(e) {
+  if (e.target === this) hideTypePopup();
+});
+
+document.getElementById('popup-card').addEventListener('click', function(e) {
+  e.stopPropagation();
+});
+
+document.getElementById('popup-close').addEventListener('click', hideTypePopup);
+
+document.querySelector('.cal-wrap').addEventListener('click', function(e) {
+  var dot = e.target.closest('.dot[data-type]');
+  if (!dot) return;
+  e.stopPropagation();
+  showTypePopup(dot.getAttribute('data-type'));
+});
+
+document.querySelector('.cal-wrap').addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  var dot = e.target.closest('.dot[data-type]');
+  if (!dot) return;
+  e.preventDefault();
+  showTypePopup(dot.getAttribute('data-type'));
+});
 
 document.fonts.ready.then(function() { render(); });
 render();
