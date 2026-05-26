@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>sugar 営業カレンダー</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,10 +55,12 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .leg{display:flex;align-items:center;gap:5px;font-size:12px;color:#432f2f;font-family:'Yomogi',cursive}
 .leg-dot{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .leg-dot svg{width:20px;height:20px}
-.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.25);z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;visibility:hidden;transition:opacity 0.15s,visibility 0.15s}
+html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
+body.popup-open{position:fixed;width:100%;left:0;right:0}
+.popup-overlay{position:fixed;top:-3px;left:0;right:0;bottom:-3px;width:100%;min-height:100vh;min-height:100dvh;min-height:-webkit-fill-available;background:rgba(0,0,0,0.25);z-index:100;margin:0;padding:0;border:none;opacity:0;visibility:hidden;transition:opacity 0.15s,visibility 0.15s;-webkit-tap-highlight-color:transparent}
 .popup-overlay.is-open{opacity:1;visibility:visible}
-.popup-card{position:relative;background:#fff;border-radius:12px;padding:10px 12px 12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);font-family:'Yomogi',cursive;transform:scale(0.96);transition:transform 0.15s;width:max-content;max-width:min(260px,calc(100vw - 2rem))}
-.popup-overlay.is-open .popup-card{transform:scale(1)}
+.popup-card{position:fixed;left:0;top:0;z-index:101;background:#fff;border-radius:12px;padding:10px 12px 12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);font-family:'Yomogi',cursive;width:max-content;max-width:min(260px,calc(100vw - 16px));opacity:0;visibility:hidden;transform:scale(0.96);transition:opacity 0.12s,transform 0.12s,visibility 0.12s;pointer-events:none}
+.popup-card.is-visible{opacity:1;visibility:visible;transform:scale(1);pointer-events:auto}
 .popup-close{position:absolute;top:2px;right:2px;width:26px;height:26px;border:none;background:none;color:#ccc;font-size:20px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;font-family:sans-serif}
 .popup-close:hover{color:#e8383d}
 .popup-body{display:flex;align-items:center;gap:10px;padding-right:18px}
@@ -144,20 +146,20 @@ var DOTCLS = {
 };
 
 var TYPE_INFO = {
-  cake:   { name: 'ホールケーキ', hours: '12:00–17:00' },
-  crepe:  { name: 'クレープ',     hours: '12:00–16:00' },
-  takeout:{ name: 'テイクアウト', hours: '12:00–18:00' },
-  cafe:   { name: 'イートイン',   hours: '13:00–17:30' },
-  cafe2:  { name: '気まぐれ',     hours: '12:00–16:30' },
-  muffin: { name: 'マフィン',     hours: '変動あり' }
+  cake:   { name: 'ホールケーキ', hours: '12:00-17:00' },
+  crepe:  { name: 'クレープ',     hours: '12:00-16:00' },
+  takeout:{ name: 'テイクアウト', hours: '12:00-18:00' },
+  cafe:   { name: 'イートイン',   hours: '13:00-18:00 (L.O.17:30)' },
+  cafe2:  { name: '気まぐれ',     hours: '12:00-16:30' },
+  muffin: { name: 'マフィン',     hours: '12:00-18:00' }
 };
 
 var shops = {
   sagisu: {
     getInfoRows: function() {
       return [
-        {type:'cake', text:'ホールケーキ　<b>金〜火</b> ' + TYPE_INFO.cake.hours},
-        {type:'crepe', text:'クレープ　<b>火〜土</b> ' + TYPE_INFO.crepe.hours}
+        {type:'cake', text:'ホールケーキ <b>金-火</b> /' + TYPE_INFO.cake.hours},
+        {type:'crepe', text:'クレープ <b>火-土</b> /' + TYPE_INFO.crepe.hours}
       ];
     },
     getLegend: function() {
@@ -179,17 +181,17 @@ var shops = {
   ebie: {
     getInfoRows: function() {
       return [
-        {type:'takeout', text:'テイクアウト　<b>金〜火</b> ' + TYPE_INFO.takeout.hours},
-        {type:'cafe', text:'イートイン　<b>金〜火</b> ' + TYPE_INFO.cafe.hours},
-        {type:'cafe2', text:'気まぐれ　<b>水・木</b> ' + TYPE_INFO.cafe2.hours},
-        {type:'muffin', text:'マフィン　<b>月・火・金</b>（' + TYPE_INFO.muffin.hours + '）'}
+        {type:'takeout', text:'テイクアウト <b>金〜火</b> /' + TYPE_INFO.takeout.hours},
+        {type:'cafe', text:'イートイン <b>金〜火</b> /' + TYPE_INFO.cafe.hours},
+        {type:'cafe2', text:'気まぐれカフェ(テイクアウト) <b>水・木</b> /' + TYPE_INFO.cafe2.hours},
+        {type:'muffin', text:'マフィン <b>月・火・金</b> /' + TYPE_INFO.muffin.hours }
       ];
     },
     getLegend: function() {
       return [
         {cls:'dot-takeout', svg:SVG.takeout, label:'テイクアウト'},
         {cls:'dot-cafe', svg:SVG.cafe, label:'イートイン'},
-        {cls:'dot-cafe2', svg:SVG.cafe2, label:'気まぐれ'},
+        {cls:'dot-cafe2', svg:SVG.cafe2, label:'気まぐれカフェ(テイクアウト)'},
         {cls:'dot-muffin', svg:SVG.muffin, label:'マフィン'},
         {pill:'#e8383d', label:'臨時休業'},
         {pill:'#00533f', label:'イベント'}
@@ -322,23 +324,76 @@ function render() {
   setTimeout(drawRowLines, 100);
 }
 
-function showTypePopup(type) {
+var popupScrollY = 0;
+var popupAnchorEl = null;
+
+function lockPageScroll() {
+  popupScrollY = window.scrollY || window.pageYOffset;
+  document.documentElement.classList.add('popup-open');
+  document.body.classList.add('popup-open');
+  document.body.style.top = '-' + popupScrollY + 'px';
+}
+
+function unlockPageScroll() {
+  document.documentElement.classList.remove('popup-open');
+  document.body.classList.remove('popup-open');
+  document.body.style.top = '';
+  window.scrollTo(0, popupScrollY);
+}
+
+function positionPopupNear(anchorEl, card) {
+  var gap = 6;
+  var margin = 8;
+  var anchor = anchorEl.getBoundingClientRect();
+  var cardW = card.offsetWidth;
+  var cardH = card.offsetHeight;
+  var vw = window.innerWidth;
+  var vh = window.innerHeight;
+  var left, top;
+  if (anchor.right + gap + cardW <= vw - margin) {
+    left = anchor.right + gap;
+    top = anchor.top - cardH - gap;
+  } else {
+    left = anchor.left - cardW - gap;
+    top = anchor.top - cardH - gap;
+  }
+  if (top < margin) top = anchor.bottom + gap;
+  if (left < margin) left = margin;
+  if (left + cardW > vw - margin) left = vw - margin - cardW;
+  if (top + cardH > vh - margin) top = vh - margin - cardH;
+  card.style.left = Math.round(left) + 'px';
+  card.style.top = Math.round(top) + 'px';
+}
+
+function showTypePopup(type, anchorEl) {
   var info = TYPE_INFO[type];
-  if (!info) return;
+  if (!info || !anchorEl) return;
+  popupAnchorEl = anchorEl;
   var overlay = document.getElementById('popup-overlay');
+  var card = document.getElementById('popup-card');
   var iconEl = document.getElementById('popup-icon');
   iconEl.className = 'popup-icon ' + (DOTCLS[type] || '');
   iconEl.innerHTML = SVG[type] || '';
   document.getElementById('popup-name').textContent = info.name;
   document.getElementById('popup-hours').textContent = info.hours;
+  card.classList.remove('is-visible');
+  lockPageScroll();
   overlay.classList.add('is-open');
   overlay.setAttribute('aria-hidden', 'false');
+  requestAnimationFrame(function() {
+    positionPopupNear(anchorEl, card);
+    card.classList.add('is-visible');
+  });
 }
 
 function hideTypePopup() {
   var overlay = document.getElementById('popup-overlay');
+  var card = document.getElementById('popup-card');
+  card.classList.remove('is-visible');
   overlay.classList.remove('is-open');
   overlay.setAttribute('aria-hidden', 'true');
+  popupAnchorEl = null;
+  unlockPageScroll();
 }
 
 document.getElementById('popup-overlay').addEventListener('click', function(e) {
@@ -355,7 +410,7 @@ document.querySelector('.cal-wrap').addEventListener('click', function(e) {
   var dot = e.target.closest('.dot[data-type]');
   if (!dot) return;
   e.stopPropagation();
-  showTypePopup(dot.getAttribute('data-type'));
+  showTypePopup(dot.getAttribute('data-type'), dot);
 });
 
 document.querySelector('.cal-wrap').addEventListener('keydown', function(e) {
@@ -363,7 +418,13 @@ document.querySelector('.cal-wrap').addEventListener('keydown', function(e) {
   var dot = e.target.closest('.dot[data-type]');
   if (!dot) return;
   e.preventDefault();
-  showTypePopup(dot.getAttribute('data-type'));
+  showTypePopup(dot.getAttribute('data-type'), dot);
+});
+
+window.addEventListener('resize', function() {
+  if (!popupAnchorEl) return;
+  var card = document.getElementById('popup-card');
+  if (card.classList.contains('is-visible')) positionPopupNear(popupAnchorEl, card);
 });
 
 document.fonts.ready.then(function() { render(); });
