@@ -158,8 +158,8 @@ var shops = {
   sagisu: {
     getInfoRows: function() {
       return [
-        {type:'cake', text:'ホールケーキ <b>金-火</b> /' + TYPE_INFO.cake.hours},
-        {type:'crepe', text:'クレープ <b>火-土</b> /' + TYPE_INFO.crepe.hours}
+        {type:'cake', text:'ホールケーキ <b>金-火</b> / ' + TYPE_INFO.cake.hours},
+        {type:'crepe', text:'クレープ <b>火-土</b> / ' + TYPE_INFO.crepe.hours}
       ];
     },
     getLegend: function() {
@@ -181,10 +181,10 @@ var shops = {
   ebie: {
     getInfoRows: function() {
       return [
-        {type:'takeout', text:'テイクアウト <b>金〜火</b> /' + TYPE_INFO.takeout.hours},
-        {type:'cafe', text:'イートイン <b>金〜火</b> /' + TYPE_INFO.cafe.hours},
-        {type:'cafe2', text:'気まぐれカフェ(テイクアウト) <b>水・木</b> /' + TYPE_INFO.cafe2.hours},
-        {type:'muffin', text:'マフィン <b>月・火・金</b> /' + TYPE_INFO.muffin.hours }
+        {type:'takeout', text:'テイクアウト <b>金〜火</b> / ' + TYPE_INFO.takeout.hours},
+        {type:'cafe', text:'イートイン <b>金〜火</b> / ' + TYPE_INFO.cafe.hours},
+        {type:'cafe2', text:'気まぐれカフェ(テイクアウト) <b>水・木</b> / ' + TYPE_INFO.cafe2.hours},
+        {type:'muffin', text:'マフィン <b>月・火・金</b> / ' + TYPE_INFO.muffin.hours }
       ];
     },
     getLegend: function() {
@@ -342,7 +342,9 @@ function unlockPageScroll() {
 }
 
 function positionPopupNear(anchorEl, card) {
-  var gap = 6;
+  // 負の値にするとアイコン側へ寄せて、わずかに重なる
+  var gapH = -6;
+  var gapV = -6;
   var margin = 8;
   var anchor = anchorEl.getBoundingClientRect();
   var cardW = card.offsetWidth;
@@ -350,14 +352,14 @@ function positionPopupNear(anchorEl, card) {
   var vw = window.innerWidth;
   var vh = window.innerHeight;
   var left, top;
-  if (anchor.right + gap + cardW <= vw - margin) {
-    left = anchor.right + gap;
-    top = anchor.top - cardH - gap;
+  if (anchor.right + gapH + cardW <= vw - margin) {
+    left = anchor.right + gapH;
+    top = anchor.top - cardH - gapV;
   } else {
-    left = anchor.left - cardW - gap;
-    top = anchor.top - cardH - gap;
+    left = anchor.left - cardW - gapH;
+    top = anchor.top - cardH - gapV;
   }
-  if (top < margin) top = anchor.bottom + gap;
+  if (top < margin) top = anchor.bottom + gapV;
   if (left < margin) left = margin;
   if (left + cardW > vw - margin) left = vw - margin - cardW;
   if (top + cardH > vh - margin) top = vh - margin - cardH;
