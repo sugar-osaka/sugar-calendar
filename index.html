@@ -123,8 +123,8 @@ var shops = {
   sagisu: {
     getInfoRows: function() {
       return [
-        {type:'cake', text:'ホールケーキ　<b>金-火</b> 12:00–17:00'},
-        {type:'crepe', text:'クレープ　<b>火-土</b> 12:00–16:00'}
+        {type:'cake', text:'ホールケーキ　<b>金-火</b> / 12:00–17:00'},
+        {type:'crepe', text:'クレープ　<b>火-土</b> / 12:00–16:00'}
       ];
     },
     getLegend: function() {
@@ -146,17 +146,17 @@ var shops = {
   ebie: {
     getInfoRows: function() {
       return [
-        {type:'takeout', text:'テイクアウト　<b>金-火</b> 12:00–18:00'},
-        {type:'cafe', text:'イートイン　<b>金-火</b> 13:00–18:00(L.O.17:30)'},
-        {type:'cafe2', text:'気まぐれカフェ(テイクアウト)<b>水・木</b> 12:00–16:30'},
-        {type:'muffin', text:'マフィン　<b>月・火・金</b> 12:00-18:00'}
+        {type:'takeout', text:'テイクアウト　<b>金-火</b> / 12:00–18:00'},
+        {type:'cafe', text:'イートイン　<b>金-火</b> / 13:00–18:00(L.O.17:30)'},
+        {type:'cafe2', text:'気まぐれカフェ(テイクアウト)<b>水・木</b> / 12:00–16:30'},
+        {type:'muffin', text:'マフィン　<b>月・火・金</b> / 12:00-18:00'}
       ];
     },
     getLegend: function() {
       return [
         {cls:'dot-takeout', svg:SVG.takeout, label:'テイクアウト'},
         {cls:'dot-cafe', svg:SVG.cafe, label:'イートイン'},
-        {cls:'dot-cafe2', svg:SVG.cafe2, label:'気まぐれカフェ / 気まぐれテイクアウト'},
+        {cls:'dot-cafe2', svg:SVG.cafe2, label:'気まぐれカフェ(テイクアウト)'},
         {cls:'dot-muffin', svg:SVG.muffin, label:'マフィン'},
         {pill:'#e8383d', label:'臨時休業'},
         {pill:'#00533f', label:'イベント'}
