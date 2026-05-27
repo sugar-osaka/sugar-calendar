@@ -835,7 +835,12 @@ window.addEventListener('resize',function(){
   if(card.classList.contains('is-visible')) positionPopupNear(popupAnchorEl,card);
 });
 
-document.fonts.ready.then(function(){ loadCSV(); });
+if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+  document.fonts.ready.then(function(){ loadCSV(); }).catch(function(){ loadCSV(); });
+} else {
+  // iOS Safari等でfonts APIが使えない場合のフォールバック
+  loadCSV();
+}
 window.addEventListener('resize',function(){setTimeout(drawCalendarLines,100);});
 </script>
 </body>
