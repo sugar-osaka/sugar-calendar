@@ -56,7 +56,7 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .dot-takeout{background:#E8C5B9;color:#A67667}
 .dot-cafe{background:#AEC1CD;color:#6B8294}
 .dot-cafe2{background:#D8C4A7;color:#A68A6F}
-.pill-closed{background:#A65B65;color:#D8A8B0;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive;cursor:pointer;position:relative;z-index:1}
+.pill-closed{background:#A65B65;color:#fcebed;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive;cursor:pointer;position:relative;z-index:1}
 /* イベント帯・臨時休業帯 */
 .event-band,.closed-band{position:absolute;top:32px;left:0;right:0;height:20px;z-index:3;display:flex;align-items:center;padding-left:4px;cursor:pointer;overflow:visible}
 .event-band{background:#fcc800;}
@@ -408,7 +408,7 @@ var shops = {
       return [
         {cls:'dot-cake',  svg:SVG.cake,  label:'ホールケーキ'},
         {cls:'dot-crepe', svg:SVG.crepe, label:'クレープ'},
-        {pill:'#A65B65', textColor:'#D8A8B0', label:'臨時休業'},
+        {pill:'#A65B65', textColor:'#fcebed', label:'臨時休業'},
         {pill:'#fcc800', label:'イベント'}
       ];
     },
@@ -443,7 +443,7 @@ var shops = {
         {cls:'dot-cafe',    svg:SVG.cafe,    label:'イートイン'},
         {cls:'dot-cafe2',   svg:SVG.cafe2,   label:'気まぐれカフェ'},
         {cls:'dot-muffin',  svg:SVG.muffin,  label:'マフィン'},
-        {pill:'#A65B65', textColor:'#D8A8B0', label:'臨時休業'},
+        {pill:'#A65B65', textColor:'#fcebed', label:'臨時休業'},
         {pill:'#fcc800', label:'イベント'}
       ];
     },
