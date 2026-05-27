@@ -48,8 +48,8 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .dot-takeout{background:#fdede4;color:#e95464}
 .dot-cafe{background:#E3F2FD;color:#1565c0}
 .dot-cafe2{background:#E8F5E9;color:#2e7d32}
-.pill-closed{background:var(--theme);color:#fff;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive}
-.pill-event{background:#00533f;color:#fff;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive}
+.pill-closed{background:#d70035;color:#fff;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive}
+.pill-event{background:#fcc800;color:#432f2f;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive}
 .legend-wrap{margin-top:1.2rem;padding-top:1rem}
 .legend{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center}
 .leg{display:flex;align-items:center;gap:5px;font-size:12px;color:#432f2f;font-family:'Yomogi',cursive}
@@ -166,8 +166,8 @@ var shops = {
       return [
         {cls:'dot-cake', svg:SVG.cake, label:'ホールケーキ'},
         {cls:'dot-crepe', svg:SVG.crepe, label:'クレープ'},
-        {pill:'theme', label:'臨時休業'},
-        {pill:'#00533f', label:'イベント'}
+        {pill:'#d70035', label:'臨時休業'},
+        {pill:'#fcc800', label:'イベント'}
       ];
     },
     getEvents: function(d) {
@@ -193,8 +193,8 @@ var shops = {
         {cls:'dot-cafe', svg:SVG.cafe, label:'イートイン'},
         {cls:'dot-cafe2', svg:SVG.cafe2, label:'気まぐれカフェ(テイクアウト)'},
         {cls:'dot-muffin', svg:SVG.muffin, label:'マフィン'},
-        {pill:'theme', label:'臨時休業'},
-        {pill:'#00533f', label:'イベント'}
+        {pill:'#d70035', label:'臨時休業'},
+        {pill:'#fcc800', label:'イベント'}
       ];
     },
     getEvents: function(d) {
@@ -300,7 +300,8 @@ function render() {
   shops[shop].getLegend().forEach(function(l) {
     if (l.pill) {
       var pillBg = l.pill === 'theme' ? SHOP_THEME[shop] : l.pill;
-      legendHTML += '<div class="leg"><div class="leg-dot" style="background:' + pillBg + ';color:#fff;font-size:10px;border-radius:10px;padding:0 6px;width:auto;min-width:28px">' + l.label + '</div></div>';
+      var pillText = pillBg === '#fcc800' ? '#432f2f' : '#fff';
+      legendHTML += '<div class="leg"><div class="leg-dot" style="background:' + pillBg + ';color:' + pillText + ';font-size:10px;border-radius:10px;padding:0 6px;width:auto;min-width:28px">' + l.label + '</div></div>';
     } else {
       legendHTML += '<div class="leg"><div class="leg-dot ' + l.cls + '">' + l.svg + '</div><span>' + l.label + '</span></div>';
     }
