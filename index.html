@@ -542,9 +542,6 @@ function drawCalendarLines() {
     var target = band || closedBand;
     if (!target) return;
 
-    // data-notext="1"がある場合はテキスト描画をスキップ
-    if (target.getAttribute('data-notext') === '1') return;
-
     var isEvent = !!band;
     var name = isEvent
       ? (target.getAttribute('data-name') || '')
@@ -652,7 +649,7 @@ function render() {
           if(band.isEnd)   bc+=' band-end';
           if(band.isStart&&band.isEnd) bc='event-band shift-down band-single';
           if(band.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
-          html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'" data-notext="1"></div>';
+          html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'"></div>';
           var evs=shops[shop].getEvents(d);
           if(evs.length){
             html+='<div class="dot-row-below double-band">';
