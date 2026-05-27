@@ -611,8 +611,7 @@ function render() {
   var day=1-startDay;
   for(var row=0;row<6;row++){
     html+='<tr>';
-    var rowHasShift = false; // この行でshift-downが始まったか
-    var shiftStartedThisRow = false; // この行の最初のclosed+bandの重なりを記録
+    var rowShiftDown = false; // この行でshift-downが必要か（行をまたいでリセット）
     for(var col=0;col<7;col++){
       var d=new Date(year,month,day);
       var isOther=day<1||day>last.getDate();
@@ -635,8 +634,8 @@ function render() {
           });
         } else if(closedBands[shop][dk] && band){
           // 臨時休業とイベントが同じ日に重なる場合
-          rowHasShift = true;
-          shiftStartedThisRow = true;
+          // → この日からrowShiftDownをtrueに（行が変わるまで維持）
+          rowShiftDown = true;
           var cb=closedBands[shop][dk];
           var cc='closed-band';
           if(cb.single||cb.isStart&&cb.isEnd) cc='closed-band band-single';
@@ -649,20 +648,9 @@ function render() {
           if(band.isEnd)   bc+=' band-end';
           if(band.isStart&&band.isEnd) bc='event-band shift-down band-single';
           if(band.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
-          html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'"></div>';
-          // 臨時休業の日はアイコン非表示
-          // 同じ行でshift-downが続く場合（臨時休業はないがこの行でshiftが始まった）
-          var bc='event-band shift-down';
-          if(band.isStart) bc+=' band-start';
-          if(band.isEnd)   bc+=' band-end';
-          if(band.isStart&&band.isEnd) bc='event-band shift-down band-single';
-          var isFirstInRow = (col===0 || band.isStart);
-          if(isFirstInRow){
-            html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
-            html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'"><span class="event-band-label">'+band.name+'</span></div>';
-          } else {
-            html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'"></div>';
-          }
+          var labelPart=band.isStart?'<span class="event-band-label">'+band.name+'</span>':'';
+          html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'">'+labelPart+'</div>';
+          // 臨時休業の日はアイコン非表示（dot-row-belowはdouble-band）
           var evs=shops[shop].getEvents(d);
           if(evs.length){
             html+='<div class="dot-row-below double-band">';
@@ -672,6 +660,8 @@ function render() {
             });
             html+='</div>';
           }
+          // イベント帯の終端なら次の行ではshift不要
+          if(band.isEnd || (band.isStart&&band.isEnd)) rowShiftDown = false;
         } else if(closedBands[shop][dk]){
           var cb=closedBands[shop][dk];
           var cc='closed-band';
@@ -684,10 +674,12 @@ function render() {
           html+='<div class="'+cc+'" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'">'+clabel+'</div>';
 
         } else if(band){
-          var bc='event-band';
+          // rowShiftDownがtrueの場合（同じ行の前のセルで臨時休業+イベント重複があった）
+          var needsShift = rowShiftDown;
+          var bc = needsShift ? 'event-band shift-down' : 'event-band';
           if(band.isStart) bc+=' band-start';
           if(band.isEnd)   bc+=' band-end';
-          if(band.isStart&&band.isEnd) bc='event-band band-single';
+          if(band.isStart&&band.isEnd) bc=(needsShift?'event-band shift-down':'event-band')+' band-single';
           if(band.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
           var labelPart=band.isStart?'<span class="event-band-label">'+band.name+'</span>':'';
           html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'">'+labelPart+'</div>';
@@ -695,13 +687,16 @@ function render() {
           // 通常アイコンも表示
           var evs=shops[shop].getEvents(d);
           if(evs.length){
-            html+='<div class="dot-row-below">';
+            var belowCls = needsShift ? 'dot-row-below double-band' : 'dot-row-below';
+            html+='<div class="'+belowCls+'">';
             evs.forEach(function(e){
               var hrs=getHours(e.type,d);
               html+='<div class="dot '+(DOTCLS[e.type]||'')+'" data-type="'+e.type+'" data-hours="'+hrs+'" role="button" tabindex="0">'+(SVG[e.type]||'')+'</div>';
             });
             html+='</div>';
           }
+          // イベント帯の終端でrowShiftDownをリセット
+          if(band.isEnd || (band.isStart&&band.isEnd)) rowShiftDown = false;
         } else {
           var evs=shops[shop].getEvents(d);
           html+='<div class="dot-row">';
