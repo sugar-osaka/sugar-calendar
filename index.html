@@ -20,10 +20,17 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .tab:first-child{border-right:1.5px solid var(--theme-soft)}
 .tab.active{background:var(--theme);color:#fff}
 .shop-info-top{padding:4px 0;margin-bottom:1rem;font-size:11px;color:#432f2f;font-family:'Yomogi',cursive;line-height:2}
-.shop-info-top .info-row{display:flex;align-items:center;gap:6px}
-.shop-info-top .info-icon{width:18px;height:18px;flex-shrink:0}
-.shop-info-top .info-icon svg{width:18px;height:18px}
+.shop-info-top .info-rows{display:table}
+.shop-info-top .info-row{display:table-row}
+.shop-info-top .info-icon{display:table-cell;width:22px;vertical-align:middle;padding-right:4px}
+.shop-info-top .info-icon svg{width:18px;height:18px;vertical-align:middle}
+.shop-info-top .info-name{display:table-cell;white-space:nowrap;vertical-align:middle;padding-right:6px}
+.shop-info-top .info-days{display:table-cell;vertical-align:middle;padding-right:4px}
+.shop-info-top .info-hours{display:table-cell;vertical-align:middle;white-space:nowrap}
 .shop-info-top b{font-weight:400}
+.day-dots{display:inline-flex;gap:3px;align-items:center;vertical-align:middle;margin:0 2px}
+.day-dot{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid #ddd;font-size:9px;color:#ccc;font-family:'Yomogi',cursive;line-height:1}
+.day-dot.active{font-weight:600}
 .nav{display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:0.8rem}
 .nav button{background:none;border:1.5px solid var(--theme-soft);border-radius:50%;width:30px;height:30px;cursor:pointer;color:var(--theme);display:flex;align-items:center;justify-content:center;font-size:18px}
 .month{font-size:26px;color:var(--theme);min-width:140px;text-align:center;font-family:'Caveat Brush',cursive}
@@ -348,14 +355,28 @@ function daysToText(days) {
   return result.join('・');
 }
 
+// 7曜日のドット表示HTML生成（月火水木金土日の順）
+var DAY_ORDER_DISPLAY = [1,2,3,4,5,6,0]; // 月〜日
+var DAY_NAMES_SHORT = ['月','火','水','木','金','土','日'];
+
+function daysToDotsHTML(days, color) {
+  var html = '<span class="day-dots">';
+  DAY_ORDER_DISPLAY.forEach(function(d, i) {
+    var active = days.indexOf(d) !== -1;
+    html += '<span class="day-dot' + (active ? ' active' : '') + '" style="' + (active ? 'color:'+color+';border-color:'+color : '') + '">' + DAY_NAMES_SHORT[i] + '</span>';
+  });
+  html += '</span>';
+  return html;
+}
+
 var shops = {
   sagisu: {
     getInfoRows: function() {
       var cakeDays  = dayOverrides['sagisu']['cake']  || [1,2,5,6,0];
       var crepeDays = dayOverrides['sagisu']['crepe'] || [2,3,4,5,6];
       return [
-        {type:'cake',  text:'ホールケーキ <b>'+daysToText(cakeDays)+'</b> / '+TYPE_INFO.cake.hours},
-        {type:'crepe', text:'クレープ <b>'+daysToText(crepeDays)+'</b> / '+TYPE_INFO.crepe.hours}
+        {type:'cake',  name:'ホールケーキ', dots:daysToDotsHTML(cakeDays,  COLORS.cake),  hours:TYPE_INFO.cake.hours},
+        {type:'crepe', name:'クレープ',     dots:daysToDotsHTML(crepeDays, COLORS.crepe), hours:TYPE_INFO.crepe.hours}
       ];
     },
     getLegend: function() {
@@ -385,10 +406,10 @@ var shops = {
       var cafe2Days   = dayOverrides['ebie']['cafe2']   || [3,4];
       var muffinDays  = dayOverrides['ebie']['muffin']  || [1,2,5];
       return [
-        {type:'takeout', text:'テイクアウト <b>'+daysToText(takeoutDays)+'</b> / '+TYPE_INFO.takeout.hours},
-        {type:'cafe',    text:'イートイン <b>'+daysToText(cafeDays)+'</b> / '+TYPE_INFO.cafe.hours},
-        {type:'cafe2',   text:'気まぐれカフェ <b>'+daysToText(cafe2Days)+'</b> / '+TYPE_INFO.cafe2.hours},
-        {type:'muffin',  text:'マフィン <b>'+daysToText(muffinDays)+'</b> / '+TYPE_INFO.muffin.hours}
+        {type:'takeout', name:'テイクアウト',   dots:daysToDotsHTML(takeoutDays, COLORS.takeout), hours:TYPE_INFO.takeout.hours},
+        {type:'cafe',    name:'イートイン',     dots:daysToDotsHTML(cafeDays,    COLORS.cafe),    hours:TYPE_INFO.cafe.hours},
+        {type:'cafe2',   name:'気まぐれカフェ', dots:daysToDotsHTML(cafe2Days,   COLORS.cafe2),   hours:TYPE_INFO.cafe2.hours},
+        {type:'muffin',  name:'マフィン',       dots:daysToDotsHTML(muffinDays,  COLORS.muffin),  hours:TYPE_INFO.muffin.hours}
       ];
     },
     getLegend: function() {
@@ -531,12 +552,18 @@ function render() {
   var labs=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   document.getElementById('month-label').textContent=labs[month]+' '+year;
 
-  var infoHTML='';
+  var infoHTML='<div class="info-rows">';
   shops[shop].getInfoRows().forEach(function(r){
     var c=COLORS[r.type];
     var sv=SVG[r.type].replace('stroke="currentColor"','stroke="'+c+'"');
-    infoHTML+='<div class="info-row"><div class="info-icon" style="color:'+c+'">'+sv+'</div><span style="color:'+c+'">'+r.text+'</span></div>';
+    infoHTML+='<div class="info-row">';
+    infoHTML+='<div class="info-icon" style="color:'+c+'">'+sv+'</div>';
+    infoHTML+='<div class="info-name" style="color:'+c+'">'+r.name+'</div>';
+    infoHTML+='<div class="info-days">'+r.dots+'</div>';
+    infoHTML+='<div class="info-hours" style="color:'+c+'">/ '+r.hours+'</div>';
+    infoHTML+='</div>';
   });
+  infoHTML+='</div>';
   document.getElementById('shop-info-top').innerHTML=infoHTML;
 
   var legendHTML='';
