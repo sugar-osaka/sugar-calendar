@@ -704,7 +704,7 @@ function positionPopupNear(anchorEl,card){
   card.style.left=Math.round(left)+'px';
   card.style.top=Math.round(top)+'px';
 }
-function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl){
+function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl,btnText){
   popupAnchorEl=anchorEl;
   var overlay=document.getElementById('popup-overlay');
   var card=document.getElementById('popup-card');
@@ -734,6 +734,7 @@ function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl)
   var reserveEl=document.getElementById('popup-reserve');
   if(reserveUrl){
     reserveEl.href=reserveUrl;
+    reserveEl.textContent=(btnText||'予約はこちら')+' →';
     reserveEl.classList.remove('hidden');
   } else {
     reserveEl.href='#';
@@ -782,7 +783,7 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     var hours=band.getAttribute('data-hours')||'';
     var rurl=band.getAttribute('data-reserve')||'';
     var hoursHTML=(period?'<span style="display:block">'+period+'</span>':'')+(hours?'<span style="display:block">'+hours+'</span>':'');
-    showPopup('','','#432f2f',name,hoursHTML,band,rurl);
+    showPopup('','','#432f2f',name,hoursHTML,band,rurl,'詳細を確認');
     return;
   }
   var closed=e.target.closest('[data-popup="closed"]');
