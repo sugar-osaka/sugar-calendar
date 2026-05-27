@@ -59,9 +59,7 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .event-band.band-single,.closed-band.band-single{border-radius:6px;left:2px;right:2px}
 .event-band-label{display:none}
 .closed-band-label{display:none}
-.band-text{font-size:10px;font-family:'Yomogi',cursive;white-space:nowrap;pointer-events:none;position:absolute;left:4px;z-index:50;line-height:20px;overflow:visible}
-.band-text-event{color:#432f2f}
-.band-text-closed{color:#fff}
+/* band-text: SVGレイヤーで描画 */
 .dot-row-below{margin-top:24px;display:flex;gap:4px;flex-wrap:wrap;position:relative;z-index:1}
 .legend-wrap{margin-top:1.2rem;padding-top:1rem}
 .legend{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center}
@@ -488,6 +486,45 @@ function drawCalendarLines() {
     paths+='<path d="'+vd+'"'+stroke+'/>';
   }
   svg.innerHTML=paths;
+
+  // 帯テキストをSVGで描画
+  var bandTexts = '';
+  var allTds = Array.prototype.slice.call(cal.querySelectorAll('tbody td'));
+  allTds.forEach(function(td) {
+    var band = td.querySelector('.event-band.band-start, .event-band.band-single');
+    var closedBand = td.querySelector('.closed-band.band-start, .closed-band.band-single');
+    var target = band || closedBand;
+    if (!target) return;
+
+    var isEvent = !!band;
+    var name = isEvent
+      ? (target.getAttribute('data-name') || '')
+      : (target.getAttribute('data-label') || '');
+    if (!name) return;
+
+    // 帯の終わりtdを探して全体幅を計算
+    var startIdx = allTds.indexOf(td);
+    var totalWidth = 0;
+    for (var i = startIdx; i < allTds.length; i++) {
+      var curTd = allTds[i];
+      var curBand = curTd.querySelector(isEvent ? '.event-band' : '.closed-band');
+      if (!curBand) break;
+      totalWidth += curTd.getBoundingClientRect().width;
+      if (curBand.classList.contains('band-end') || curBand.classList.contains('band-single')) break;
+    }
+
+    var tdRect = td.getBoundingClientRect();
+    var x = tdRect.left - wrapRect.left + 5;
+    var y = tdRect.top - wrapRect.top + 32 + 14; // 帯の中央あたり
+    var color = isEvent ? '#432f2f' : '#ffffff';
+    var clipW = totalWidth - 8;
+
+    var clipId = 'clip-band-' + startIdx;
+    bandTexts += '<clipPath id="' + clipId + '"><rect x="' + (x-2) + '" y="' + (y-14) + '" width="' + clipW + '" height="20"/></clipPath>';
+    bandTexts += '<text x="' + x + '" y="' + y + '" font-size="11" font-family="Yomogi,cursive" fill="' + color + '" clip-path="url(#' + clipId + ')" style="pointer-events:none">' + name + '</text>';
+  });
+
+  svg.innerHTML = paths + bandTexts;
 }
 
 function render() {
@@ -548,7 +585,7 @@ function render() {
           if(cb.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
           var clabel=cb.isStart?'<span class="closed-band-label">'+cb.label+'</span>':'';
           html+='<div class="'+cc+'" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'">'+clabel+'</div>';
-          if(cb.isStart) html+='<div class="band-text band-text-closed" style="top:32px">'+cb.label+'</div>';
+
         } else if(band){
           var bc='event-band';
           if(band.isStart) bc+=' band-start';
@@ -557,7 +594,7 @@ function render() {
           if(band.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
           var labelPart=band.isStart?'<span class="event-band-label">'+band.name+'</span>':'';
           html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'">'+labelPart+'</div>';
-          if(band.isStart) html+='<div class="band-text band-text-event" style="top:32px">'+band.name+'</div>';
+
           // 通常アイコンも表示
           var evs=shops[shop].getEvents(d);
           if(evs.length){
