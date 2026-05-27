@@ -159,6 +159,8 @@ var specialEvents  = {sagisu:{}, ebie:{}};
 var eventBands     = {sagisu:{}, ebie:{}};
 var offTypes       = {sagisu:{}, ebie:{}};
 var timeOverrides  = {sagisu:{}, ebie:{}};
+// 営業曜日設定 dayOverrides[shop][type] = [0,1,2,...] (0=日,1=月,...,6=土)
+var dayOverrides   = {sagisu:{}, ebie:{}};
 
 function dateKey(d) { return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(); }
 
@@ -194,9 +196,9 @@ function loadCSV() {
         // 種別の日本語→英語変換
         var kindMap = {
           '非表示':'off', '営業時間変更':'time', '臨時休業':'closed',
-          'イベント':'event', '固定営業時間':'time_default',
+          'イベント':'event', '固定営業時間':'time_default', '営業曜日':'day',
           'off':'off', 'time':'time', 'closed':'closed',
-          'event':'event', 'time_default':'time_default'
+          'event':'event', 'time_default':'time_default', 'day':'day'
         };
         var kind = kindMap[kindRaw] || kindRaw.toLowerCase();
 
@@ -214,6 +216,17 @@ function loadCSV() {
         // 通常営業時間のデフォルト変更
         if (kind === 'time_default' && target && content) {
           if (TYPE_INFO[target]) TYPE_INFO[target].hours = content;
+          continue;
+        }
+
+        // 営業曜日の設定（日付不要）
+        if (kind === 'day' && target && content) {
+          var dayMap = {'日':0,'月':1,'火':2,'水':3,'木':4,'金':5,'土':6};
+          var days = [];
+          for (var ci = 0; ci < content.length; ci++) {
+            if (dayMap[content[ci]] !== undefined) days.push(dayMap[content[ci]]);
+          }
+          if (days.length) dayOverrides[shopName][target] = days;
           continue;
         }
 
@@ -264,12 +277,39 @@ function getHours(type, d) {
   return TYPE_INFO[type] ? TYPE_INFO[type].hours : '';
 }
 
+// 曜日番号の配列を「月〜水」などの表示文字列に変換
+var DAY_NAMES = ['日','月','火','水','木','金','土'];
+var DAY_ORDER = [1,2,3,4,5,6,0]; // 月〜日の順
+
+function daysToText(days) {
+  if (!days || days.length === 0) return '';
+  // DAY_ORDER順に並べ直す
+  var sorted = DAY_ORDER.filter(function(d){ return days.indexOf(d) !== -1; });
+  if (sorted.length === 7) return '毎日';
+  // 連続する曜日をまとめる（例：月火水→月〜水）
+  var result = [];
+  var i = 0;
+  while (i < sorted.length) {
+    var start = i;
+    while (i + 1 < sorted.length && DAY_ORDER.indexOf(sorted[i+1]) === DAY_ORDER.indexOf(sorted[i]) + 1) i++;
+    if (i - start >= 2) {
+      result.push(DAY_NAMES[sorted[start]] + '〜' + DAY_NAMES[sorted[i]]);
+    } else {
+      for (var j = start; j <= i; j++) result.push(DAY_NAMES[sorted[j]]);
+    }
+    i++;
+  }
+  return result.join('・');
+}
+
 var shops = {
   sagisu: {
     getInfoRows: function() {
+      var cakeDays  = dayOverrides['sagisu']['cake']  || [1,2,5,6,0];
+      var crepeDays = dayOverrides['sagisu']['crepe'] || [2,3,4,5,6];
       return [
-        {type:'cake',  text:'ホールケーキ <b>金〜火</b> / '+TYPE_INFO.cake.hours},
-        {type:'crepe', text:'クレープ <b>火〜土</b> / '+TYPE_INFO.crepe.hours}
+        {type:'cake',  text:'ホールケーキ <b>'+daysToText(cakeDays)+'</b> / '+TYPE_INFO.cake.hours},
+        {type:'crepe', text:'クレープ <b>'+daysToText(crepeDays)+'</b> / '+TYPE_INFO.crepe.hours}
       ];
     },
     getLegend: function() {
@@ -284,19 +324,25 @@ var shops = {
       var dk = dateKey(d);
       var sp = specialEvents['sagisu'][dk]; if (sp) return sp;
       var w = d.getDay(), evs = [];
-      if (w !== 3 && w !== 4) evs.push({type:'cake'});
-      if (w !== 0 && w !== 1) evs.push({type:'crepe'});
+      var cakeDays  = dayOverrides['sagisu']['cake']  || [1,2,5,6,0];
+      var crepeDays = dayOverrides['sagisu']['crepe'] || [2,3,4,5,6];
+      if (cakeDays.indexOf(w)  !== -1) evs.push({type:'cake'});
+      if (crepeDays.indexOf(w) !== -1) evs.push({type:'crepe'});
       var off = offTypes['sagisu'][dk] || [];
       return evs.filter(function(e){return off.indexOf(e.type)===-1;});
     }
   },
   ebie: {
     getInfoRows: function() {
+      var takeoutDays = dayOverrides['ebie']['takeout'] || [1,2,5,6,0];
+      var cafeDays    = dayOverrides['ebie']['cafe']    || [1,2,5,6,0];
+      var cafe2Days   = dayOverrides['ebie']['cafe2']   || [3,4];
+      var muffinDays  = dayOverrides['ebie']['muffin']  || [1,2,5];
       return [
-        {type:'takeout', text:'テイクアウト <b>金〜火</b> / '+TYPE_INFO.takeout.hours},
-        {type:'cafe',    text:'イートイン <b>金〜火</b> / '+TYPE_INFO.cafe.hours},
-        {type:'cafe2',   text:'気まぐれカフェ <b>水・木</b> / '+TYPE_INFO.cafe2.hours},
-        {type:'muffin',  text:'マフィン <b>月・火・金</b> / '+TYPE_INFO.muffin.hours}
+        {type:'takeout', text:'テイクアウト <b>'+daysToText(takeoutDays)+'</b> / '+TYPE_INFO.takeout.hours},
+        {type:'cafe',    text:'イートイン <b>'+daysToText(cafeDays)+'</b> / '+TYPE_INFO.cafe.hours},
+        {type:'cafe2',   text:'気まぐれカフェ <b>'+daysToText(cafe2Days)+'</b> / '+TYPE_INFO.cafe2.hours},
+        {type:'muffin',  text:'マフィン <b>'+daysToText(muffinDays)+'</b> / '+TYPE_INFO.muffin.hours}
       ];
     },
     getLegend: function() {
@@ -313,14 +359,18 @@ var shops = {
       var dk = dateKey(d);
       var sp = specialEvents['ebie'][dk]; if (sp) return sp;
       var w = d.getDay(), evs = [];
-      if (w === 3 || w === 4) {
+      var takeoutDays = dayOverrides['ebie']['takeout'] || [1,2,5,6,0];
+      var cafeDays    = dayOverrides['ebie']['cafe']    || [1,2,5,6,0];
+      var cafe2Days   = dayOverrides['ebie']['cafe2']   || [3,4];
+      var muffinDays  = dayOverrides['ebie']['muffin']  || [1,2,5];
+      if (cafe2Days.indexOf(w) !== -1) {
         evs.push({type:'cafe2'});
       } else {
-        evs.push({type:'takeout'});
-        evs.push({type:'cafe'});
+        if (takeoutDays.indexOf(w) !== -1) evs.push({type:'takeout'});
+        if (cafeDays.indexOf(w)    !== -1) evs.push({type:'cafe'});
       }
       var off = offTypes['ebie'][dk] || [];
-      if (off.indexOf('muffin') === -1 && (w===1||w===2||w===5)) evs.push({type:'muffin'});
+      if (off.indexOf('muffin') === -1 && muffinDays.indexOf(w) !== -1) evs.push({type:'muffin'});
       return evs.filter(function(e){return off.indexOf(e.type)===-1;});
     }
   }
