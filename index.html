@@ -49,12 +49,15 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .dot-cafe{background:#E3F2FD;color:#1565c0}
 .dot-cafe2{background:#E8F5E9;color:#2e7d32}
 .pill-closed{background:#d70035;color:#fff;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive;cursor:pointer;position:relative;z-index:1}
-/* イベント帯 */
-.event-band{position:absolute;top:32px;left:0;right:0;height:20px;background:#fcc800;z-index:0;display:flex;align-items:center;padding-left:4px;cursor:pointer}
-.event-band.band-start{border-radius:6px 0 0 6px;left:2px}
-.event-band.band-end{border-radius:0 6px 6px 0;right:2px}
-.event-band.band-single{border-radius:6px;left:2px;right:2px}
+/* イベント帯・臨時休業帯 */
+.event-band,.closed-band{position:absolute;top:32px;left:0;right:0;height:20px;z-index:0;display:flex;align-items:center;padding-left:4px;cursor:pointer}
+.event-band{background:#fcc800;}
+.closed-band{background:#d70035;}
+.event-band.band-start,.closed-band.band-start{border-radius:6px 0 0 6px;left:2px}
+.event-band.band-end,.closed-band.band-end{border-radius:0 6px 6px 0;right:2px}
+.event-band.band-single,.closed-band.band-single{border-radius:6px;left:2px;right:2px}
 .event-band-label{font-size:10px;color:#432f2f;font-family:'Yomogi',cursive;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;pointer-events:none}
+.closed-band-label{font-size:10px;color:#fff;font-family:'Yomogi',cursive;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;pointer-events:none}
 .dot-row-below{margin-top:24px;display:flex;gap:4px;flex-wrap:wrap;position:relative;z-index:1}
 .legend-wrap{margin-top:1.2rem;padding-top:1rem}
 .legend{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center}
@@ -157,6 +160,7 @@ var TYPE_INFO = {
 // スプシから読み込むデータ
 var specialEvents  = {sagisu:{}, ebie:{}};
 var eventBands     = {sagisu:{}, ebie:{}};
+var closedBands    = {sagisu:{}, ebie:{}};
 var offTypes       = {sagisu:{}, ebie:{}};
 var timeOverrides  = {sagisu:{}, ebie:{}};
 // 営業曜日設定 dayOverrides[shop][type] = [0,1,2,...] (0=日,1=月,...,6=土)
@@ -244,10 +248,20 @@ function loadCSV() {
 
         } else if (kind === 'closed') {
           var endD = parseDate(endDateStr) || startD;
+          var periodText = formatDateJP(startD);
+          if (startD.toDateString() !== endD.toDateString()) periodText += '〜'+formatDateJP(endD);
           var cur = new Date(startD);
           while (cur <= endD) {
             var ck = dateKey(cur);
-            specialEvents[shopName][ck] = [{type:'closed', label:content||'臨時休業'}];
+            var isStart = cur.toDateString() === startD.toDateString();
+            var isEnd   = cur.toDateString() === endD.toDateString();
+            closedBands[shopName][ck] = {
+              label: content || '臨時休業',
+              period: periodText,
+              isStart: isStart,
+              isEnd: isEnd,
+              single: startD.toDateString() === endD.toDateString()
+            };
             cur.setDate(cur.getDate()+1);
           }
 
@@ -492,6 +506,15 @@ function render() {
           sp.forEach(function(e){
             if(e.type==='closed') html+='<div class="pill-closed" data-popup="closed" data-label="'+(e.label||'臨時休業')+'">'+(e.label||'臨時休業')+'</div>';
           });
+        } else if(closedBands[shop][dk]){
+          var cb=closedBands[shop][dk];
+          var cc='closed-band';
+          if(cb.single) cc='closed-band band-single';
+          else if(cb.isStart&&cb.isEnd) cc='closed-band band-single';
+          else if(cb.isStart) cc='closed-band band-start';
+          else if(cb.isEnd)   cc='closed-band band-end';
+          var clabel=cb.isStart?'<span class="closed-band-label">'+cb.label+'</span>':'';
+          html+='<div class="'+cc+'" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'">'+clabel+'</div>';
         } else if(band){
           var bc='event-band';
           if(band.isStart) bc+=' band-start';
@@ -614,7 +637,9 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
   var closed=e.target.closest('[data-popup="closed"]');
   if(closed){
     e.stopPropagation();
-    showPopup('','',closed.getAttribute('data-label')||'臨時休業','',closed);
+    var clabel=closed.getAttribute('data-label')||'臨時休業';
+    var cperiod=closed.getAttribute('data-period')||'';
+    showPopup('','',clabel,cperiod?'<span>'+cperiod+'</span>':'',closed);
   }
 });
 
