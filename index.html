@@ -86,7 +86,8 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
 .popup-close{position:absolute;top:2px;right:2px;width:26px;height:26px;border:none;background:none;color:#ccc;font-size:20px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;font-family:sans-serif}
 .popup-close:hover{color:var(--theme)}
 .popup-icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-.popup-icon svg{width:18px;height:18px}
+.popup-reserve{display:inline-block;margin-top:6px;padding:4px 10px;background:var(--theme,#e8383d);color:#fff;border-radius:20px;font-size:11px;font-family:'Yomogi',cursive;text-decoration:none;line-height:1.4}
+.popup-reserve.hidden{display:none}
 </style>
 </head>
 <body>
@@ -119,6 +120,7 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
       <div class="popup-text">
         <div class="popup-name" id="popup-name"></div>
         <div class="popup-hours" id="popup-hours"></div>
+        <a class="popup-reserve" id="popup-reserve" href="#" target="_blank" rel="noopener noreferrer">予約はこちら →</a>
       </div>
     </div>
   </div>
@@ -172,6 +174,8 @@ var eventBands     = {sagisu:{}, ebie:{}};
 var closedBands    = {sagisu:{}, ebie:{}};
 var offTypes       = {sagisu:{}, ebie:{}};
 var timeOverrides  = {sagisu:{}, ebie:{}};
+// 予約URL: reserveUrls[shop][type] = 'https://...' または reserveUrls[shop]['event-dateKey'] = 'https://...'
+var reserveUrls    = {sagisu:{}, ebie:{}};
 // 営業曜日設定 dayOverrides[shop][type] = [0,1,2,...] (0=日,1=月,...,6=土)
 var dayOverrides   = {sagisu:{}, ebie:{}};
 
@@ -197,13 +201,14 @@ function parseAndApplyCSV(text) {
   var rows = text.trim().split('\n');
   for (var i = 1; i < rows.length; i++) {
     var cols = rows[i].split(',');
-        var dateStr  = (cols[0]||'').trim();
-        var shopRaw  = (cols[1]||'').trim().toLowerCase();
-        var kindRaw  = (cols[2]||'').trim();
-        var targetRaw= (cols[3]||'').trim();
-        var content  = (cols[4]||'').trim();
-        var endDateStr=(cols[5]||'').trim();
-        var eventHours=(cols[6]||'').trim();
+        var dateStr   = (cols[0]||'').trim();
+        var shopRaw   = (cols[1]||'').trim().toLowerCase();
+        var kindRaw   = (cols[2]||'').trim();
+        var targetRaw = (cols[3]||'').trim();
+        var content   = (cols[4]||'').trim();
+        var endDateStr= (cols[5]||'').trim();
+        var eventHours= (cols[6]||'').trim();
+        var reserveUrl= (cols[7]||'').trim();
 
         // 店舗名の正規化
         var shopName = shopRaw;
@@ -212,6 +217,7 @@ function parseAndApplyCSV(text) {
         var kindMap = {
           '非表示':'off', '営業時間変更':'time', '臨時休業':'closed',
           'イベント':'event', '固定営業時間':'time_default', '固定営業曜日':'day',
+          '固定営業曜日&予約URL':'day',
           'off':'off', 'time':'time', 'closed':'closed',
           'event':'event', 'time_default':'time_default', 'day':'day'
         };
@@ -290,10 +296,15 @@ function parseAndApplyCSV(text) {
               hours: eventHours,
               period: periodText,
               isStart: isStart,
-              isEnd: isEnd
+              isEnd: isEnd,
+              reserveUrl: reserveUrl
             };
             cur.setDate(cur.getDate()+1);
           }
+        }
+        // 予約URL（H列から全typeに対応）
+        if (reserveUrl && target) {
+          reserveUrls[shopName][target] = reserveUrl;
         }
       }
   render();
@@ -627,7 +638,7 @@ function render() {
           if(band.isStart&&band.isEnd) bc='event-band band-single';
           if(band.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
           var labelPart=band.isStart?'<span class="event-band-label">'+band.name+'</span>':'';
-          html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'">'+labelPart+'</div>';
+          html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'">'+labelPart+'</div>';
 
           // 通常アイコンも表示
           var evs=shops[shop].getEvents(d);
@@ -689,7 +700,7 @@ function positionPopupNear(anchorEl,card){
   card.style.left=Math.round(left)+'px';
   card.style.top=Math.round(top)+'px';
 }
-function showPopup(iconCls,iconSVG,name,hoursText,anchorEl){
+function showPopup(iconCls,iconSVG,name,hoursText,anchorEl,reserveUrl){
   popupAnchorEl=anchorEl;
   var overlay=document.getElementById('popup-overlay');
   var card=document.getElementById('popup-card');
@@ -698,6 +709,14 @@ function showPopup(iconCls,iconSVG,name,hoursText,anchorEl){
   iconEl.innerHTML=iconSVG||'';
   document.getElementById('popup-name').textContent=name;
   document.getElementById('popup-hours').innerHTML=hoursText;
+  var reserveEl=document.getElementById('popup-reserve');
+  if(reserveUrl){
+    reserveEl.href=reserveUrl;
+    reserveEl.classList.remove('hidden');
+  } else {
+    reserveEl.href='#';
+    reserveEl.classList.add('hidden');
+  }
   card.classList.remove('is-visible');
   lockPageScroll();
   overlay.classList.add('is-open');
@@ -728,7 +747,8 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     var type=dot.getAttribute('data-type');
     var hrs=dot.getAttribute('data-hours')||(TYPE_INFO[type]?TYPE_INFO[type].hours:'');
     var name=TYPE_INFO[type]?TYPE_INFO[type].name:type;
-    showPopup(DOTCLS[type],SVG[type],name,hrs,dot);
+    var rurl=reserveUrls[shop][type]||'';
+    showPopup(DOTCLS[type],SVG[type],name,hrs,dot,rurl);
     return;
   }
   var band=e.target.closest('[data-popup="event"]');
@@ -737,8 +757,9 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     var name=band.getAttribute('data-name')||'イベント';
     var period=band.getAttribute('data-period')||'';
     var hours=band.getAttribute('data-hours')||'';
+    var rurl=band.getAttribute('data-reserve')||'';
     var hoursHTML=(period?'<span style="display:block">'+period+'</span>':'')+(hours?'<span style="display:block">'+hours+'</span>':'');
-    showPopup('','',name,hoursHTML,band);
+    showPopup('','',name,hoursHTML,band,rurl);
     return;
   }
   var closed=e.target.closest('[data-popup="closed"]');
@@ -746,7 +767,7 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     e.stopPropagation();
     var clabel=closed.getAttribute('data-label')||'臨時休業';
     var cperiod=closed.getAttribute('data-period')||'';
-    showPopup('','',clabel,cperiod?'<span>'+cperiod+'</span>':'',closed);
+    showPopup('','',clabel,cperiod?'<span>'+cperiod+'</span>':'',closed,'');
   }
 });
 
