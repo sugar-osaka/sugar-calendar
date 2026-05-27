@@ -53,14 +53,14 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .dot-cake{background:#F5D6DA;color:#B85366}
 .dot-crepe{background:#F3E1BD;color:#A87C28}
 .dot-muffin{background:#E6C58B;color:#A6834F}
-.dot-takeout{background:#E8C5B9;color:#E83929}
+.dot-takeout{background:#E8C5B9;color:#C22047}
 .dot-cafe{background:#AEC1CD;color:#6B8294}
 .dot-cafe2{background:#D8C4A7;color:#A68A6F}
-.pill-closed{background:#A94A3B;color:#fcebed;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive;cursor:pointer;position:relative;z-index:1}
+.pill-closed{background:#AF011C;color:#fcebed;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive;cursor:pointer;position:relative;z-index:1}
 /* イベント帯・臨時休業帯 */
 .event-band,.closed-band{position:absolute;top:32px;left:0;right:0;height:20px;z-index:3;display:flex;align-items:center;padding-left:4px;cursor:pointer;overflow:visible}
 .event-band{background:#fcc800;}
-.closed-band{background:#A94A3B;}
+.closed-band{background:#AF011C;}
 /* 両方ある日はイベントを下にずらす */
 .event-band.shift-down{top:55px;}
 .event-band.band-start,.closed-band.band-start{border-radius:6px 0 0 6px;left:2px}
@@ -144,7 +144,7 @@ var maxMonth = now.getMonth() === 11 ? 0 : now.getMonth() + 1;
 
 var COLORS = {
   cake:'#B85366', crepe:'#A87C28', muffin:'#A6834F',
-  takeout:'#E83929', cafe:'#6B8294', cafe2:'#A68A6F'
+  takeout:'#C22047', cafe:'#6B8294', cafe2:'#A68A6F'
 };
 
 var SVG = {
@@ -408,7 +408,7 @@ var shops = {
       return [
         {cls:'dot-cake',  svg:SVG.cake,  label:'ホールケーキ'},
         {cls:'dot-crepe', svg:SVG.crepe, label:'クレープ'},
-        {pill:'#A94A3B', textColor:'#fcebed', label:'臨時休業'},
+        {pill:'#AF011C', textColor:'#fcebed', label:'臨時休業'},
         {pill:'#fcc800', label:'イベント'}
       ];
     },
@@ -443,7 +443,7 @@ var shops = {
         {cls:'dot-cafe',    svg:SVG.cafe,    label:'イートイン'},
         {cls:'dot-cafe2',   svg:SVG.cafe2,   label:'気まぐれカフェ'},
         {cls:'dot-muffin',  svg:SVG.muffin,  label:'マフィン'},
-        {pill:'#A94A3B', textColor:'#fcebed', label:'臨時休業'},
+        {pill:'#AF011C', textColor:'#fcebed', label:'臨時休業'},
         {pill:'#fcc800', label:'イベント'}
       ];
     },
