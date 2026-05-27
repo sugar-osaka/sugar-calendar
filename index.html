@@ -32,7 +32,7 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .cal th{font-size:14px;color:#ccc;padding:6px 0 8px;text-align:center;font-weight:400;font-family:'Caveat Brush',cursive}
 .cal th.sun{color:var(--theme)}
 .cal th.sat{color:var(--theme);opacity:0.5}
-.cal td{vertical-align:top;padding:4px;border-top:none;height:96px;width:14.28%;position:relative;overflow:hidden}
+.cal td{vertical-align:top;padding:4px;border-top:none;height:96px;width:14.28%;position:relative;overflow:visible}
 .cal td.other .date-num{color:#eee}
 .cal td.today .date-num{background:var(--theme);color:#fff!important;border-radius:50%}
 .cal td.sun .date-num{color:var(--theme)}
@@ -56,8 +56,8 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .event-band.band-start,.closed-band.band-start{border-radius:6px 0 0 6px;left:2px}
 .event-band.band-end,.closed-band.band-end{border-radius:0 6px 6px 0;right:2px}
 .event-band.band-single,.closed-band.band-single{border-radius:6px;left:2px;right:2px}
-.event-band-label{font-size:10px;color:#432f2f;font-family:'Yomogi',cursive;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;pointer-events:none}
-.closed-band-label{font-size:10px;color:#fff;font-family:'Yomogi',cursive;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;pointer-events:none}
+.event-band-label{font-size:10px;color:#432f2f;font-family:'Yomogi',cursive;white-space:nowrap;overflow:visible;pointer-events:none;position:relative;z-index:3}
+.closed-band-label{font-size:10px;color:#fff;font-family:'Yomogi',cursive;white-space:nowrap;overflow:visible;pointer-events:none;position:relative;z-index:3}
 .dot-row-below{margin-top:24px;display:flex;gap:4px;flex-wrap:wrap;position:relative;z-index:1}
 .legend-wrap{margin-top:1.2rem;padding-top:1rem}
 .legend{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center}
