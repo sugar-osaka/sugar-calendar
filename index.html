@@ -31,7 +31,6 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .cal th{font-size:14px;color:#ccc;padding:6px 0 8px;text-align:center;font-weight:400;font-family:'Caveat Brush',cursive}
 .cal th.sun{color:#e8383d}
 .cal th.sat{color:#e8383d;opacity:0.5}
-.cal th:not(:first-child),.cal td:not(:first-child){border-left:1.5px dotted rgba(111,84,54,0.5)}
 .cal td{vertical-align:top;padding:4px;border-top:none;height:96px;width:14.28%}
 .cal td.other .date-num{color:#eee}
 .cal td.today .date-num{background:#e8383d;color:#fff!important;border-radius:50%}
@@ -59,16 +58,16 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
 body.popup-open{position:fixed;width:100%;left:0;right:0}
 .popup-overlay{position:fixed;top:-3px;left:0;right:0;bottom:-3px;width:100%;min-height:100vh;min-height:100dvh;min-height:-webkit-fill-available;background:rgba(0,0,0,0.25);z-index:100;margin:0;padding:0;border:none;opacity:0;visibility:hidden;transition:opacity 0.15s,visibility 0.15s;-webkit-tap-highlight-color:transparent}
 .popup-overlay.is-open{opacity:1;visibility:visible}
-.popup-card{position:fixed;left:0;top:0;z-index:101;background:#fff;border-radius:12px;padding:10px 12px 12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);font-family:'Yomogi',cursive;width:max-content;max-width:min(260px,calc(100vw - 16px));opacity:0;visibility:hidden;transform:scale(0.96);transition:opacity 0.12s,transform 0.12s,visibility 0.12s;pointer-events:none}
+.popup-card{position:fixed;left:0;top:0;z-index:101;background:#fff;border-radius:12px;padding:10px 12px 12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);font-family:'Yomogi',cursive;width:auto;max-width:min(280px,calc(100vw - 16px));opacity:0;visibility:hidden;transform:scale(0.96);transition:opacity 0.12s,transform 0.12s,visibility 0.12s;pointer-events:none}
+.popup-body{display:flex;align-items:flex-start;gap:10px;padding-right:18px}
+.popup-text{min-width:0;flex:1}
+.popup-name{font-size:16px;color:#432f2f;line-height:1.35;font-family:'Caveat Brush',cursive;white-space:normal;word-break:break-word;overflow-wrap:anywhere}
+.popup-hours{font-size:13px;color:#432f2f;opacity:0.7;margin-top:2px;letter-spacing:0.04em;line-height:1.35;white-space:normal;word-break:break-word}
 .popup-card.is-visible{opacity:1;visibility:visible;transform:scale(1);pointer-events:auto}
 .popup-close{position:absolute;top:2px;right:2px;width:26px;height:26px;border:none;background:none;color:#ccc;font-size:20px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;font-family:sans-serif}
 .popup-close:hover{color:#e8383d}
-.popup-body{display:flex;align-items:center;gap:10px;padding-right:18px}
-.popup-icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.popup-icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
 .popup-icon svg{width:18px;height:18px}
-.popup-text{min-width:0}
-.popup-name{font-size:17px;color:#432f2f;line-height:1.2;font-family:'Caveat Brush',cursive;white-space:nowrap}
-.popup-hours{font-size:13px;color:#432f2f;opacity:0.7;margin-top:2px;letter-spacing:0.04em;line-height:1.3}
 </style>
 </head>
 <body>
@@ -88,7 +87,7 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
     <button onclick="changeMonth(1)">&#8250;</button>
   </div>
   <div class="cal-wrap">
-    <svg id="row-lines" style="position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:2;overflow:visible" xmlns="http://www.w3.org/2000/svg"></svg>
+    <svg id="cal-lines" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible" xmlns="http://www.w3.org/2000/svg"></svg>
     <table class="cal" id="cal"></table>
   </div>
   <div class="legend-wrap"><div class="legend" id="legend"></div></div>
@@ -150,7 +149,7 @@ var TYPE_INFO = {
   crepe:  { name: 'クレープ',     hours: '12:00-16:00' },
   takeout:{ name: 'テイクアウト', hours: '12:00-18:00' },
   cafe:   { name: 'イートイン',   hours: '13:00-18:00 (L.O.17:30)' },
-  cafe2:  { name: '気まぐれカフェ(テイクアウト)',     hours: '12:00-16:30' },
+  cafe2:  { name: '気まぐれカフェ(テイクアウト)',     hours: '12:00-16:30 (L.O.16:00)' },
   muffin: { name: 'マフィン',     hours: '12:00-18:00' }
 };
 
@@ -230,19 +229,20 @@ function changeMonth(d) {
   year = ny; month = nmo; render();
 }
 
-function drawRowLines() {
+function drawCalendarLines() {
   var cal = document.getElementById('cal');
-  var svg = document.getElementById('row-lines');
+  var svg = document.getElementById('cal-lines');
+  if (!cal || !svg || !cal.rows.length) return;
   var wrap = document.querySelector('.cal-wrap');
   var wrapRect = wrap.getBoundingClientRect();
   var calRect = cal.getBoundingClientRect();
-  var rows = cal.querySelectorAll('tbody tr');
+  var stroke = ' stroke="#6f5436" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.7"';
   var paths = '';
-  rows.forEach(function(row) {
-    var r = row.getBoundingClientRect();
-    var y = r.top - wrapRect.top;
-    var x0 = calRect.left - wrapRect.left;
-    var W = calRect.width;
+  var x0 = calRect.left - wrapRect.left;
+  var W = calRect.width;
+
+  cal.querySelectorAll('tbody tr').forEach(function(row) {
+    var y = row.getBoundingClientRect().top - wrapRect.top;
     var segs = 16, step = W / segs;
     var d = 'M ' + x0 + ' ' + y;
     for (var s = 0; s < segs; s++) {
@@ -251,8 +251,29 @@ function drawRowLines() {
       var ex = x0 + (s + 1) * step;
       d += ' Q ' + cx + ' ' + cy + ' ' + ex + ' ' + y;
     }
-    paths += '<path d="' + d + '" stroke="#6f5436" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.7"/>';
+    paths += '<path d="' + d + '"' + stroke + '/>';
   });
+
+  var headerCells = cal.rows[0].cells;
+  var yTop = calRect.top - wrapRect.top;
+  var lastRow = cal.rows[cal.rows.length - 1];
+  var yBottom = lastRow.getBoundingClientRect().bottom - wrapRect.top;
+  var H = yBottom - yTop;
+  var vSegs = Math.max(14, Math.round(H / 10));
+
+  for (var c = 1; c < headerCells.length; c++) {
+    var x = Math.round(headerCells[c].getBoundingClientRect().left - wrapRect.left);
+    var vStep = H / vSegs;
+    var vd = 'M ' + x + ' ' + yTop;
+    for (var v = 0; v < vSegs; v++) {
+      var vx = x + (v % 2 === 0 ? -1.2 : 1.2);
+      var vy = yTop + v * vStep + vStep * 0.4;
+      var ey = yTop + (v + 1) * vStep;
+      vd += ' Q ' + vx + ' ' + vy + ' ' + x + ' ' + ey;
+    }
+    paths += '<path d="' + vd + '"' + stroke + '/>';
+  }
+
   svg.innerHTML = paths;
 }
 
@@ -321,7 +342,7 @@ function render() {
     if (day > last.getDate() && row >= 4) break;
   }
   document.getElementById('cal').innerHTML = html;
-  setTimeout(drawRowLines, 100);
+  setTimeout(drawCalendarLines, 100);
 }
 
 var popupScrollY = 0;
@@ -431,7 +452,7 @@ window.addEventListener('resize', function() {
 
 document.fonts.ready.then(function() { render(); });
 render();
-window.addEventListener('resize', function() { setTimeout(drawRowLines, 100); });
+window.addEventListener('resize', function() { setTimeout(drawCalendarLines, 100); });
 </script>
 </body>
 </html>
