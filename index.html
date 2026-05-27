@@ -712,14 +712,22 @@ function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl)
   iconEl.className='popup-icon'+(iconCls?' '+iconCls:'');
   iconEl.innerHTML='';
   if(iconSVG && iconColor){
-    var colored = iconSVG.replace(/stroke="currentColor"/g, 'stroke="'+iconColor+'"').replace(/fill="currentColor"/g, 'fill="'+iconColor+'"');
-    var encoded = 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(colored);
-    var img = document.createElement('img');
-    img.src = encoded;
-    img.width = 18;
-    img.height = 18;
-    img.style.display = 'block';
-    iconEl.appendChild(img);
+    var colored = iconSVG
+      .replace(/stroke="currentColor"/g, 'stroke="'+iconColor+'"')
+      .replace(/fill="currentColor"/g, 'fill="'+iconColor+'"');
+    // namespaceを明示してSVGを生成（iPhone Safari対応）
+    var wrapper = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    wrapper.setAttribute('viewBox','0 0 24 24');
+    wrapper.setAttribute('width','18');
+    wrapper.setAttribute('height','18');
+    wrapper.setAttribute('fill','none');
+    wrapper.setAttribute('stroke',iconColor);
+    wrapper.setAttribute('stroke-width','1.6');
+    wrapper.setAttribute('stroke-linecap','round');
+    wrapper.setAttribute('stroke-linejoin','round');
+    // innerHTMLはSVG要素内では動作する
+    wrapper.innerHTML = colored.replace(/<svg[^>]*>/,'').replace('</svg>','');
+    iconEl.appendChild(wrapper);
   }
   document.getElementById('popup-name').textContent=name;
   document.getElementById('popup-hours').innerHTML=hoursText;
