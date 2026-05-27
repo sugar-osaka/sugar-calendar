@@ -650,7 +650,7 @@ function render() {
           if(band.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
           var labelPart=band.isStart?'<span class="event-band-label">'+band.name+'</span>':'';
           html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'">'+labelPart+'</div>';
-          // 臨時休業の日はアイコン非表示（dot-row-belowはdouble-band）
+          // 臨時休業+イベント重複日はアイコンを表示（催事出店などのため）
           var evs=shops[shop].getEvents(d);
           if(evs.length){
             html+='<div class="dot-row-below double-band">';
