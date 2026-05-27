@@ -542,11 +542,17 @@ function drawCalendarLines() {
     var target = band || closedBand;
     if (!target) return;
 
+    // data-notext="1"がある場合はテキスト描画をスキップ
+    if (target.getAttribute('data-notext') === '1') return;
+
     var isEvent = !!band;
     var name = isEvent
       ? (target.getAttribute('data-name') || '')
       : (target.getAttribute('data-label') || '');
     if (!name) return;
+
+    // shift-downの場合はy位置を下げる
+    var isShifted = target.classList.contains('shift-down');
 
     // 帯の終わりtdを探して全体幅を計算
     var startIdx = allTds.indexOf(td);
@@ -561,7 +567,8 @@ function drawCalendarLines() {
 
     var tdRect = td.getBoundingClientRect();
     var x = tdRect.left - wrapRect.left + 5;
-    var y = tdRect.top - wrapRect.top + 32 + 14; // 帯の中央あたり
+    var bandTop = isShifted ? 55 : 32;
+    var y = tdRect.top - wrapRect.top + bandTop + 14;
     var color = isEvent ? '#432f2f' : '#ffffff';
     var clipW = totalWidth - 8;
 
@@ -636,14 +643,14 @@ function render() {
           else if(cb.isEnd)   cc='closed-band band-end';
           var clabel=cb.isStart?'<span class="closed-band-label">'+cb.label+'</span>':'';
           html+='<div class="'+cc+'" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'">'+clabel+'</div>';
-          // イベント帯をずらして表示
+          // イベント帯をずらして表示（この日だけshift-down）
           var bc='event-band shift-down';
           if(band.isStart) bc+=' band-start';
           if(band.isEnd)   bc+=' band-end';
           if(band.isStart&&band.isEnd) bc='event-band shift-down band-single';
           if(band.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
-          var labelPart=band.isStart?'<span class="event-band-label">'+band.name+'</span>':'';
-          html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'">'+labelPart+'</div>';
+          // テキストは重なる日には表示しない（SVGレイヤーで後で描画）
+          html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'" data-notext="1"></div>';
           var evs=shops[shop].getEvents(d);
           if(evs.length){
             html+='<div class="dot-row-below double-band">';
