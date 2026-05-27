@@ -241,13 +241,17 @@ function parseAndApplyCSV(text) {
         }
 
         // 営業曜日の設定（日付不要）
-        if (kind === 'day' && target && content) {
-          var dayMap = {'日':0,'月':1,'火':2,'水':3,'木':4,'金':5,'土':6};
-          var days = [];
-          for (var ci = 0; ci < content.length; ci++) {
-            if (dayMap[content[ci]] !== undefined) days.push(dayMap[content[ci]]);
+        if (kind === 'day' && target) {
+          if (content) {
+            var dayMap = {'日':0,'月':1,'火':2,'水':3,'木':4,'金':5,'土':6};
+            var days = [];
+            for (var ci = 0; ci < content.length; ci++) {
+              if (dayMap[content[ci]] !== undefined) days.push(dayMap[content[ci]]);
+            }
+            if (days.length) dayOverrides[shopName][target] = days;
           }
-          if (days.length) dayOverrides[shopName][target] = days;
+          // H列に予約URLがあれば保存
+          if (reserveUrl) reserveUrls[shopName][target] = reserveUrl;
           continue;
         }
 
