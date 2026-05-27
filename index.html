@@ -650,16 +650,7 @@ function render() {
           if(band.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
           var labelPart=band.isStart?'<span class="event-band-label">'+band.name+'</span>':'';
           html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'">'+labelPart+'</div>';
-          // 臨時休業+イベント重複日はアイコンを表示（催事出店などのため）
-          var evs=shops[shop].getEvents(d);
-          if(evs.length){
-            html+='<div class="dot-row-below double-band">';
-            evs.forEach(function(e){
-              var hrs=getHours(e.type,d);
-              html+='<div class="dot '+(DOTCLS[e.type]||'')+'" data-type="'+e.type+'" data-hours="'+hrs+'" role="button" tabindex="0">'+(SVG[e.type]||'')+'</div>';
-            });
-            html+='</div>';
-          }
+          // 臨時休業+イベント重複日: イートイン・テイクアウト等のアイコンは非表示（イベント帯のみ表示）
           // イベント帯の終端なら次の行ではshift不要
           if(band.isEnd || (band.isStart&&band.isEnd)) rowShiftDown = false;
         } else if(closedBands[shop][dk]){
