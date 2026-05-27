@@ -710,7 +710,27 @@ function showPopup(iconCls,iconSVG,name,hoursText,anchorEl,reserveUrl){
   var card=document.getElementById('popup-card');
   var iconEl=document.getElementById('popup-icon');
   iconEl.className='popup-icon'+(iconCls?' '+iconCls:'');
-  iconEl.innerHTML=iconSVG||'';
+  // iPhoneでSVGが表示されない問題をDOMParserで解決
+  iconEl.innerHTML='';
+  if(iconSVG){
+    try{
+      var parser=new DOMParser();
+      var doc=parser.parseFromString('<svg xmlns="http://www.w3.org/2000/svg">'+iconSVG+'</svg>','image/svg+xml');
+      var svgEl=doc.querySelector('svg > svg') || doc.querySelector('svg');
+      if(svgEl){
+        // 元のSVGを取り出してiconElに追加
+        var tmp=document.createElement('div');
+        tmp.innerHTML=iconSVG;
+        var s=tmp.querySelector('svg');
+        if(s) iconEl.appendChild(s);
+        else iconEl.innerHTML=iconSVG;
+      } else {
+        iconEl.innerHTML=iconSVG;
+      }
+    }catch(e){
+      iconEl.innerHTML=iconSVG;
+    }
+  }
   document.getElementById('popup-name').textContent=name;
   document.getElementById('popup-hours').innerHTML=hoursText;
   var reserveEl=document.getElementById('popup-reserve');
