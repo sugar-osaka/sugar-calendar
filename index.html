@@ -355,9 +355,9 @@ function daysToText(days) {
   return result.join('・');
 }
 
-// 7曜日のドット表示HTML生成（月火水木金土日の順）
-var DAY_ORDER_DISPLAY = [1,2,3,4,5,6,0]; // 月〜日
-var DAY_NAMES_SHORT = ['月','火','水','木','金','土','日'];
+// 7曜日のドット表示HTML生成（日月火水木金土の順）
+var DAY_ORDER_DISPLAY = [0,1,2,3,4,5,6]; // 日〜土
+var DAY_NAMES_SHORT = ['日','月','火','水','木','金','土'];
 
 function daysToDotsHTML(days, color) {
   var html = '<span class="day-dots">';
