@@ -243,7 +243,13 @@ function loadCSV() {
           timeOverrides[shopName][dk][target] = content;
 
         } else if (kind === 'closed') {
-          specialEvents[shopName][dk] = [{type:'closed', label:content||'臨時休業'}];
+          var endD = parseDate(endDateStr) || startD;
+          var cur = new Date(startD);
+          while (cur <= endD) {
+            var ck = dateKey(cur);
+            specialEvents[shopName][ck] = [{type:'closed', label:content||'臨時休業'}];
+            cur.setDate(cur.getDate()+1);
+          }
 
         } else if (kind === 'event') {
           var endD = parseDate(endDateStr) || startD;
