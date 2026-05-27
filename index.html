@@ -57,8 +57,11 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .event-band.band-start,.closed-band.band-start{border-radius:6px 0 0 6px;left:2px}
 .event-band.band-end,.closed-band.band-end{border-radius:0 6px 6px 0;right:2px}
 .event-band.band-single,.closed-band.band-single{border-radius:6px;left:2px;right:2px}
-.event-band-label{font-size:10px;color:#432f2f;font-family:'Yomogi',cursive;white-space:nowrap;pointer-events:none;position:absolute;left:4px;top:50%;transform:translateY(-50%);z-index:20}
-.closed-band-label{font-size:10px;color:#fff;font-family:'Yomogi',cursive;white-space:nowrap;pointer-events:none;position:absolute;left:4px;top:50%;transform:translateY(-50%);z-index:20}
+.event-band-label{display:none}
+.closed-band-label{display:none}
+.band-text{font-size:10px;font-family:'Yomogi',cursive;white-space:nowrap;pointer-events:none;position:absolute;left:4px;z-index:50;line-height:20px}
+.band-text-event{color:#432f2f}
+.band-text-closed{color:#fff}
 .dot-row-below{margin-top:24px;display:flex;gap:4px;flex-wrap:wrap;position:relative;z-index:1}
 .legend-wrap{margin-top:1.2rem;padding-top:1rem}
 .legend{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center}
@@ -541,6 +544,7 @@ function render() {
           if(cb.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
           var clabel=cb.isStart?'<span class="closed-band-label">'+cb.label+'</span>':'';
           html+='<div class="'+cc+'" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'">'+clabel+'</div>';
+          if(cb.isStart) html+='<div class="band-text band-text-closed" style="top:32px">'+cb.label+'</div>';
         } else if(band){
           var bc='event-band';
           if(band.isStart) bc+=' band-start';
@@ -549,6 +553,7 @@ function render() {
           if(band.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
           var labelPart=band.isStart?'<span class="event-band-label">'+band.name+'</span>':'';
           html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'">'+labelPart+'</div>';
+          if(band.isStart) html+='<div class="band-text band-text-event" style="top:32px">'+band.name+'</div>';
           // 通常アイコンも表示
           var evs=shops[shop].getEvents(d);
           if(evs.length){
