@@ -51,14 +51,14 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .dot-cafe2{background:#E8F5E9;color:#2e7d32}
 .pill-closed{background:#d70035;color:#fff;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive;cursor:pointer;position:relative;z-index:1}
 /* イベント帯・臨時休業帯 */
-.event-band,.closed-band{position:absolute;top:32px;left:0;right:0;height:20px;z-index:0;display:flex;align-items:center;padding-left:4px;cursor:pointer}
+.event-band,.closed-band{position:absolute;top:32px;left:0;right:0;height:20px;z-index:3;display:flex;align-items:center;padding-left:4px;cursor:pointer;overflow:visible}
 .event-band{background:#fcc800;}
 .closed-band{background:#d70035;}
 .event-band.band-start,.closed-band.band-start{border-radius:6px 0 0 6px;left:2px}
 .event-band.band-end,.closed-band.band-end{border-radius:0 6px 6px 0;right:2px}
 .event-band.band-single,.closed-band.band-single{border-radius:6px;left:2px;right:2px}
-.event-band-label{font-size:10px;color:#432f2f;font-family:'Yomogi',cursive;white-space:nowrap;pointer-events:none;position:absolute;left:4px;top:50%;transform:translateY(-50%);z-index:10}
-.closed-band-label{font-size:10px;color:#fff;font-family:'Yomogi',cursive;white-space:nowrap;pointer-events:none;position:absolute;left:4px;top:50%;transform:translateY(-50%);z-index:10}
+.event-band-label{font-size:10px;color:#432f2f;font-family:'Yomogi',cursive;white-space:nowrap;pointer-events:none;position:absolute;left:4px;top:50%;transform:translateY(-50%);z-index:20}
+.closed-band-label{font-size:10px;color:#fff;font-family:'Yomogi',cursive;white-space:nowrap;pointer-events:none;position:absolute;left:4px;top:50%;transform:translateY(-50%);z-index:20}
 .dot-row-below{margin-top:24px;display:flex;gap:4px;flex-wrap:wrap;position:relative;z-index:1}
 .legend-wrap{margin-top:1.2rem;padding-top:1rem}
 .legend{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center}
