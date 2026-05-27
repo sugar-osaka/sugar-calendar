@@ -704,18 +704,22 @@ function positionPopupNear(anchorEl,card){
   card.style.left=Math.round(left)+'px';
   card.style.top=Math.round(top)+'px';
 }
-function showPopup(iconCls,iconSVG,name,hoursText,anchorEl,reserveUrl){
+function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl){
   popupAnchorEl=anchorEl;
   var overlay=document.getElementById('popup-overlay');
   var card=document.getElementById('popup-card');
   var iconEl=document.getElementById('popup-icon');
   iconEl.className='popup-icon'+(iconCls?' '+iconCls:'');
   iconEl.innerHTML='';
-  if(iconSVG){
-    var tmp=document.createElement('div');
-    tmp.innerHTML=iconSVG;
-    var s=tmp.firstChild;
-    if(s) iconEl.appendChild(s);
+  if(iconSVG && iconColor){
+    var colored = iconSVG.replace(/stroke="currentColor"/g, 'stroke="'+iconColor+'"').replace(/fill="currentColor"/g, 'fill="'+iconColor+'"');
+    var encoded = 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(colored);
+    var img = document.createElement('img');
+    img.src = encoded;
+    img.width = 18;
+    img.height = 18;
+    img.style.display = 'block';
+    iconEl.appendChild(img);
   }
   document.getElementById('popup-name').textContent=name;
   document.getElementById('popup-hours').innerHTML=hoursText;
@@ -758,7 +762,8 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     var hrs=dot.getAttribute('data-hours')||(TYPE_INFO[type]?TYPE_INFO[type].hours:'');
     var name=TYPE_INFO[type]?TYPE_INFO[type].name:type;
     var rurl=reserveUrls[shop][type]||'';
-    showPopup(DOTCLS[type],SVG[type],name,hrs,dot,rurl);
+    var color=COLORS[type]||'#432f2f';
+    showPopup(DOTCLS[type],SVG[type],color,name,hrs,dot,rurl);
     return;
   }
   var band=e.target.closest('[data-popup="event"]');
@@ -769,7 +774,7 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     var hours=band.getAttribute('data-hours')||'';
     var rurl=band.getAttribute('data-reserve')||'';
     var hoursHTML=(period?'<span style="display:block">'+period+'</span>':'')+(hours?'<span style="display:block">'+hours+'</span>':'');
-    showPopup('','',name,hoursHTML,band,rurl);
+    showPopup('','','#432f2f',name,hoursHTML,band,rurl);
     return;
   }
   var closed=e.target.closest('[data-popup="closed"]');
@@ -777,7 +782,7 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     e.stopPropagation();
     var clabel=closed.getAttribute('data-label')||'臨時休業';
     var cperiod=closed.getAttribute('data-period')||'';
-    showPopup('','',clabel,cperiod?'<span>'+cperiod+'</span>':'',closed,'');
+    showPopup('','','#432f2f',clabel,cperiod?'<span>'+cperiod+'</span>':'',closed,'');
   }
 });
 
