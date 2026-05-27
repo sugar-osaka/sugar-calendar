@@ -32,14 +32,14 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .cal th{font-size:14px;color:#ccc;padding:6px 0 8px;text-align:center;font-weight:400;font-family:'Caveat Brush',cursive}
 .cal th.sun{color:var(--theme)}
 .cal th.sat{color:var(--theme);opacity:0.5}
-.cal td{vertical-align:top;padding:4px;border-top:none;height:96px;width:14.28%}
+.cal td{vertical-align:top;padding:4px;border-top:none;height:96px;width:14.28%;position:relative;overflow:hidden}
 .cal td.other .date-num{color:#eee}
 .cal td.today .date-num{background:var(--theme);color:#fff!important;border-radius:50%}
 .cal td.sun .date-num{color:var(--theme)}
 .cal td.sat .date-num{color:var(--theme);opacity:0.5}
 .cal td.other.sun .date-num,.cal td.other.sat .date-num{color:#eee}
-.date-num{font-size:20px;margin-bottom:3px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-family:'Caveat Brush',cursive}
-.dot-row{display:flex;gap:4px;flex-wrap:wrap}
+.date-num{font-size:20px;margin-bottom:3px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-family:'Caveat Brush',cursive;position:relative;z-index:1}
+.dot-row{display:flex;gap:4px;flex-wrap:wrap;position:relative;z-index:1}
 .dot{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .dot svg{width:20px;height:20px;flex-shrink:0;pointer-events:none}
 .dot-cake{background:#FDE8E8;color:#c02025}
@@ -48,8 +48,14 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .dot-takeout{background:#fdede4;color:#e95464}
 .dot-cafe{background:#E3F2FD;color:#1565c0}
 .dot-cafe2{background:#E8F5E9;color:#2e7d32}
-.pill-closed{background:#d70035;color:#fff;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive}
-.pill-event{background:#fcc800;color:#432f2f;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive}
+.pill-closed{background:#d70035;color:#fff;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive;cursor:pointer;position:relative;z-index:1}
+/* イベント帯 */
+.event-band{position:absolute;top:32px;left:0;right:0;height:20px;background:#fcc800;z-index:0;display:flex;align-items:center;padding-left:4px;cursor:pointer}
+.event-band.band-start{border-radius:6px 0 0 6px;left:2px}
+.event-band.band-end{border-radius:0 6px 6px 0;right:2px}
+.event-band.band-single{border-radius:6px;left:2px;right:2px}
+.event-band-label{font-size:10px;color:#432f2f;font-family:'Yomogi',cursive;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;pointer-events:none}
+.dot-row-below{margin-top:24px;display:flex;gap:4px;flex-wrap:wrap;position:relative;z-index:1}
 .legend-wrap{margin-top:1.2rem;padding-top:1rem}
 .legend{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center}
 .leg{display:flex;align-items:center;gap:5px;font-size:12px;color:#432f2f;font-family:'Yomogi',cursive}
@@ -63,7 +69,7 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
 .popup-body{display:flex;align-items:flex-start;gap:10px;padding-right:18px}
 .popup-text{min-width:0;flex:1}
 .popup-name{font-size:16px;color:#432f2f;line-height:1.35;font-family:'Caveat Brush',cursive;white-space:normal;word-break:break-word;overflow-wrap:anywhere}
-.popup-hours{font-size:13px;color:#432f2f;opacity:0.7;margin-top:2px;letter-spacing:0.04em;line-height:1.35;white-space:normal;word-break:break-word}
+.popup-hours{font-size:13px;color:#432f2f;opacity:0.7;margin-top:2px;letter-spacing:0.04em;line-height:1.5;white-space:normal;word-break:break-word}
 .popup-card.is-visible{opacity:1;visibility:visible;transform:scale(1);pointer-events:auto}
 .popup-close{position:absolute;top:2px;right:2px;width:26px;height:26px;border:none;background:none;color:#ccc;font-size:20px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;font-family:sans-serif}
 .popup-close:hover{color:var(--theme)}
@@ -106,6 +112,11 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
   </div>
 </div>
 <script>
+// ============================================================
+// スプレッドシートCSV URL
+// ============================================================
+var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTPofFfru7LP5csztEsj2BlMcfl6NeVuTw9_cUwAyw_bn948b-Ro2cYQQ6tWIpeLZegaqaOcnFblFUD/pub?output=csv';
+
 var shop = 'sagisu';
 var now = new Date();
 var year = now.getFullYear();
@@ -115,90 +126,171 @@ var maxYear = now.getMonth() === 11 ? now.getFullYear() + 1 : now.getFullYear();
 var maxMonth = now.getMonth() === 11 ? 0 : now.getMonth() + 1;
 
 var COLORS = {
-  cake: '#c02025', crepe: '#b85c00', muffin: '#8a6000',
-  takeout: '#e95464', cafe: '#1565c0', cafe2: '#2e7d32'
+  cake:'#c02025', crepe:'#b85c00', muffin:'#8a6000',
+  takeout:'#e95464', cafe:'#1565c0', cafe2:'#2e7d32'
 };
 
 var SVG = {
-  cake: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="9" x2="8" y2="5"/><line x1="12" y1="9" x2="12" y2="4"/><line x1="16" y1="9" x2="16" y2="5"/><path d="M7 4.5 Q8 3 9 4.5"/><path d="M11 3 Q12 1.5 13 3"/><path d="M15 4.5 Q16 3 17 4.5"/><rect x="3" y="9" width="18" height="11" rx="2.5"/><path d="M3 13 Q7 11 12 13 Q17 11 21 13"/><line x1="3" y1="16" x2="21" y2="16"/></svg>',
-  crepe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10 L12 22 L19 10 Z"/><path d="M5 10 Q12 7 19 10"/><path d="M7 10 Q9 8 12 8 Q15 8 17 10"/><path d="M8 7 Q8 4 10 4 Q12 3 14 4 Q16 4 16 7"/><path d="M9 6 Q10 4.5 12 4.5 Q14 4.5 15 6"/><circle cx="10" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="4.5" r="0.8" fill="currentColor" stroke="none"/></svg>',
-  muffin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13 L8 21 L16 21 L17 13 Z"/><line x1="10" y1="13" x2="9.5" y2="21"/><line x1="12" y1="13" x2="12" y2="21"/><line x1="14" y1="13" x2="14.5" y2="21"/><path d="M7 13 Q5 13 5 10 Q5 7 8 6 Q9 3 12 3 Q15 3 16 6 Q19 7 19 10 Q19 13 17 13 Q15 14 12 14 Q9 14 7 13 Z"/><path d="M8 7 Q9 5.5 11 6"/><path d="M14 5.5 Q15.5 6.5 15 8"/></svg>',
-  takeout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="15" width="18" height="4" rx="1"/><rect x="3" y="11" width="18" height="4" rx="0.5"/><path d="M3 11 L12 5 L21 11"/><path d="M3 11 Q7 9.5 12 10.5 Q17 9.5 21 11"/><ellipse cx="12" cy="5.5" rx="3" ry="3.5" fill="currentColor" stroke="none"/><path d="M10.5 3 Q12 1.8 13.5 3" stroke="currentColor" stroke-width="1" fill="none"/></svg>',
-  cafe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8 L17 8 L15 19 L9 19 Z"/><path d="M17 10 Q21 10 21 14 Q21 18 17 18"/><line x1="5" y1="22" x2="19" y2="22"/><path d="M10 5 Q10 3 12 3 Q12 5 10 5"/></svg>',
-  cafe2: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8 L17 8 L15 19 L9 19 Z"/><path d="M17 10 Q21 10 21 14 Q21 18 17 18"/><line x1="5" y1="22" x2="19" y2="22"/><path d="M9 5 Q11 2 13 5"/></svg>'
+  cake:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="9" x2="8" y2="5"/><line x1="12" y1="9" x2="12" y2="4"/><line x1="16" y1="9" x2="16" y2="5"/><path d="M7 4.5 Q8 3 9 4.5"/><path d="M11 3 Q12 1.5 13 3"/><path d="M15 4.5 Q16 3 17 4.5"/><rect x="3" y="9" width="18" height="11" rx="2.5"/><path d="M3 13 Q7 11 12 13 Q17 11 21 13"/><line x1="3" y1="16" x2="21" y2="16"/></svg>',
+  crepe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10 L12 22 L19 10 Z"/><path d="M5 10 Q12 7 19 10"/><path d="M7 10 Q9 8 12 8 Q15 8 17 10"/><path d="M8 7 Q8 4 10 4 Q12 3 14 4 Q16 4 16 7"/><path d="M9 6 Q10 4.5 12 4.5 Q14 4.5 15 6"/><circle cx="10" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="4.5" r="0.8" fill="currentColor" stroke="none"/></svg>',
+  muffin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13 L8 21 L16 21 L17 13 Z"/><line x1="10" y1="13" x2="9.5" y2="21"/><line x1="12" y1="13" x2="12" y2="21"/><line x1="14" y1="13" x2="14.5" y2="21"/><path d="M7 13 Q5 13 5 10 Q5 7 8 6 Q9 3 12 3 Q15 3 16 6 Q19 7 19 10 Q19 13 17 13 Q15 14 12 14 Q9 14 7 13 Z"/><path d="M8 7 Q9 5.5 11 6"/><path d="M14 5.5 Q15.5 6.5 15 8"/></svg>',
+  takeout:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="15" width="18" height="4" rx="1"/><rect x="3" y="11" width="18" height="4" rx="0.5"/><path d="M3 11 L12 5 L21 11"/><path d="M3 11 Q7 9.5 12 10.5 Q17 9.5 21 11"/><ellipse cx="12" cy="5.5" rx="3" ry="3.5" fill="currentColor" stroke="none"/><path d="M10.5 3 Q12 1.8 13.5 3" stroke="currentColor" stroke-width="1" fill="none"/></svg>',
+  cafe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8 L17 8 L15 19 L9 19 Z"/><path d="M17 10 Q21 10 21 14 Q21 18 17 18"/><line x1="5" y1="22" x2="19" y2="22"/><path d="M10 5 Q10 3 12 3 Q12 5 10 5"/></svg>',
+  cafe2:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8 L17 8 L15 19 L9 19 Z"/><path d="M17 10 Q21 10 21 14 Q21 18 17 18"/><line x1="5" y1="22" x2="19" y2="22"/><path d="M9 5 Q11 2 13 5"/></svg>'
 };
-
-// ===== 特別予定をここに入力 =====
-// 例: specialEvents['2026-5-10'] = [{type:'closed', label:'臨時休業'}];
-// 例: specialEvents['2026-6-15'] = [{type:'event', label:'イベント 11:00〜20:00'}];
-var specialEvents = {};
-
-// ===== マフィンのON/OFF (ebieのみ) =====
-// 例: muffinOverride['2026-5-10'] = false;
-// 例: muffinOverride['2026-5-12'] = true;
-var muffinOverride = {};
-
-function key(d) { return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); }
 
 var DOTCLS = {
   cake:'dot-cake', crepe:'dot-crepe', muffin:'dot-muffin',
   takeout:'dot-takeout', cafe:'dot-cafe', cafe2:'dot-cafe2'
 };
 
+// デフォルト営業時間
 var TYPE_INFO = {
-  cake:   { name: 'ホールケーキ', hours: '12:00-17:00' },
-  crepe:  { name: 'クレープ',     hours: '12:00-16:00' },
-  takeout:{ name: 'テイクアウト', hours: '12:00-18:00' },
-  cafe:   { name: 'イートイン',   hours: '13:00-18:00 (L.O.17:30)' },
-  cafe2:  { name: '気まぐれカフェ(テイクアウト)',     hours: '12:00-16:30 (L.O.16:00)' },
-  muffin: { name: 'マフィン',     hours: '12:00-18:00' }
+  cake:   {name:'ホールケーキ', hours:'12:00-17:00'},
+  crepe:  {name:'クレープ',     hours:'12:00-16:00'},
+  takeout:{name:'テイクアウト', hours:'12:00-18:00'},
+  cafe:   {name:'イートイン',   hours:'13:00-17:30 (L.O.17:00)'},
+  cafe2:  {name:'気まぐれカフェ', hours:'12:00-16:30 (L.O.16:00)'},
+  muffin: {name:'マフィン',     hours:'12:00-18:00'}
 };
+
+// スプシから読み込むデータ
+var specialEvents  = {sagisu:{}, ebie:{}};
+var eventBands     = {sagisu:{}, ebie:{}};
+var offTypes       = {sagisu:{}, ebie:{}};
+var timeOverrides  = {sagisu:{}, ebie:{}};
+
+function dateKey(d) { return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(); }
+
+function parseDate(str) {
+  if (!str) return null;
+  var s = str.trim().replace(/\//g,'-');
+  var p = s.split('-');
+  if (p.length < 3) return null;
+  return new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
+}
+
+function formatDateJP(d) { return (d.getMonth()+1)+'/'+d.getDate(); }
+
+function loadCSV() {
+  fetch(CSV_URL)
+    .then(function(r){return r.text();})
+    .then(function(text){
+      var rows = text.trim().split('\n');
+      for (var i = 1; i < rows.length; i++) {
+        // CSVのカンマ区切り（ダブルクォート対応簡易版）
+        var cols = rows[i].split(',');
+        var dateStr  = (cols[0]||'').trim();
+        var shopName = (cols[1]||'').trim().toLowerCase();
+        var kind     = (cols[2]||'').trim().toLowerCase();
+        var target   = (cols[3]||'').trim().toLowerCase();
+        var content  = (cols[4]||'').trim();
+        var endDateStr=(cols[5]||'').trim();
+        var eventHours=(cols[6]||'').trim();
+
+        if (shopName !== 'sagisu' && shopName !== 'ebie') continue;
+
+        // 通常営業時間のデフォルト変更
+        if (kind === 'time_default' && target && content) {
+          if (TYPE_INFO[target]) TYPE_INFO[target].hours = content;
+          continue;
+        }
+
+        var startD = parseDate(dateStr);
+        if (!startD) continue;
+        var dk = dateKey(startD);
+
+        if (kind === 'off') {
+          if (!offTypes[shopName][dk]) offTypes[shopName][dk] = [];
+          offTypes[shopName][dk].push(target);
+
+        } else if (kind === 'time') {
+          if (!timeOverrides[shopName][dk]) timeOverrides[shopName][dk] = {};
+          timeOverrides[shopName][dk][target] = content;
+
+        } else if (kind === 'closed') {
+          specialEvents[shopName][dk] = [{type:'closed', label:content||'臨時休業'}];
+
+        } else if (kind === 'event') {
+          var endD = parseDate(endDateStr) || startD;
+          var periodText = formatDateJP(startD);
+          if (startD.toDateString() !== endD.toDateString()) periodText += '〜'+formatDateJP(endD);
+          var cur = new Date(startD);
+          while (cur <= endD) {
+            var ck = dateKey(cur);
+            var isStart = cur.toDateString() === startD.toDateString();
+            var isEnd   = cur.toDateString() === endD.toDateString();
+            eventBands[shopName][ck] = {
+              name: content,
+              hours: eventHours,
+              period: periodText,
+              isStart: isStart,
+              isEnd: isEnd
+            };
+            cur.setDate(cur.getDate()+1);
+          }
+        }
+      }
+      render();
+    })
+    .catch(function(){ render(); });
+}
+
+function getHours(type, d) {
+  var dk = dateKey(d);
+  var ov = timeOverrides[shop][dk];
+  if (ov && ov[type]) return ov[type];
+  return TYPE_INFO[type] ? TYPE_INFO[type].hours : '';
+}
 
 var shops = {
   sagisu: {
     getInfoRows: function() {
       return [
-        {type:'cake', text:'ホールケーキ <b>金-火</b> / ' + TYPE_INFO.cake.hours},
-        {type:'crepe', text:'クレープ <b>火-土</b> / ' + TYPE_INFO.crepe.hours}
+        {type:'cake',  text:'ホールケーキ <b>金〜火</b> / '+TYPE_INFO.cake.hours},
+        {type:'crepe', text:'クレープ <b>火〜土</b> / '+TYPE_INFO.crepe.hours}
       ];
     },
     getLegend: function() {
       return [
-        {cls:'dot-cake', svg:SVG.cake, label:'ホールケーキ'},
+        {cls:'dot-cake',  svg:SVG.cake,  label:'ホールケーキ'},
         {cls:'dot-crepe', svg:SVG.crepe, label:'クレープ'},
         {pill:'#d70035', label:'臨時休業'},
         {pill:'#fcc800', label:'イベント'}
       ];
     },
     getEvents: function(d) {
-      var sp = specialEvents[key(d)]; if (sp) return sp;
+      var dk = dateKey(d);
+      var sp = specialEvents['sagisu'][dk]; if (sp) return sp;
       var w = d.getDay(), evs = [];
       if (w !== 3 && w !== 4) evs.push({type:'cake'});
       if (w !== 0 && w !== 1) evs.push({type:'crepe'});
-      return evs;
+      var off = offTypes['sagisu'][dk] || [];
+      return evs.filter(function(e){return off.indexOf(e.type)===-1;});
     }
   },
   ebie: {
     getInfoRows: function() {
       return [
-        {type:'takeout', text:'テイクアウト <b>金〜火</b> / ' + TYPE_INFO.takeout.hours},
-        {type:'cafe', text:'イートイン <b>金〜火</b> / ' + TYPE_INFO.cafe.hours},
-        {type:'cafe2', text:'気まぐれカフェ(テイクアウト) <b>水・木</b> / ' + TYPE_INFO.cafe2.hours},
-        {type:'muffin', text:'マフィン <b>月・火・金</b> / ' + TYPE_INFO.muffin.hours }
+        {type:'takeout', text:'テイクアウト <b>金〜火</b> / '+TYPE_INFO.takeout.hours},
+        {type:'cafe',    text:'イートイン <b>金〜火</b> / '+TYPE_INFO.cafe.hours},
+        {type:'cafe2',   text:'気まぐれカフェ <b>水・木</b> / '+TYPE_INFO.cafe2.hours},
+        {type:'muffin',  text:'マフィン <b>月・火・金</b> / '+TYPE_INFO.muffin.hours}
       ];
     },
     getLegend: function() {
       return [
         {cls:'dot-takeout', svg:SVG.takeout, label:'テイクアウト'},
-        {cls:'dot-cafe', svg:SVG.cafe, label:'イートイン'},
-        {cls:'dot-cafe2', svg:SVG.cafe2, label:'気まぐれカフェ(テイクアウト)'},
-        {cls:'dot-muffin', svg:SVG.muffin, label:'マフィン'},
+        {cls:'dot-cafe',    svg:SVG.cafe,    label:'イートイン'},
+        {cls:'dot-cafe2',   svg:SVG.cafe2,   label:'気まぐれカフェ'},
+        {cls:'dot-muffin',  svg:SVG.muffin,  label:'マフィン'},
         {pill:'#d70035', label:'臨時休業'},
         {pill:'#fcc800', label:'イベント'}
       ];
     },
     getEvents: function(d) {
-      var sp = specialEvents[key(d)]; if (sp) return sp;
+      var dk = dateKey(d);
+      var sp = specialEvents['ebie'][dk]; if (sp) return sp;
       var w = d.getDay(), evs = [];
       if (w === 3 || w === 4) {
         evs.push({type:'cafe2'});
@@ -206,262 +298,257 @@ var shops = {
         evs.push({type:'takeout'});
         evs.push({type:'cafe'});
       }
-      var mo = muffinOverride[key(d)];
-      if (mo === true || (mo === undefined && (w === 1 || w === 2 || w === 5))) evs.push({type:'muffin'});
-      return evs;
+      var off = offTypes['ebie'][dk] || [];
+      if (off.indexOf('muffin') === -1 && (w===1||w===2||w===5)) evs.push({type:'muffin'});
+      return evs.filter(function(e){return off.indexOf(e.type)===-1;});
     }
   }
 };
 
-var SHOP_THEME = { sagisu: '#e8383d', ebie: '#006a6c' };
+var SHOP_THEME = {sagisu:'#e8383d', ebie:'#006a6c'};
 
 function setShop(s) {
   shop = s;
   var wrap = document.getElementById('wrap');
-  wrap.classList.remove('shop-sagisu', 'shop-ebie');
-  wrap.classList.add('shop-' + s);
+  wrap.classList.remove('shop-sagisu','shop-ebie');
+  wrap.classList.add('shop-'+s);
   var tabs = document.querySelectorAll('.tab');
-  tabs[0].classList.toggle('active', s === 'sagisu');
-  tabs[1].classList.toggle('active', s === 'ebie');
+  tabs[0].classList.toggle('active', s==='sagisu');
+  tabs[1].classList.toggle('active', s==='ebie');
   render();
 }
 
 function changeMonth(d) {
-  var nm = month + d;
-  var ny = nm > 11 ? year + 1 : nm < 0 ? year - 1 : year;
-  var nmo = nm > 11 ? 0 : nm < 0 ? 11 : nm;
-  if (ny > maxYear || (ny === maxYear && nmo > maxMonth)) return;
-  if (ny < now.getFullYear() || (ny === now.getFullYear() && nmo < now.getMonth())) return;
-  year = ny; month = nmo; render();
+  var nm = month+d;
+  var ny = nm>11?year+1:nm<0?year-1:year;
+  var nmo = nm>11?0:nm<0?11:nm;
+  if (ny>maxYear||(ny===maxYear&&nmo>maxMonth)) return;
+  if (ny<now.getFullYear()||(ny===now.getFullYear()&&nmo<now.getMonth())) return;
+  year=ny; month=nmo; render();
 }
 
 function drawCalendarLines() {
   var cal = document.getElementById('cal');
   var svg = document.getElementById('cal-lines');
-  if (!cal || !svg || !cal.rows.length) return;
+  if (!cal||!svg||!cal.rows.length) return;
   var wrap = document.querySelector('.cal-wrap');
   var wrapRect = wrap.getBoundingClientRect();
-  var calRect = cal.getBoundingClientRect();
+  var calRect  = cal.getBoundingClientRect();
   var stroke = ' stroke="#6f5436" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.7"';
   var paths = '';
-  var x0 = calRect.left - wrapRect.left;
-  var W = calRect.width;
-
-  cal.querySelectorAll('tbody tr').forEach(function(row) {
-    var y = row.getBoundingClientRect().top - wrapRect.top;
-    var segs = 16, step = W / segs;
-    var d = 'M ' + x0 + ' ' + y;
-    for (var s = 0; s < segs; s++) {
-      var cx = x0 + s * step + step * 0.4;
-      var cy = y + (s % 2 === 0 ? -1.5 : 1.5);
-      var ex = x0 + (s + 1) * step;
-      d += ' Q ' + cx + ' ' + cy + ' ' + ex + ' ' + y;
+  var x0 = calRect.left-wrapRect.left;
+  var W  = calRect.width;
+  cal.querySelectorAll('tbody tr').forEach(function(row){
+    var y = row.getBoundingClientRect().top-wrapRect.top;
+    var segs=16, step=W/segs;
+    var d='M '+x0+' '+y;
+    for(var s=0;s<segs;s++){
+      var cx=x0+s*step+step*0.4, cy=y+(s%2===0?-1.5:1.5), ex=x0+(s+1)*step;
+      d+=' Q '+cx+' '+cy+' '+ex+' '+y;
     }
-    paths += '<path d="' + d + '"' + stroke + '/>';
+    paths+='<path d="'+d+'"'+stroke+'/>';
   });
-
-  var headerCells = cal.rows[0].cells;
-  var yTop = calRect.top - wrapRect.top;
-  var lastRow = cal.rows[cal.rows.length - 1];
-  var yBottom = lastRow.getBoundingClientRect().bottom - wrapRect.top;
-  var H = yBottom - yTop;
-  var vSegs = Math.max(8, Math.round(H / 18));
-  var vWobble = [0.35, -0.3, 0.25, -0.35, 0.3, -0.25];
-
-  for (var c = 1; c < headerCells.length; c++) {
-    var x = Math.round(headerCells[c].getBoundingClientRect().left - wrapRect.left);
-    var vStep = H / vSegs;
-    var vd = 'M ' + x + ' ' + yTop;
-    for (var v = 0; v < vSegs; v++) {
-      var vx = x + vWobble[v % vWobble.length];
-      var vy = yTop + v * vStep + vStep * 0.35;
-      var ey = yTop + (v + 1) * vStep;
-      vd += ' Q ' + vx + ' ' + vy + ' ' + x + ' ' + ey;
+  var hCells = cal.rows[0].cells;
+  var yTop   = calRect.top-wrapRect.top;
+  var yBottom= cal.rows[cal.rows.length-1].getBoundingClientRect().bottom-wrapRect.top;
+  var H=yBottom-yTop;
+  var vSegs=Math.max(8,Math.round(H/18));
+  var vW=[0.35,-0.3,0.25,-0.35,0.3,-0.25];
+  for(var c=1;c<hCells.length;c++){
+    var x=Math.round(hCells[c].getBoundingClientRect().left-wrapRect.left);
+    var vStep=H/vSegs;
+    var vd='M '+x+' '+yTop;
+    for(var v=0;v<vSegs;v++){
+      var vx=x+vW[v%vW.length], vy=yTop+v*vStep+vStep*0.35, ey=yTop+(v+1)*vStep;
+      vd+=' Q '+vx+' '+vy+' '+x+' '+ey;
     }
-    paths += '<path d="' + vd + '"' + stroke + '/>';
+    paths+='<path d="'+vd+'"'+stroke+'/>';
   }
-
-  svg.innerHTML = paths;
+  svg.innerHTML=paths;
 }
 
 function render() {
-  var labs = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  document.getElementById('month-label').textContent = labs[month] + ' ' + year;
+  var labs=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('month-label').textContent=labs[month]+' '+year;
 
-  var infoHTML = '';
-  shops[shop].getInfoRows().forEach(function(r) {
-    var c = COLORS[r.type];
-    var sv = SVG[r.type].replace('stroke="currentColor"', 'stroke="' + c + '"');
-    infoHTML += '<div class="info-row"><div class="info-icon" style="color:' + c + '">' + sv + '</div><span style="color:' + c + '">' + r.text + '</span></div>';
+  var infoHTML='';
+  shops[shop].getInfoRows().forEach(function(r){
+    var c=COLORS[r.type];
+    var sv=SVG[r.type].replace('stroke="currentColor"','stroke="'+c+'"');
+    infoHTML+='<div class="info-row"><div class="info-icon" style="color:'+c+'">'+sv+'</div><span style="color:'+c+'">'+r.text+'</span></div>';
   });
-  document.getElementById('shop-info-top').innerHTML = infoHTML;
+  document.getElementById('shop-info-top').innerHTML=infoHTML;
 
-  var legendHTML = '';
-  shops[shop].getLegend().forEach(function(l) {
-    if (l.pill) {
-      var pillBg = l.pill === 'theme' ? SHOP_THEME[shop] : l.pill;
-      var pillText = pillBg === '#fcc800' ? '#432f2f' : '#fff';
-      legendHTML += '<div class="leg"><div class="leg-dot" style="background:' + pillBg + ';color:' + pillText + ';font-size:10px;border-radius:10px;padding:0 6px;width:auto;min-width:28px">' + l.label + '</div></div>';
+  var legendHTML='';
+  shops[shop].getLegend().forEach(function(l){
+    if(l.pill){
+      var pt=l.pill==='#fcc800'?'#432f2f':'#fff';
+      legendHTML+='<div class="leg"><div class="leg-dot" style="background:'+l.pill+';color:'+pt+';font-size:10px;border-radius:10px;padding:0 6px;width:auto;min-width:28px">'+l.label+'</div></div>';
     } else {
-      legendHTML += '<div class="leg"><div class="leg-dot ' + l.cls + '">' + l.svg + '</div><span>' + l.label + '</span></div>';
+      legendHTML+='<div class="leg"><div class="leg-dot '+l.cls+'">'+l.svg+'</div><span>'+l.label+'</span></div>';
     }
   });
-  document.getElementById('legend').innerHTML = legendHTML;
+  document.getElementById('legend').innerHTML=legendHTML;
 
-  var first = new Date(year, month, 1);
-  var last = new Date(year, month + 1, 0);
-  var startDay = first.getDay();
-  var html = '<tr><th class="sun">Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th class="sat">Sat</th></tr>';
-  var day = 1 - startDay;
-  for (var row = 0; row < 6; row++) {
-    html += '<tr>';
-    for (var col = 0; col < 7; col++) {
-      var d = new Date(year, month, day);
-      var isOther = day < 1 || day > last.getDate();
-      var isToday = d.toDateString() === today.toDateString();
-      var cls = '';
-      if (isOther) cls += ' other';
-      if (isToday) cls += ' today';
-      if (col === 0) cls += ' sun';
-      if (col === 6) cls += ' sat';
-      html += '<td class="' + cls.trim() + '">';
-      if (!isOther) {
-        html += '<div class="date-num">' + day + '</div>';
-        var evs = shops[shop].getEvents(d);
-        var hasSpecial = evs.some(function(e) { return e.type === 'closed' || e.type === 'event'; });
-        if (hasSpecial) {
-          evs.forEach(function(e) {
-            if (e.type === 'closed') html += '<div class="pill-closed">' + (e.label || '臨時休業') + '</div>';
-            if (e.type === 'event') html += '<div class="pill-event">' + (e.label || 'イベント') + '</div>';
+  var first=new Date(year,month,1), last=new Date(year,month+1,0), startDay=first.getDay();
+  var html='<tr><th class="sun">Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th class="sat">Sat</th></tr>';
+  var day=1-startDay;
+  for(var row=0;row<6;row++){
+    html+='<tr>';
+    for(var col=0;col<7;col++){
+      var d=new Date(year,month,day);
+      var isOther=day<1||day>last.getDate();
+      var isToday=d.toDateString()===today.toDateString();
+      var cls='';
+      if(isOther) cls+=' other';
+      if(isToday) cls+=' today';
+      if(col===0) cls+=' sun';
+      if(col===6) cls+=' sat';
+      html+='<td class="'+cls.trim()+'">';
+      if(!isOther){
+        html+='<div class="date-num">'+day+'</div>';
+        var dk=dateKey(d);
+        var sp=specialEvents[shop][dk];
+        var band=eventBands[shop][dk];
+
+        if(sp){
+          sp.forEach(function(e){
+            if(e.type==='closed') html+='<div class="pill-closed" data-popup="closed" data-label="'+(e.label||'臨時休業')+'">'+(e.label||'臨時休業')+'</div>';
           });
+        } else if(band){
+          var bc='event-band';
+          if(band.isStart) bc+=' band-start';
+          if(band.isEnd)   bc+=' band-end';
+          if(band.isStart&&band.isEnd) bc='event-band band-single';
+          var labelPart=band.isStart?'<span class="event-band-label">'+band.name+'</span>':'';
+          html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'">'+labelPart+'</div>';
+          // 通常アイコンも表示
+          var evs=shops[shop].getEvents(d);
+          if(evs.length){
+            html+='<div class="dot-row-below">';
+            evs.forEach(function(e){
+              var hrs=getHours(e.type,d);
+              html+='<div class="dot '+(DOTCLS[e.type]||'')+'" data-type="'+e.type+'" data-hours="'+hrs+'" role="button" tabindex="0">'+(SVG[e.type]||'')+'</div>';
+            });
+            html+='</div>';
+          }
         } else {
-          html += '<div class="dot-row">';
-          evs.forEach(function(e) {
-            if (TYPE_INFO[e.type]) {
-              html += '<div class="dot ' + (DOTCLS[e.type] || '') + '" data-type="' + e.type + '" role="button" tabindex="0" aria-label="' + TYPE_INFO[e.type].name + '">' + (SVG[e.type] || '') + '</div>';
-            }
+          var evs=shops[shop].getEvents(d);
+          html+='<div class="dot-row">';
+          evs.forEach(function(e){
+            var hrs=getHours(e.type,d);
+            html+='<div class="dot '+(DOTCLS[e.type]||'')+'" data-type="'+e.type+'" data-hours="'+hrs+'" role="button" tabindex="0">'+(SVG[e.type]||'')+'</div>';
           });
-          html += '</div>';
+          html+='</div>';
         }
       }
-      html += '</td>';
+      html+='</td>';
       day++;
     }
-    html += '</tr>';
-    if (day > last.getDate() && row >= 4) break;
+    html+='</tr>';
+    if(day>last.getDate()&&row>=4) break;
   }
-  document.getElementById('cal').innerHTML = html;
-  setTimeout(drawCalendarLines, 100);
+  document.getElementById('cal').innerHTML=html;
+  setTimeout(drawCalendarLines,100);
 }
 
-var popupScrollY = 0;
-var popupAnchorEl = null;
+// ポップアップ
+var popupScrollY=0, popupAnchorEl=null;
 
-function lockPageScroll() {
-  popupScrollY = window.scrollY || window.pageYOffset;
+function lockPageScroll(){
+  popupScrollY=window.scrollY||window.pageYOffset;
   document.documentElement.classList.add('popup-open');
   document.body.classList.add('popup-open');
-  document.body.style.top = '-' + popupScrollY + 'px';
+  document.body.style.top='-'+popupScrollY+'px';
 }
-
-function unlockPageScroll() {
+function unlockPageScroll(){
   document.documentElement.classList.remove('popup-open');
   document.body.classList.remove('popup-open');
-  document.body.style.top = '';
-  window.scrollTo(0, popupScrollY);
+  document.body.style.top='';
+  window.scrollTo(0,popupScrollY);
 }
-
-function positionPopupNear(anchorEl, card) {
-  // 負の値にするとアイコン側へ寄せて、わずかに重なる
-  var gapH = -6;
-  var gapV = -6;
-  var margin = 8;
-  var anchor = anchorEl.getBoundingClientRect();
-  var cardW = card.offsetWidth;
-  var cardH = card.offsetHeight;
-  var vw = window.innerWidth;
-  var vh = window.innerHeight;
-  var left, top;
-  if (anchor.right + gapH + cardW <= vw - margin) {
-    left = anchor.right + gapH;
-    top = anchor.top - cardH - gapV;
-  } else {
-    left = anchor.left - cardW - gapH;
-    top = anchor.top - cardH - gapV;
-  }
-  if (top < margin) top = anchor.bottom + gapV;
-  if (left < margin) left = margin;
-  if (left + cardW > vw - margin) left = vw - margin - cardW;
-  if (top + cardH > vh - margin) top = vh - margin - cardH;
-  card.style.left = Math.round(left) + 'px';
-  card.style.top = Math.round(top) + 'px';
+function positionPopupNear(anchorEl,card){
+  var gapH=-6,gapV=-6,margin=8;
+  var anchor=anchorEl.getBoundingClientRect();
+  var cardW=card.offsetWidth,cardH=card.offsetHeight;
+  var vw=window.innerWidth,vh=window.innerHeight;
+  var left,top;
+  if(anchor.right+gapH+cardW<=vw-margin){left=anchor.right+gapH;top=anchor.top-cardH-gapV;}
+  else{left=anchor.left-cardW-gapH;top=anchor.top-cardH-gapV;}
+  if(top<margin) top=anchor.bottom+gapV;
+  if(left<margin) left=margin;
+  if(left+cardW>vw-margin) left=vw-margin-cardW;
+  if(top+cardH>vh-margin) top=vh-margin-cardH;
+  card.style.left=Math.round(left)+'px';
+  card.style.top=Math.round(top)+'px';
 }
-
-function showTypePopup(type, anchorEl) {
-  var info = TYPE_INFO[type];
-  if (!info || !anchorEl) return;
-  popupAnchorEl = anchorEl;
-  var overlay = document.getElementById('popup-overlay');
-  var card = document.getElementById('popup-card');
-  var iconEl = document.getElementById('popup-icon');
-  iconEl.className = 'popup-icon ' + (DOTCLS[type] || '');
-  iconEl.innerHTML = SVG[type] || '';
-  document.getElementById('popup-name').textContent = info.name;
-  document.getElementById('popup-hours').textContent = info.hours;
+function showPopup(iconCls,iconSVG,name,hoursText,anchorEl){
+  popupAnchorEl=anchorEl;
+  var overlay=document.getElementById('popup-overlay');
+  var card=document.getElementById('popup-card');
+  var iconEl=document.getElementById('popup-icon');
+  iconEl.className='popup-icon'+(iconCls?' '+iconCls:'');
+  iconEl.innerHTML=iconSVG||'';
+  document.getElementById('popup-name').textContent=name;
+  document.getElementById('popup-hours').innerHTML=hoursText;
   card.classList.remove('is-visible');
   lockPageScroll();
   overlay.classList.add('is-open');
-  overlay.setAttribute('aria-hidden', 'false');
-  requestAnimationFrame(function() {
-    positionPopupNear(anchorEl, card);
+  overlay.setAttribute('aria-hidden','false');
+  requestAnimationFrame(function(){
+    positionPopupNear(anchorEl,card);
     card.classList.add('is-visible');
   });
 }
-
-function hideTypePopup() {
-  var overlay = document.getElementById('popup-overlay');
-  var card = document.getElementById('popup-card');
+function hideTypePopup(){
+  var overlay=document.getElementById('popup-overlay');
+  var card=document.getElementById('popup-card');
   card.classList.remove('is-visible');
   overlay.classList.remove('is-open');
-  overlay.setAttribute('aria-hidden', 'true');
-  popupAnchorEl = null;
+  overlay.setAttribute('aria-hidden','true');
+  popupAnchorEl=null;
   unlockPageScroll();
 }
 
-document.getElementById('popup-overlay').addEventListener('click', function(e) {
-  if (e.target === this) hideTypePopup();
+document.getElementById('popup-overlay').addEventListener('click',function(e){if(e.target===this)hideTypePopup();});
+document.getElementById('popup-card').addEventListener('click',function(e){e.stopPropagation();});
+document.getElementById('popup-close').addEventListener('click',hideTypePopup);
+
+document.querySelector('.cal-wrap').addEventListener('click',function(e){
+  var dot=e.target.closest('.dot[data-type]');
+  if(dot){
+    e.stopPropagation();
+    var type=dot.getAttribute('data-type');
+    var hrs=dot.getAttribute('data-hours')||(TYPE_INFO[type]?TYPE_INFO[type].hours:'');
+    var name=TYPE_INFO[type]?TYPE_INFO[type].name:type;
+    showPopup(DOTCLS[type],SVG[type],name,hrs,dot);
+    return;
+  }
+  var band=e.target.closest('[data-popup="event"]');
+  if(band){
+    e.stopPropagation();
+    var name=band.getAttribute('data-name')||'イベント';
+    var period=band.getAttribute('data-period')||'';
+    var hours=band.getAttribute('data-hours')||'';
+    var hoursHTML=(period?'<span style="display:block">'+period+'</span>':'')+(hours?'<span style="display:block">'+hours+'</span>':'');
+    showPopup('','',name,hoursHTML,band);
+    return;
+  }
+  var closed=e.target.closest('[data-popup="closed"]');
+  if(closed){
+    e.stopPropagation();
+    showPopup('','',closed.getAttribute('data-label')||'臨時休業','',closed);
+  }
 });
 
-document.getElementById('popup-card').addEventListener('click', function(e) {
-  e.stopPropagation();
+window.addEventListener('resize',function(){
+  if(!popupAnchorEl) return;
+  var card=document.getElementById('popup-card');
+  if(card.classList.contains('is-visible')) positionPopupNear(popupAnchorEl,card);
 });
 
-document.getElementById('popup-close').addEventListener('click', hideTypePopup);
-
-document.querySelector('.cal-wrap').addEventListener('click', function(e) {
-  var dot = e.target.closest('.dot[data-type]');
-  if (!dot) return;
-  e.stopPropagation();
-  showTypePopup(dot.getAttribute('data-type'), dot);
-});
-
-document.querySelector('.cal-wrap').addEventListener('keydown', function(e) {
-  if (e.key !== 'Enter' && e.key !== ' ') return;
-  var dot = e.target.closest('.dot[data-type]');
-  if (!dot) return;
-  e.preventDefault();
-  showTypePopup(dot.getAttribute('data-type'), dot);
-});
-
-window.addEventListener('resize', function() {
-  if (!popupAnchorEl) return;
-  var card = document.getElementById('popup-card');
-  if (card.classList.contains('is-visible')) positionPopupNear(popupAnchorEl, card);
-});
-
-document.fonts.ready.then(function() { render(); });
-render();
-window.addEventListener('resize', function() { setTimeout(drawCalendarLines, 100); });
+document.fonts.ready.then(function(){ loadCSV(); });
+window.addEventListener('resize',function(){setTimeout(drawCalendarLines,100);});
 </script>
 </body>
 </html>
