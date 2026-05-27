@@ -11,7 +11,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .wrap{max-width:480px;margin:0 auto;padding:1.5rem 1rem;font-family:'Yomogi',cursive;--theme:#e8383d;--theme-soft:#f0c0c0}
-.wrap.shop-ebie{--theme:#006a6c;--theme-soft:#b8d8d9}
+.wrap.shop-ebie{--theme:#7A9A60;--theme-soft:#E8EFE3}
 .header{text-align:center;margin-bottom:1rem}
 .header img{width:160px;height:auto;display:block;margin:0 auto 6px}
 .header p{font-size:11px;letter-spacing:0.2em;color:#432f2f;margin-top:4px;font-family:'Yomogi',cursive}
@@ -52,15 +52,15 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .dot svg{width:20px;height:20px;flex-shrink:0;pointer-events:none}
 .dot-cake{background:#FDE8E8;color:#c02025}
 .dot-crepe{background:#FFF3E0;color:#b85c00}
-.dot-muffin{background:#FFF8E1;color:#8a6000}
-.dot-takeout{background:#fdede4;color:#e95464}
-.dot-cafe{background:#E3F2FD;color:#1565c0}
-.dot-cafe2{background:#E8F5E9;color:#2e7d32}
-.pill-closed{background:#d70035;color:#fff;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive;cursor:pointer;position:relative;z-index:1}
+.dot-muffin{background:#E6C58B;color:#A6834F}
+.dot-takeout{background:#E8C5B9;color:#A67667}
+.dot-cafe{background:#AEC1CD;color:#6B8294}
+.dot-cafe2{background:#D8C4A7;color:#A68A6F}
+.pill-closed{background:#A65B65;color:#D8A8B0;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive;cursor:pointer;position:relative;z-index:1}
 /* イベント帯・臨時休業帯 */
 .event-band,.closed-band{position:absolute;top:32px;left:0;right:0;height:20px;z-index:3;display:flex;align-items:center;padding-left:4px;cursor:pointer;overflow:visible}
 .event-band{background:#fcc800;}
-.closed-band{background:#d70035;}
+.closed-band{background:#A65B65;}
 /* 両方ある日はイベントを下にずらす */
 .event-band.shift-down{top:55px;}
 .event-band.band-start,.closed-band.band-start{border-radius:6px 0 0 6px;left:2px}
@@ -143,8 +143,8 @@ var maxYear = now.getMonth() === 11 ? now.getFullYear() + 1 : now.getFullYear();
 var maxMonth = now.getMonth() === 11 ? 0 : now.getMonth() + 1;
 
 var COLORS = {
-  cake:'#c02025', crepe:'#b85c00', muffin:'#8a6000',
-  takeout:'#e95464', cafe:'#1565c0', cafe2:'#2e7d32'
+  cake:'#c02025', crepe:'#b85c00', muffin:'#A6834F',
+  takeout:'#A67667', cafe:'#6B8294', cafe2:'#A68A6F'
 };
 
 var SVG = {
@@ -408,7 +408,7 @@ var shops = {
       return [
         {cls:'dot-cake',  svg:SVG.cake,  label:'ホールケーキ'},
         {cls:'dot-crepe', svg:SVG.crepe, label:'クレープ'},
-        {pill:'#d70035', label:'臨時休業'},
+        {pill:'#A65B65', textColor:'#D8A8B0', label:'臨時休業'},
         {pill:'#fcc800', label:'イベント'}
       ];
     },
@@ -443,7 +443,7 @@ var shops = {
         {cls:'dot-cafe',    svg:SVG.cafe,    label:'イートイン'},
         {cls:'dot-cafe2',   svg:SVG.cafe2,   label:'気まぐれカフェ'},
         {cls:'dot-muffin',  svg:SVG.muffin,  label:'マフィン'},
-        {pill:'#d70035', label:'臨時休業'},
+        {pill:'#A65B65', textColor:'#D8A8B0', label:'臨時休業'},
         {pill:'#fcc800', label:'イベント'}
       ];
     },
@@ -468,7 +468,7 @@ var shops = {
   }
 };
 
-var SHOP_THEME = {sagisu:'#e8383d', ebie:'#006a6c'};
+var SHOP_THEME = {sagisu:'#e8383d', ebie:'#7A9A60'};
 
 function setShop(s) {
   shop = s;
@@ -598,7 +598,7 @@ function render() {
   var legendHTML='';
   shops[shop].getLegend().forEach(function(l){
     if(l.pill){
-      var pt=l.pill==='#fcc800'?'#432f2f':'#fff';
+      var pt=l.textColor || (l.pill==='#fcc800'?'#432f2f':'#fff');
       legendHTML+='<div class="leg"><div class="leg-dot" style="background:'+l.pill+';color:'+pt+';font-size:10px;border-radius:10px;padding:0 6px;width:auto;min-width:28px">'+l.label+'</div></div>';
     } else {
       legendHTML+='<div class="leg"><div class="leg-dot '+l.cls+'">'+l.svg+'</div><span>'+l.label+'</span></div>';
