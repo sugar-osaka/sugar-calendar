@@ -656,7 +656,8 @@ function render() {
           if(band.isStart) bc+=' band-start';
           if(band.isEnd)   bc+=' band-end';
           if(band.isStart&&band.isEnd) bc='event-band shift-down band-single';
-          if(band.isStart){
+          var isFirstInRow = (col===0 || band.isStart);
+          if(isFirstInRow){
             html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
             html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'"><span class="event-band-label">'+band.name+'</span></div>';
           } else {
