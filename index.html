@@ -650,16 +650,7 @@ function render() {
           if(band.isStart&&band.isEnd) bc='event-band shift-down band-single';
           if(band.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
           html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'"></div>';
-          var evs=shops[shop].getEvents(d);
-          if(evs.length){
-            html+='<div class="dot-row-below double-band">';
-            evs.forEach(function(e){
-              var hrs=getHours(e.type,d);
-              html+='<div class="dot '+(DOTCLS[e.type]||'')+'" data-type="'+e.type+'" data-hours="'+hrs+'" role="button" tabindex="0">'+(SVG[e.type]||'')+'</div>';
-            });
-            html+='</div>';
-          }
-        } else if(band && rowHasShift){
+          // 臨時休業の日はアイコン非表示
           // 同じ行でshift-downが続く場合（臨時休業はないがこの行でshiftが始まった）
           var bc='event-band shift-down';
           if(band.isStart) bc+=' band-start';
