@@ -303,6 +303,13 @@ function loadCSV() {
   var CACHE_KEY = 'sugar_csv';
   var CACHE_TIME_KEY = 'sugar_csv_time';
   var CACHE_DURATION = 5 * 60 * 1000; // 5分
+  // 強制リロード時はキャッシュをクリア
+  try {
+    if (performance && performance.navigation && performance.navigation.type === 1) {
+      sessionStorage.removeItem(CACHE_KEY);
+      sessionStorage.removeItem(CACHE_TIME_KEY);
+    }
+  } catch(e) {}
   try {
     var cached = sessionStorage.getItem(CACHE_KEY);
     var cachedTime = sessionStorage.getItem(CACHE_TIME_KEY);
