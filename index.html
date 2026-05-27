@@ -259,15 +259,16 @@ function drawCalendarLines() {
   var lastRow = cal.rows[cal.rows.length - 1];
   var yBottom = lastRow.getBoundingClientRect().bottom - wrapRect.top;
   var H = yBottom - yTop;
-  var vSegs = Math.max(14, Math.round(H / 10));
+  var vSegs = Math.max(8, Math.round(H / 18));
+  var vWobble = [0.35, -0.3, 0.25, -0.35, 0.3, -0.25];
 
   for (var c = 1; c < headerCells.length; c++) {
     var x = Math.round(headerCells[c].getBoundingClientRect().left - wrapRect.left);
     var vStep = H / vSegs;
     var vd = 'M ' + x + ' ' + yTop;
     for (var v = 0; v < vSegs; v++) {
-      var vx = x + (v % 2 === 0 ? -1.2 : 1.2);
-      var vy = yTop + v * vStep + vStep * 0.4;
+      var vx = x + vWobble[v % vWobble.length];
+      var vy = yTop + v * vStep + vStep * 0.35;
       var ey = yTop + (v + 1) * vStep;
       vd += ' Q ' + vx + ' ' + vy + ' ' + x + ' ' + ey;
     }
