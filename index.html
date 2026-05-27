@@ -202,11 +202,11 @@ function parseAndApplyCSV(text) {
   for (var i = 1; i < rows.length; i++) {
     var cols = rows[i].split(',');
         var dateStr   = (cols[0]||'').trim();
-        var shopRaw   = (cols[1]||'').trim().toLowerCase();
-        var kindRaw   = (cols[2]||'').trim();
-        var targetRaw = (cols[3]||'').trim();
-        var content   = (cols[4]||'').trim();
-        var endDateStr= (cols[5]||'').trim();
+        var endDateStr= (cols[1]||'').trim();
+        var shopRaw   = (cols[2]||'').trim().toLowerCase();
+        var kindRaw   = (cols[3]||'').trim();
+        var targetRaw = (cols[4]||'').trim();
+        var content   = (cols[5]||'').trim();
         var eventHours= (cols[6]||'').trim();
         var reserveUrl= (cols[7]||'').trim();
 
