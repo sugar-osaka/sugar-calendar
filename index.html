@@ -10,32 +10,33 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
-.wrap{max-width:480px;margin:0 auto;padding:1.5rem 1rem;font-family:'Yomogi',cursive}
+.wrap{max-width:480px;margin:0 auto;padding:1.5rem 1rem;font-family:'Yomogi',cursive;--theme:#e8383d;--theme-soft:#f0c0c0}
+.wrap.shop-ebie{--theme:#006a6c;--theme-soft:#b8d8d9}
 .header{text-align:center;margin-bottom:1rem}
 .header img{width:160px;height:auto;display:block;margin:0 auto 6px}
 .header p{font-size:11px;letter-spacing:0.2em;color:#432f2f;margin-top:4px;font-family:'Yomogi',cursive}
-.tabs{display:flex;gap:0;justify-content:center;margin-bottom:1rem;border:1.5px solid #f0c0c0;border-radius:20px;overflow:hidden;width:fit-content;margin-left:auto;margin-right:auto}
+.tabs{display:flex;gap:0;justify-content:center;margin-bottom:1rem;border:1.5px solid var(--theme-soft);border-radius:20px;overflow:hidden;width:fit-content;margin-left:auto;margin-right:auto}
 .tab{padding:8px 22px;font-size:15px;cursor:pointer;background:#fff;color:#ccc;border:none;transition:all 0.15s;font-family:'Caveat Brush',cursive}
-.tab:first-child{border-right:1.5px solid #f0c0c0}
-.tab.active{background:#e8383d;color:#fff}
+.tab:first-child{border-right:1.5px solid var(--theme-soft)}
+.tab.active{background:var(--theme);color:#fff}
 .shop-info-top{padding:4px 0;margin-bottom:1rem;font-size:11px;color:#432f2f;font-family:'Yomogi',cursive;line-height:2}
 .shop-info-top .info-row{display:flex;align-items:center;gap:6px}
 .shop-info-top .info-icon{width:18px;height:18px;flex-shrink:0}
 .shop-info-top .info-icon svg{width:18px;height:18px}
 .shop-info-top b{font-weight:400}
 .nav{display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:0.8rem}
-.nav button{background:none;border:1.5px solid #f0c0c0;border-radius:50%;width:30px;height:30px;cursor:pointer;color:#e8383d;display:flex;align-items:center;justify-content:center;font-size:18px}
-.month{font-size:26px;color:#e8383d;min-width:140px;text-align:center;font-family:'Caveat Brush',cursive}
+.nav button{background:none;border:1.5px solid var(--theme-soft);border-radius:50%;width:30px;height:30px;cursor:pointer;color:var(--theme);display:flex;align-items:center;justify-content:center;font-size:18px}
+.month{font-size:26px;color:var(--theme);min-width:140px;text-align:center;font-family:'Caveat Brush',cursive}
 .cal-wrap{position:relative}
 .cal{width:100%;border-collapse:collapse;table-layout:fixed}
 .cal th{font-size:14px;color:#ccc;padding:6px 0 8px;text-align:center;font-weight:400;font-family:'Caveat Brush',cursive}
-.cal th.sun{color:#e8383d}
-.cal th.sat{color:#e8383d;opacity:0.5}
+.cal th.sun{color:var(--theme)}
+.cal th.sat{color:var(--theme);opacity:0.5}
 .cal td{vertical-align:top;padding:4px;border-top:none;height:96px;width:14.28%}
 .cal td.other .date-num{color:#eee}
-.cal td.today .date-num{background:#e8383d;color:#fff!important;border-radius:50%}
-.cal td.sun .date-num{color:#e8383d}
-.cal td.sat .date-num{color:#e8383d;opacity:0.5}
+.cal td.today .date-num{background:var(--theme);color:#fff!important;border-radius:50%}
+.cal td.sun .date-num{color:var(--theme)}
+.cal td.sat .date-num{color:var(--theme);opacity:0.5}
 .cal td.other.sun .date-num,.cal td.other.sat .date-num{color:#eee}
 .date-num{font-size:20px;margin-bottom:3px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-family:'Caveat Brush',cursive}
 .dot-row{display:flex;gap:4px;flex-wrap:wrap}
@@ -47,7 +48,7 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .dot-takeout{background:#fdede4;color:#e95464}
 .dot-cafe{background:#E3F2FD;color:#1565c0}
 .dot-cafe2{background:#E8F5E9;color:#2e7d32}
-.pill-closed{background:#e8383d;color:#fff;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive}
+.pill-closed{background:var(--theme);color:#fff;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive}
 .pill-event{background:#00533f;color:#fff;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive}
 .legend-wrap{margin-top:1.2rem;padding-top:1rem}
 .legend{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center}
@@ -65,13 +66,13 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
 .popup-hours{font-size:13px;color:#432f2f;opacity:0.7;margin-top:2px;letter-spacing:0.04em;line-height:1.35;white-space:normal;word-break:break-word}
 .popup-card.is-visible{opacity:1;visibility:visible;transform:scale(1);pointer-events:auto}
 .popup-close{position:absolute;top:2px;right:2px;width:26px;height:26px;border:none;background:none;color:#ccc;font-size:20px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;font-family:sans-serif}
-.popup-close:hover{color:#e8383d}
+.popup-close:hover{color:var(--theme)}
 .popup-icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
 .popup-icon svg{width:18px;height:18px}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap shop-sagisu" id="wrap">
   <div class="header">
     <img src="logo.png" alt="sugar logo">
     <p>営業カレンダー</p>
@@ -165,7 +166,7 @@ var shops = {
       return [
         {cls:'dot-cake', svg:SVG.cake, label:'ホールケーキ'},
         {cls:'dot-crepe', svg:SVG.crepe, label:'クレープ'},
-        {pill:'#e8383d', label:'臨時休業'},
+        {pill:'theme', label:'臨時休業'},
         {pill:'#00533f', label:'イベント'}
       ];
     },
@@ -192,7 +193,7 @@ var shops = {
         {cls:'dot-cafe', svg:SVG.cafe, label:'イートイン'},
         {cls:'dot-cafe2', svg:SVG.cafe2, label:'気まぐれカフェ(テイクアウト)'},
         {cls:'dot-muffin', svg:SVG.muffin, label:'マフィン'},
-        {pill:'#e8383d', label:'臨時休業'},
+        {pill:'theme', label:'臨時休業'},
         {pill:'#00533f', label:'イベント'}
       ];
     },
@@ -212,8 +213,13 @@ var shops = {
   }
 };
 
+var SHOP_THEME = { sagisu: '#e8383d', ebie: '#006a6c' };
+
 function setShop(s) {
   shop = s;
+  var wrap = document.getElementById('wrap');
+  wrap.classList.remove('shop-sagisu', 'shop-ebie');
+  wrap.classList.add('shop-' + s);
   var tabs = document.querySelectorAll('.tab');
   tabs[0].classList.toggle('active', s === 'sagisu');
   tabs[1].classList.toggle('active', s === 'ebie');
@@ -293,7 +299,8 @@ function render() {
   var legendHTML = '';
   shops[shop].getLegend().forEach(function(l) {
     if (l.pill) {
-      legendHTML += '<div class="leg"><div class="leg-dot" style="background:' + l.pill + ';color:#fff;font-size:10px;border-radius:10px;padding:0 6px;width:auto;min-width:28px">' + l.label + '</div></div>';
+      var pillBg = l.pill === 'theme' ? SHOP_THEME[shop] : l.pill;
+      legendHTML += '<div class="leg"><div class="leg-dot" style="background:' + pillBg + ';color:#fff;font-size:10px;border-radius:10px;padding:0 6px;width:auto;min-width:28px">' + l.label + '</div></div>';
     } else {
       legendHTML += '<div class="leg"><div class="leg-dot ' + l.cls + '">' + l.svg + '</div><span>' + l.label + '</span></div>';
     }
