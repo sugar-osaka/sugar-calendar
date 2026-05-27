@@ -59,7 +59,7 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .event-band.band-single,.closed-band.band-single{border-radius:6px;left:2px;right:2px}
 .event-band-label{display:none}
 .closed-band-label{display:none}
-.band-text{font-size:10px;font-family:'Yomogi',cursive;white-space:nowrap;pointer-events:none;position:absolute;left:4px;z-index:50;line-height:20px}
+.band-text{font-size:10px;font-family:'Yomogi',cursive;white-space:nowrap;pointer-events:none;position:absolute;left:4px;z-index:50;line-height:20px;overflow:hidden}
 .band-text-event{color:#432f2f}
 .band-text-closed{color:#fff}
 .dot-row-below{margin-top:24px;display:flex;gap:4px;flex-wrap:wrap;position:relative;z-index:1}
@@ -446,6 +446,33 @@ function changeMonth(d) {
   year=ny; month=nmo; render();
 }
 
+function updateBandTextWidths() {
+  var cal = document.getElementById('cal');
+  if (!cal) return;
+  var texts = cal.querySelectorAll('.band-text');
+  texts.forEach(function(textEl) {
+    var td = textEl.parentElement;
+    if (!td) return;
+    // このtdから始まる帯の終わりのtdを探す
+    var allTds = Array.prototype.slice.call(cal.querySelectorAll('td'));
+    var startIdx = allTds.indexOf(td);
+    if (startIdx === -1) return;
+    var totalWidth = 0;
+    var bandType = textEl.classList.contains('band-text-event') ? 'event' : 'closed';
+    for (var i = startIdx; i < allTds.length; i++) {
+      var curTd = allTds[i];
+      var hasBand = curTd.querySelector(bandType === 'event' ? '.event-band' : '.closed-band');
+      if (!hasBand) break;
+      totalWidth += curTd.offsetWidth;
+      var band = hasBand;
+      if (band.classList.contains('band-end') || band.classList.contains('band-single')) break;
+    }
+    if (totalWidth > 0) {
+      textEl.style.width = (totalWidth - 8) + 'px';
+    }
+  });
+}
+
 function drawCalendarLines() {
   var cal = document.getElementById('cal');
   var svg = document.getElementById('cal-lines');
@@ -581,7 +608,7 @@ function render() {
     if(day>last.getDate()&&row>=4) break;
   }
   document.getElementById('cal').innerHTML=html;
-  setTimeout(drawCalendarLines,100);
+  setTimeout(function(){ drawCalendarLines(); updateBandTextWidths(); }, 100);
 }
 
 // ポップアップ
