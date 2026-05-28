@@ -562,7 +562,7 @@ function drawCalendarLines() {
       // 日曜か1日かチェック
       var col = tdIdx % 7;
       var dk = td.getAttribute('data-dk') || '';
-      var day1 = dk ? parseInt(dk.slice(-2), 10) === 1 : false;
+      var day1 = dk ? parseInt(dk.split('-').pop(), 10) === 1 : false;
       if (col === 0 || day1) {
         var midBand = td.querySelector('.event-band');
         var midClosed = td.querySelector('.closed-band');
@@ -604,7 +604,14 @@ function drawCalendarLines() {
     var bandTop = isShifted ? 55 : 32;
     var y = tdRect.top - wrapRect.top + bandTop + 14;
     var color = isEvent ? '#432f2f' : '#ffffff';
-    var clipW = totalWidth - 8;
+    // 行末（土曜=col6）で幅を打ち切り、はみ出し防止
+    var colOfTd = (allTds.indexOf(td)) % 7;
+    var maxCols = 7 - colOfTd;
+    var wrapEl = cal.closest('.cal-wrap') || cal.parentElement;
+    var calWidth = cal.getBoundingClientRect().width;
+    var cellW = calWidth / 7;
+    var maxWidth = maxCols * cellW - 8;
+    var clipW = Math.min(totalWidth - 8, maxWidth);
 
     var clipId = 'clip-band-' + startIdx + '-' + tdIdx;
     bandTexts += '<clipPath id="' + clipId + '"><rect x="' + (x-2) + '" y="' + (y-14) + '" width="' + clipW + '" height="20"/></clipPath>';
