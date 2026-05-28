@@ -547,22 +547,48 @@ function drawCalendarLines() {
   // 帯テキストをSVGで描画
   var bandTexts = '';
   var allTds = Array.prototype.slice.call(cal.querySelectorAll('tbody td'));
-  allTds.forEach(function(td) {
+  allTds.forEach(function(td, tdIdx) {
+    // band-start/single の場合は通常通り
     var band = td.querySelector('.event-band.band-start, .event-band.band-single');
     var closedBand = td.querySelector('.closed-band.band-start, .closed-band.band-single');
-    var target = band || closedBand;
+
+    // band-start/single でない場合でも、日曜(col=0)または1日ならラベルを追加
+    var isEvent = false;
+    var target = null;
+    if (band || closedBand) {
+      target = band || closedBand;
+      isEvent = !!band;
+    } else {
+      // 日曜か1日かチェック
+      var col = tdIdx % 7;
+      var dk = td.getAttribute('data-dk') || '';
+      var day1 = dk ? parseInt(dk.slice(-2), 10) === 1 : false;
+      if (col === 0 || day1) {
+        var midBand = td.querySelector('.event-band');
+        var midClosed = td.querySelector('.closed-band');
+        if (midBand) { target = midBand; isEvent = true; }
+        else if (midClosed) { target = midClosed; isEvent = false; }
+      }
+    }
     if (!target) return;
 
-    var isEvent = !!band;
     var name = isEvent
       ? (target.getAttribute('data-name') || '')
       : (target.getAttribute('data-label') || '');
     if (!name) return;
 
+    // band-end/single のみの場合（1日続きでない）はスキップ
+    if (!band && !closedBand) {
+      if (target.classList.contains('band-end') && !target.classList.contains('band-start')) {
+        // endのみ→最終日なので追加ラベル不要
+        // ただし月初や日曜でも終端なら表示する（短い帯）
+      }
+    }
+
     // shift-downの場合はy位置を下げる
     var isShifted = target.classList.contains('shift-down');
 
-    // 帯の終わりtdを探して全体幅を計算
+    // 帯の終わりtdを探して残り幅を計算
     var startIdx = allTds.indexOf(td);
     var totalWidth = 0;
     for (var i = startIdx; i < allTds.length; i++) {
@@ -580,7 +606,7 @@ function drawCalendarLines() {
     var color = isEvent ? '#432f2f' : '#ffffff';
     var clipW = totalWidth - 8;
 
-    var clipId = 'clip-band-' + startIdx;
+    var clipId = 'clip-band-' + startIdx + '-' + tdIdx;
     bandTexts += '<clipPath id="' + clipId + '"><rect x="' + (x-2) + '" y="' + (y-14) + '" width="' + clipW + '" height="20"/></clipPath>';
     bandTexts += '<text x="' + x + '" y="' + y + '" font-size="11" font-family="Yomogi,cursive" fill="' + color + '" clip-path="url(#' + clipId + ')" style="pointer-events:none">' + name + '</text>';
   });
@@ -652,14 +678,16 @@ function render() {
           if(cb.single||cb.isStart&&cb.isEnd) cc='closed-band band-single';
           else if(cb.isStart) cc='closed-band band-start';
           else if(cb.isEnd)   cc='closed-band band-end';
-          var clabel=cb.isStart?'<span class="closed-band-label">'+cb.label+'</span>':'';
+          var showCLabel=(cb.isStart||col===0||day===1)&&!cb.single;
+          var clabel=showCLabel?'<span class="closed-band-label">'+cb.label+'</span>':'';
           html+='<div class="'+cc+'" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'">'+clabel+'</div>';
           var bc='event-band shift-down';
           if(band.isStart) bc+=' band-start';
           if(band.isEnd)   bc+=' band-end';
           if(band.isStart&&band.isEnd) bc='event-band shift-down band-single';
           if(band.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
-          var labelPart=band.isStart?'<span class="event-band-label">'+band.name+'</span>':'';
+          var showELabel0=(band.isStart||col===0||day===1)&&!band.single;
+          var labelPart=showELabel0?'<span class="event-band-label">'+band.name+'</span>':'';
           html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'">'+labelPart+'</div>';
           // 臨時休業+イベント重複日: イートイン・テイクアウト等のアイコンは非表示（イベント帯のみ表示）
           // イベント帯の終端なら次の行ではshift不要
@@ -672,7 +700,8 @@ function render() {
           else if(cb.isStart) cc='closed-band band-start';
           else if(cb.isEnd)   cc='closed-band band-end';
           if(cb.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
-          var clabel=cb.isStart?'<span class="closed-band-label">'+cb.label+'</span>':'';
+          var showCLabel2=(cb.isStart||col===0||day===1)&&!cb.single;
+          var clabel=showCLabel2?'<span class="closed-band-label">'+cb.label+'</span>':'';
           html+='<div class="'+cc+'" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'">'+clabel+'</div>';
 
         } else if(band){
@@ -683,7 +712,8 @@ function render() {
           if(band.isEnd)   bc+=' band-end';
           if(band.isStart&&band.isEnd) bc=(needsShift?'event-band shift-down':'event-band')+' band-single';
           if(band.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
-          var labelPart=band.isStart?'<span class="event-band-label">'+band.name+'</span>':'';
+          var showELabel2=(band.isStart||col===0||day===1)&&!band.single;
+          var labelPart=showELabel2?'<span class="event-band-label">'+band.name+'</span>':'';
           html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'">'+labelPart+'</div>';
 
           // 通常アイコンも表示
