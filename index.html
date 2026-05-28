@@ -48,6 +48,8 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .cal td.other.sun .date-num,.cal td.other.sat .date-num{color:#eee}
 .date-num{font-size:20px;margin-bottom:3px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-family:'Caveat Brush',cursive;position:relative;z-index:1}
 .dot-row{display:flex;gap:4px;flex-wrap:wrap;position:relative;z-index:1}
+.dot-wrap{position:relative;display:inline-block}
+.dot-badge{position:absolute;bottom:-3px;right:-6px;background:#e67e22;color:#fff;font-size:7px;font-weight:bold;padding:1px 3px;border-radius:3px;white-space:nowrap;line-height:1.4;z-index:2;pointer-events:none}
 .dot{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .dot svg{width:20px;height:20px;flex-shrink:0;pointer-events:none}
 .dot-cake{background:#F5D6DA;color:#B85366}
@@ -193,6 +195,15 @@ function parseDate(str) {
 }
 
 function formatDateJP(d) { return (d.getMonth()+1)+'/'+d.getDate(); }
+
+function makeDotHTML(e, hrs, dk) {
+  var hasChange = timeOverrides[shop][dk] && timeOverrides[shop][dk][e.type];
+  var badge = hasChange ? '<span class="dot-badge">変更</span>' : '';
+  if (badge) {
+    return '<div class="dot-wrap"><div class="dot '+(DOTCLS[e.type]||'')+'" data-type="'+e.type+'" data-hours="'+hrs+'" role="button" tabindex="0">'+(SVG[e.type]||'')+'</div>'+badge+'</div>';
+  }
+  return '<div class="dot '+(DOTCLS[e.type]||'')+'" data-type="'+e.type+'" data-hours="'+hrs+'" role="button" tabindex="0">'+(SVG[e.type]||'')+'</div>';
+}
 
 function parseAndApplyCSV(text) {
   specialEvents  = {sagisu:{}, ebie:{}};
@@ -621,7 +632,7 @@ function render() {
       if(isToday) cls+=' today';
       if(col===0) cls+=' sun';
       if(col===6) cls+=' sat';
-      html+='<td class="'+cls.trim()+'">';
+      html+='<td class="'+cls.trim()+'" data-dk="'+dateKey(d)+'">';
       if(!isOther){
         html+='<div class="date-num">'+day+'</div>';
         var dk=dateKey(d);
@@ -682,7 +693,7 @@ function render() {
             html+='<div class="'+belowCls+'">';
             evs.forEach(function(e){
               var hrs=getHours(e.type,d);
-              html+='<div class="dot '+(DOTCLS[e.type]||'')+'" data-type="'+e.type+'" data-hours="'+hrs+'" role="button" tabindex="0">'+(SVG[e.type]||'')+'</div>';
+              html+=makeDotHTML(e,hrs,dk);
             });
             html+='</div>';
           }
@@ -693,7 +704,7 @@ function render() {
           html+='<div class="dot-row">';
           evs.forEach(function(e){
             var hrs=getHours(e.type,d);
-            html+='<div class="dot '+(DOTCLS[e.type]||'')+'" data-type="'+e.type+'" data-hours="'+hrs+'" role="button" tabindex="0">'+(SVG[e.type]||'')+'</div>';
+            html+=makeDotHTML(e,hrs,dk);
           });
           html+='</div>';
         }
@@ -806,7 +817,11 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     var name=TYPE_INFO[type]?TYPE_INFO[type].name:type;
     var rurl=reserveUrls[shop][type]||'';
     var color=COLORS[type]||'#432f2f';
-    showPopup(DOTCLS[type],SVG[type],color,name,hrs,dot,rurl);
+    var tdEl=dot.closest('td');
+    var dk=tdEl?tdEl.getAttribute('data-dk'):'';
+    var hasChange=dk&&timeOverrides[shop][dk]&&timeOverrides[shop][dk][type];
+    var hrsHTML=hrs+(hasChange?'&nbsp;<span style="background:#e67e22;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">変更</span>':'');
+    showPopup(DOTCLS[type],SVG[type],color,name,hrsHTML,dot,rurl);
     return;
   }
   var band=e.target.closest('[data-popup="event"]');
