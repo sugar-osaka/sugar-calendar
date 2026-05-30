@@ -366,7 +366,7 @@ function parseAndApplyCSV(text) {
           while (cur <= endD) {
             var ck = dateKey(cur);
             if (!extraTypes[shopName][ck]) extraTypes[shopName][ck] = {};
-            if (target) extraTypes[shopName][ck][target] = content || '';
+            if (target) extraTypes[shopName][ck][target] = {hours: content || '', label: targetRaw || ''};
             cur.setDate(cur.getDate()+1);
           }
 
@@ -497,7 +497,7 @@ function getHours(type, d) {
   var dk = dateKey(d);
   // 臨時営業の時間が設定されていれば最優先
   var ex = extraTypes[shop][dk];
-  if (ex && ex[type]) return ex[type];
+  if (ex && ex[type]) return ex[type].hours !== undefined ? ex[type].hours : ex[type];
   var ov = timeOverrides[shop][dk];
   if (ov && ov[type]) return ov[type];
   return TYPE_INFO[type] ? TYPE_INFO[type].hours : '';
@@ -985,6 +985,10 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     var dk=tdEl?tdEl.getAttribute('data-dk'):'';
     var hasExtra=dk&&extraTypes[shop][dk]&&(extraTypes[shop][dk][type]!==undefined);
     var hasChange=!hasExtra&&dk&&timeOverrides[shop][dk]&&timeOverrides[shop][dk][type];
+    // 臨時営業の場合は対象名（ラベル）を優先表示
+    if (hasExtra && extraTypes[shop][dk][type] && extraTypes[shop][dk][type].label) {
+      name = extraTypes[shop][dk][type].label;
+    }
     var hrsHTML=hrs+(hasExtra?'&nbsp;<span style="background:#2980b9;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">臨時営業</span>':hasChange?'&nbsp;<span style="background:#e67e22;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">変更</span>':'');
     showPopup(DOTCLS[type],SVG[type],color,name,hrsHTML,dot,rurl);
     return;
