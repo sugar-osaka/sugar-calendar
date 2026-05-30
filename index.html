@@ -278,12 +278,24 @@ function parseAndApplyCSV(text) {
         var dk = dateKey(startD);
 
         if (kind === 'extra') {
-          if (!extraTypes[shopName][dk]) extraTypes[shopName][dk] = [];
-          if (target) extraTypes[shopName][dk].push(target);
+          var endD = parseDate(endDateStr) || startD;
+          var cur = new Date(startD);
+          while (cur <= endD) {
+            var ck = dateKey(cur);
+            if (!extraTypes[shopName][ck]) extraTypes[shopName][ck] = [];
+            if (target && extraTypes[shopName][ck].indexOf(target) === -1) extraTypes[shopName][ck].push(target);
+            cur.setDate(cur.getDate()+1);
+          }
 
         } else if (kind === 'off') {
-          if (!offTypes[shopName][dk]) offTypes[shopName][dk] = [];
-          offTypes[shopName][dk].push(target);
+          var endD = parseDate(endDateStr) || startD;
+          var cur = new Date(startD);
+          while (cur <= endD) {
+            var ck = dateKey(cur);
+            if (!offTypes[shopName][ck]) offTypes[shopName][ck] = [];
+            if (target && offTypes[shopName][ck].indexOf(target) === -1) offTypes[shopName][ck].push(target);
+            cur.setDate(cur.getDate()+1);
+          }
 
         } else if (kind === 'time') {
           if (!timeOverrides[shopName][dk]) timeOverrides[shopName][dk] = {};
