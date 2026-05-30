@@ -52,23 +52,23 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .dot-badge{position:absolute;bottom:-3px;right:-6px;background:#e67e22;color:#fff;font-size:7px;font-weight:bold;padding:1px 3px;border-radius:3px;white-space:nowrap;line-height:1.4;z-index:2;pointer-events:none}
 .dot{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .dot svg{width:20px;height:20px;flex-shrink:0;pointer-events:none}
-.dot-cake{background:#F5D6DA;color:#B85366}
-.dot-coffee{background:#E8EDD5;color:#7A8C3E}
+.dot-whole_cake{background:#F5D6DA;color:#B85366}
+.dot-coffee_cup{background:#E8EDD5;color:#7A8C3E}
 .dot-valentine{background:#FCEBED;color:#C0392B}
 .dot-whiteday{background:#E8F4F8;color:#4A90C0}
-.dot-oshogatsu{background:#F5F0E8;color:#8B6914}
+.dot-OSHOGATSU{background:#F5F0E8;color:#8B6914}
 .dot-sugar{background:#FDF8EC;color:#B8860B}
 .dot-cookie{background:#F0DEC0;color:#C68642}
 .dot-gift{background:#F2D6E8;color:#B85C8A}
-.dot-tree{background:#C8E6C9;color:#3A7D44}
+.dot-Christmas{background:#C8E6C9;color:#3A7D44}
 .dot-bouquet{background:#F8D7E8;color:#C45E8A}
-.dot-koinobori{background:#BBDEFB;color:#2980b9}
-.dot-sakura{background:#FADADD;color:#D4829A}
+.dot-KODOMO_NO_HI{background:#BBDEFB;color:#2980b9}
+.dot-SAKURA{background:#FADADD;color:#D4829A}
 .dot-crepe{background:#F3E1BD;color:#A87C28}
 .dot-muffin{background:#E6C58B;color:#A6834F}
 .dot-takeout{background:#E8C5B9;color:#C22047}
 .dot-cafe{background:#AEC1CD;color:#6B8294}
-.dot-cafe2{background:#D8C4A7;color:#A68A6F}
+.dot-KIMAGURE_cafe{background:#D8C4A7;color:#A68A6F}
 .pill-closed{background:#AF011C;color:#fcebed;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive;cursor:pointer;position:relative;z-index:1}
 .dot-closed{background:#AF011C;color:#fcebed;font-size:14px;font-weight:bold;font-family:'Yomogi',cursive}
 /* イベント帯・臨時休業帯 */
@@ -151,22 +151,22 @@ var MASTER_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTPofFfru7LP5c
 
 var iconMaster = {};
 var ICON_NAME_MAP = {
-  "ホールケーキ": "cake",
+  "ホールケーキ": "whole_cake",
   "クレープ": "crepe",
   "テイクアウト": "takeout",
   "カフェ": "cafe",
   "イートイン": "cafe",
-  "気まぐれカフェ": "cafe2",
+  "気まぐれカフェ": "KIMAGURE_cafe",
   "マフィン": "muffin",
-  "コーヒー": "coffee",
+  "コーヒー": "coffee_cup",
   "クッキー": "cookie",
   "ギフト": "gift",
-  "クリスマス": "tree",
-  "こどもの日": "koinobori",
-  "桜": "sakura",
+  "クリスマス": "Christmas",
+  "こどもの日": "KODOMO_NO_HI",
+  "桜": "SAKURA",
   "バレンタイン": "valentine",
   "ホワイトデー": "whiteday",
-  "お正月": "oshogatsu",
+  "お正月": "OSHOGATSU",
   "sugar": "sugar"
 };
 var shop = 'sagisu';
@@ -178,58 +178,58 @@ var maxYear = now.getMonth() === 11 ? now.getFullYear() + 1 : now.getFullYear();
 var maxMonth = now.getMonth() === 11 ? 0 : now.getMonth() + 1;
 
 var COLORS = {
-  cake:'#B85366', crepe:'#A87C28', muffin:'#A6834F',
-  takeout:'#C22047', cafe:'#6B8294', cafe2:'#A68A6F',
-  coffee:'#7A8C3E', cookie:'#C68642', gift:'#B85C8A',
-  tree:'#3A7D44', koinobori:'#2980b9', sakura:'#D4829A',
-  valentine:'#C0392B', whiteday:'#4A90C0', oshogatsu:'#8B6914', sugar:'#B8860B'
+  whole_cake:'#B85366', crepe:'#A87C28', muffin:'#A6834F',
+  takeout:'#C22047', cafe:'#6B8294', KIMAGURE_cafe:'#A68A6F',
+  coffee_cup:'#7A8C3E', cookie:'#C68642', gift:'#B85C8A',
+  Christmas:'#3A7D44', KODOMO_NO_HI:'#2980b9', SAKURA:'#D4829A',
+  valentine:'#C0392B', whiteday:'#4A90C0', OSHOGATSU:'#8B6914', sugar:'#B8860B'
 };
 
 var SVG = {
-  cake:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="9" x2="8" y2="5"/><line x1="12" y1="9" x2="12" y2="4"/><line x1="16" y1="9" x2="16" y2="5"/><path d="M7 4.5 Q8 3 9 4.5"/><path d="M11 3 Q12 1.5 13 3"/><path d="M15 4.5 Q16 3 17 4.5"/><rect x="3" y="9" width="18" height="11" rx="2.5"/><path d="M3 13 Q7 11 12 13 Q17 11 21 13"/><line x1="3" y1="16" x2="21" y2="16"/></svg>',
+  whole_cake:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="9" x2="8" y2="5"/><line x1="12" y1="9" x2="12" y2="4"/><line x1="16" y1="9" x2="16" y2="5"/><path d="M7 4.5 Q8 3 9 4.5"/><path d="M11 3 Q12 1.5 13 3"/><path d="M15 4.5 Q16 3 17 4.5"/><rect x="3" y="9" width="18" height="11" rx="2.5"/><path d="M3 13 Q7 11 12 13 Q17 11 21 13"/><line x1="3" y1="16" x2="21" y2="16"/></svg>',
   crepe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10 L12 22 L19 10 Z"/><path d="M5 10 Q12 7 19 10"/><path d="M7 10 Q9 8 12 8 Q15 8 17 10"/><path d="M8 7 Q8 4 10 4 Q12 3 14 4 Q16 4 16 7"/><path d="M9 6 Q10 4.5 12 4.5 Q14 4.5 15 6"/><circle cx="10" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="4.5" r="0.8" fill="currentColor" stroke="none"/></svg>',
   muffin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13 L8 21 L16 21 L17 13 Z"/><line x1="10" y1="13" x2="9.5" y2="21"/><line x1="12" y1="13" x2="12" y2="21"/><line x1="14" y1="13" x2="14.5" y2="21"/><path d="M7 13 Q5 13 5 10 Q5 7 8 6 Q9 3 12 3 Q15 3 16 6 Q19 7 19 10 Q19 13 17 13 Q15 14 12 14 Q9 14 7 13 Z"/><path d="M8 7 Q9 5.5 11 6"/><path d="M14 5.5 Q15.5 6.5 15 8"/></svg>',
   takeout:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="15" width="18" height="4" rx="1"/><rect x="3" y="11" width="18" height="4" rx="0.5"/><path d="M3 11 L12 5 L21 11"/><path d="M3 11 Q7 9.5 12 10.5 Q17 9.5 21 11"/><ellipse cx="12" cy="5.5" rx="3" ry="3.5" fill="currentColor" stroke="none"/><path d="M10.5 3 Q12 1.8 13.5 3" stroke="currentColor" stroke-width="1" fill="none"/></svg>',
   cafe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8 L17 8 L15 19 L9 19 Z"/><path d="M17 10 Q21 10 21 14 Q21 18 17 18"/><line x1="5" y1="22" x2="19" y2="22"/><path d="M10 5 Q10 3 12 3 Q12 5 10 5"/></svg>',
-  cafe2:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8 L17 8 L15 19 L9 19 Z"/><path d="M17 10 Q21 10 21 14 Q21 18 17 18"/><line x1="5" y1="22" x2="19" y2="22"/><path d="M9 5 Q11 2 13 5"/></svg>',
-  coffee:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8 L19 8 L17 19 L7 19 Z"/><path d="M19 10 Q23 10 23 14 Q23 18 19 18"/><line x1="3" y1="22" x2="21" y2="22"/><path d="M9 5 Q9 3 11 3 Q11 5 13 5 Q13 3 15 3"/></svg>',
+  KIMAGURE_cafe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8 L17 8 L15 19 L9 19 Z"/><path d="M17 10 Q21 10 21 14 Q21 18 17 18"/><line x1="5" y1="22" x2="19" y2="22"/><path d="M9 5 Q11 2 13 5"/></svg>',
+  coffee_cup:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8 L19 8 L17 19 L7 19 Z"/><path d="M19 10 Q23 10 23 14 Q23 18 19 18"/><line x1="3" y1="22" x2="21" y2="22"/><path d="M9 5 Q9 3 11 3 Q11 5 13 5 Q13 3 15 3"/></svg>',
   cookie:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="9" r="1.2" fill="currentColor" stroke="none"/><circle cx="14" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="8" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="14" cy="14" r="1.2" fill="currentColor" stroke="none"/><circle cx="11" cy="17" r="0.9" fill="currentColor" stroke="none"/></svg>',
   gift:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="10" width="18" height="11" rx="1.5"/><rect x="2" y="6" width="20" height="4" rx="1"/><line x1="12" y1="6" x2="12" y2="21"/><path d="M12 6 Q10 3 8 4 Q6 5 8 6 Q10 7 12 6"/><path d="M12 6 Q14 3 16 4 Q18 5 16 6 Q14 7 12 6"/></svg>',
-  tree:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 20,16 4,16"/><polygon points="12,7 19,19 5,19"/><rect x="10" y="19" width="4" height="3" rx="0.5"/></svg>',
+  Christmas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 20,16 4,16"/><polygon points="12,7 19,19 5,19"/><rect x="10" y="19" width="4" height="3" rx="0.5"/></svg>',
   bouquet:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="2.5"/><circle cx="8" cy="10" r="2"/><circle cx="16" cy="10" r="2"/><circle cx="9" cy="5" r="1.8"/><circle cx="15" cy="5" r="1.8"/><path d="M9 12 Q12 14 15 12 L13 22 L11 22 Z"/></svg>',
-  koinobori:'<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="1" x2="3" y2="27"/><circle cx="3" cy="1.8" r="1.6" fill="currentColor" stroke="none"/><path d="M3 5 L5 4.5 Q16 3.5 22 7 Q25 9 22 11.5 Q16 15 5 14 L3 13.5 Z" fill="currentColor" stroke="none"/><path d="M22 7 L26 6 L22 10" fill="currentColor" stroke="none"/><circle cx="7" cy="9" r="1.6" fill="white" stroke="none"/><path d="M11 6.5 Q15 8 15 9.5 Q15 11 11 12" stroke="white" stroke-width="1.1" fill="none"/><path d="M3 16 L5 15.5 Q14 14.5 20 17.5 Q23 19.5 20 22 Q14 25.5 5 24.5 L3 24 Z" fill="currentColor" stroke="none"/><path d="M20 17.5 L23 16.5 L20 21" fill="currentColor" stroke="none"/><circle cx="7" cy="20" r="1.4" fill="white" stroke="none"/><path d="M11 17.5 Q14 19 14 20.5 Q14 22 11 22.5" stroke="white" stroke-width="1.1" fill="none"/></svg>',
-  sakura:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(12,12)"><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(0)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(72)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(144)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(216)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(288)"/><circle cx="0" cy="0" r="1.8"/></g></svg>',
+  KODOMO_NO_HI:'<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="1" x2="3" y2="27"/><circle cx="3" cy="1.8" r="1.6" fill="currentColor" stroke="none"/><path d="M3 5 L5 4.5 Q16 3.5 22 7 Q25 9 22 11.5 Q16 15 5 14 L3 13.5 Z" fill="currentColor" stroke="none"/><path d="M22 7 L26 6 L22 10" fill="currentColor" stroke="none"/><circle cx="7" cy="9" r="1.6" fill="white" stroke="none"/><path d="M11 6.5 Q15 8 15 9.5 Q15 11 11 12" stroke="white" stroke-width="1.1" fill="none"/><path d="M3 16 L5 15.5 Q14 14.5 20 17.5 Q23 19.5 20 22 Q14 25.5 5 24.5 L3 24 Z" fill="currentColor" stroke="none"/><path d="M20 17.5 L23 16.5 L20 21" fill="currentColor" stroke="none"/><circle cx="7" cy="20" r="1.4" fill="white" stroke="none"/><path d="M11 17.5 Q14 19 14 20.5 Q14 22 11 22.5" stroke="white" stroke-width="1.1" fill="none"/></svg>',
+  SAKURA:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(12,12)"><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(0)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(72)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(144)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(216)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(288)"/><circle cx="0" cy="0" r="1.8"/></g></svg>',
   valentine:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19 Q5 13 5 8 Q5 5 7.5 4 Q10 3 12 6 Q14 3 16.5 4 Q19 5 19 8 Q19 13 12 19 Z"/></svg>',
   whiteday:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19 Q5 13 5 8 Q5 5 7.5 4 Q10 3 12 6 Q14 3 16.5 4 Q19 5 19 8 Q19 13 12 19 Z"/></svg>',
-  oshogatsu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="19" width="12" height="3" rx="1"/><rect x="7" y="16" width="10" height="3" rx="0.5"/><ellipse cx="12" cy="13" rx="5" ry="3.5"/><circle cx="12" cy="8" r="3"/><circle cx="12" cy="5.5" r="1.2" fill="currentColor" stroke="none"/><line x1="12" y1="4.3" x2="12" y2="3.5"/></svg>',
+  OSHOGATSU:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="19" width="12" height="3" rx="1"/><rect x="7" y="16" width="10" height="3" rx="0.5"/><ellipse cx="12" cy="13" rx="5" ry="3.5"/><circle cx="12" cy="8" r="3"/><circle cx="12" cy="5.5" r="1.2" fill="currentColor" stroke="none"/><line x1="12" y1="4.3" x2="12" y2="3.5"/></svg>',
   sugar:'<svg viewBox="0 0 44 44"><text x="50%" y="57%" font-size="12" font-family="Caveat Brush,cursive" fill="currentColor" stroke="none" text-anchor="middle" dominant-baseline="middle">sugar</text></svg>'
 };
 
 var DOTCLS = {
-  cake:'dot-cake', crepe:'dot-crepe', muffin:'dot-muffin',
-  takeout:'dot-takeout', cafe:'dot-cafe', cafe2:'dot-cafe2',
-  coffee:'dot-coffee', cookie:'dot-cookie', gift:'dot-gift',
-  tree:'dot-tree', koinobori:'dot-koinobori', sakura:'dot-sakura',
-  valentine:'dot-valentine', whiteday:'dot-whiteday', oshogatsu:'dot-oshogatsu', sugar:'dot-sugar'
+  whole_cake:'dot-whole_cake', crepe:'dot-crepe', muffin:'dot-muffin',
+  takeout:'dot-takeout', cafe:'dot-cafe', KIMAGURE_cafe:'dot-KIMAGURE_cafe',
+  coffee_cup:'dot-coffee_cup', cookie:'dot-cookie', gift:'dot-gift',
+  Christmas:'dot-Christmas', KODOMO_NO_HI:'dot-KODOMO_NO_HI', SAKURA:'dot-SAKURA',
+  valentine:'dot-valentine', whiteday:'dot-whiteday', OSHOGATSU:'dot-OSHOGATSU', sugar:'dot-sugar'
 };
 
 // デフォルト営業時間
 var TYPE_INFO = {
-  cake:   {name:'ホールケーキ', hours:'12:00-17:00'},
+  whole_cake:   {name:'ホールケーキ', hours:'12:00-17:00'},
   crepe:  {name:'クレープ',     hours:'12:00-16:00'},
   takeout:{name:'テイクアウト', hours:'12:00-18:00'},
   cafe:   {name:'イートイン',   hours:'13:00-17:30 (L.O.17:00)'},
-  cafe2:  {name:'気まぐれカフェ', hours:'12:00-16:30 (L.O.16:00)'},
+  KIMAGURE_cafe:  {name:'気まぐれカフェ', hours:'12:00-16:30 (L.O.16:00)'},
   muffin: {name:'マフィン',     hours:'12:00-18:00'},
-  coffee:    {name:'コーヒー',     hours:''},
+  coffee_cup:    {name:'コーヒー',     hours:''},
   cookie:    {name:'クッキー',     hours:''},
   gift:      {name:'ギフト',       hours:''},
-  tree:      {name:'クリスマス', hours:''},
-  koinobori: {name:'こどもの日',  hours:''},
-  sakura:    {name:'桜',           hours:''},
+  Christmas:      {name:'クリスマス', hours:''},
+  KODOMO_NO_HI: {name:'こどもの日',  hours:''},
+  SAKURA:    {name:'桜',           hours:''},
   valentine: {name:'バレンタイン', hours:''},
   whiteday:  {name:'ホワイトデー',  hours:''},
-  oshogatsu: {name:'お正月',     hours:''},
+  OSHOGATSU: {name:'お正月',     hours:''},
   sugar:     {name:'sugar',       hours:''}
 };
 
@@ -243,7 +243,7 @@ var timeOverrides  = {sagisu:{}, ebie:{}};
 var reserveUrls    = {sagisu:{}, ebie:{}};
 // 営業曜日設定 dayOverrides[shop][type] = [0,1,2,...] (0=日,1=月,...,6=土)
 var dayOverrides   = {sagisu:{}, ebie:{}};
-// 臨時営業: extraTypes[shop][dk] = {cake:'13:00-14:00', crepe:''}
+// 臨時営業: extraTypes[shop][dk] = {whole_cake:'13:00-14:00', crepe:''}
 var extraTypes     = {sagisu:{}, ebie:{}};
 
 function dateKey(d) { return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(); }
@@ -319,17 +319,17 @@ function parseAndApplyCSV(text) {
 
         // 対象の日本語→英語変換
         var targetMap = {
-          'ホールケーキ':'cake', 'クレープ':'crepe', 'テイクアウト':'takeout',
-          'イートイン':'cafe', '気まぐれカフェ':'cafe2', 'マフィン':'muffin',
-          'コーヒー':'coffee', 'クッキー':'cookie', 'ギフト':'gift',
-          'クリスマス':'tree', 'こどもの日':'koinobori', '桜':'sakura',
+          'ホールケーキ':'whole_cake', 'クレープ':'crepe', 'テイクアウト':'takeout',
+          'イートイン':'cafe', '気まぐれカフェ':'KIMAGURE_cafe', 'マフィン':'muffin',
+          'コーヒー':'coffee_cup', 'クッキー':'cookie', 'ギフト':'gift',
+          'クリスマス':'Christmas', 'こどもの日':'KODOMO_NO_HI', '桜':'SAKURA',
           'バレンタイン':'valentine', 'ホワイトデー':'whiteday',
-          'お正月':'oshogatsu', 'sugar':'sugar',
-          'cake':'cake', 'crepe':'crepe', 'takeout':'takeout',
-          'cafe':'cafe', 'cafe2':'cafe2', 'muffin':'muffin',
-          'coffee':'coffee', 'cookie':'cookie', 'gift':'gift',
-          'tree':'tree', 'koinobori':'koinobori', 'sakura':'sakura',
-          'valentine':'valentine', 'whiteday':'whiteday', 'oshogatsu':'oshogatsu'
+          'お正月':'OSHOGATSU', 'sugar':'sugar',
+          'whole_cake':'whole_cake', 'crepe':'crepe', 'takeout':'takeout',
+          'cafe':'cafe', 'KIMAGURE_cafe':'KIMAGURE_cafe', 'muffin':'muffin',
+          'coffee_cup':'coffee_cup', 'cookie':'cookie', 'gift':'gift',
+          'Christmas':'Christmas', 'KODOMO_NO_HI':'KODOMO_NO_HI', 'SAKURA':'SAKURA',
+          'valentine':'valentine', 'whiteday':'whiteday', 'OSHOGATSU':'OSHOGATSU'
         };
         var target = targetMap[targetRaw] || iconMaster[targetRaw] || targetRaw.toLowerCase();
 
@@ -545,16 +545,16 @@ function daysToDotsHTML(days, color) {
 var shops = {
   sagisu: {
     getInfoRows: function() {
-      var cakeDays  = dayOverrides['sagisu']['cake']  || [1,2,5,6,0];
+      var cakeDays  = dayOverrides['sagisu']['whole_cake']  || [1,2,5,6,0];
       var crepeDays = dayOverrides['sagisu']['crepe'] || [2,3,4,5,6];
       return [
-        {type:'cake',  name:'ホールケーキ', dots:daysToDotsHTML(cakeDays,  COLORS.cake),  hours:TYPE_INFO.cake.hours},
+        {type:'whole_cake',  name:'ホールケーキ', dots:daysToDotsHTML(cakeDays,  COLORS.whole_cake),  hours:TYPE_INFO.whole_cake.hours},
         {type:'crepe', name:'クレープ',     dots:daysToDotsHTML(crepeDays, COLORS.crepe), hours:TYPE_INFO.crepe.hours}
       ];
     },
     getLegend: function() {
       return [
-        {cls:'dot-cake',  svg:SVG.cake,  label:'ホールケーキ'},
+        {cls:'dot-whole_cake',  svg:SVG.whole_cake,  label:'ホールケーキ'},
         {cls:'dot-crepe', svg:SVG.crepe, label:'クレープ'},
         {closed:true, label:'臨時休業'},
         {pill:'#fcc800', label:'イベント'}
@@ -564,9 +564,9 @@ var shops = {
       var dk = dateKey(d);
       var sp = specialEvents['sagisu'][dk]; if (sp) return sp;
       var w = d.getDay(), evs = [];
-      var cakeDays  = dayOverrides['sagisu']['cake']  || [1,2,5,6,0];
+      var cakeDays  = dayOverrides['sagisu']['whole_cake']  || [1,2,5,6,0];
       var crepeDays = dayOverrides['sagisu']['crepe'] || [2,3,4,5,6];
-      if (cakeDays.indexOf(w)  !== -1) evs.push({type:'cake'});
+      if (cakeDays.indexOf(w)  !== -1) evs.push({type:'whole_cake'});
       if (crepeDays.indexOf(w) !== -1) evs.push({type:'crepe'});
       // 臨時営業：通常表示しない日でも強制追加
       var extras = extraTypes['sagisu'][dk] || {};
@@ -579,12 +579,12 @@ var shops = {
     getInfoRows: function() {
       var takeoutDays = dayOverrides['ebie']['takeout'] || [1,2,5,6,0];
       var cafeDays    = dayOverrides['ebie']['cafe']    || [1,2,5,6,0];
-      var cafe2Days   = dayOverrides['ebie']['cafe2']   || [3,4];
+      var cafe2Days   = dayOverrides['ebie']['KIMAGURE_cafe']   || [3,4];
       var muffinDays  = dayOverrides['ebie']['muffin']  || [1,2,5];
       return [
         {type:'takeout', name:'テイクアウト',   dots:daysToDotsHTML(takeoutDays, COLORS.takeout), hours:TYPE_INFO.takeout.hours},
         {type:'cafe',    name:'イートイン',     dots:daysToDotsHTML(cafeDays,    COLORS.cafe),    hours:TYPE_INFO.cafe.hours},
-        {type:'cafe2',   name:'気まぐれカフェ', dots:daysToDotsHTML(cafe2Days,   COLORS.cafe2),   hours:TYPE_INFO.cafe2.hours},
+        {type:'KIMAGURE_cafe',   name:'気まぐれカフェ', dots:daysToDotsHTML(cafe2Days,   COLORS.KIMAGURE_cafe),   hours:TYPE_INFO.KIMAGURE_cafe.hours},
         {type:'muffin',  name:'マフィン',       dots:daysToDotsHTML(muffinDays,  COLORS.muffin),  hours:TYPE_INFO.muffin.hours}
       ];
     },
@@ -592,7 +592,7 @@ var shops = {
       return [
         {cls:'dot-takeout', svg:SVG.takeout, label:'テイクアウト'},
         {cls:'dot-cafe',    svg:SVG.cafe,    label:'イートイン'},
-        {cls:'dot-cafe2',   svg:SVG.cafe2,   label:'気まぐれカフェ'},
+        {cls:'dot-KIMAGURE_cafe',   svg:SVG.KIMAGURE_cafe,   label:'気まぐれカフェ'},
         {cls:'dot-muffin',  svg:SVG.muffin,  label:'マフィン'},
         {closed:true, label:'臨時休業'},
         {pill:'#fcc800', label:'イベント'}
@@ -604,10 +604,10 @@ var shops = {
       var w = d.getDay(), evs = [];
       var takeoutDays = dayOverrides['ebie']['takeout'] || [1,2,5,6,0];
       var cafeDays    = dayOverrides['ebie']['cafe']    || [1,2,5,6,0];
-      var cafe2Days   = dayOverrides['ebie']['cafe2']   || [3,4];
+      var cafe2Days   = dayOverrides['ebie']['KIMAGURE_cafe']   || [3,4];
       var muffinDays  = dayOverrides['ebie']['muffin']  || [1,2,5];
       if (cafe2Days.indexOf(w) !== -1) {
-        evs.push({type:'cafe2'});
+        evs.push({type:'KIMAGURE_cafe'});
       } else {
         if (takeoutDays.indexOf(w) !== -1) evs.push({type:'takeout'});
         if (cafeDays.indexOf(w)    !== -1) evs.push({type:'cafe'});
