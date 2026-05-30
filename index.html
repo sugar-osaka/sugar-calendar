@@ -183,7 +183,7 @@ var timeOverrides  = {sagisu:{}, ebie:{}};
 var reserveUrls    = {sagisu:{}, ebie:{}};
 // 営業曜日設定 dayOverrides[shop][type] = [0,1,2,...] (0=日,1=月,...,6=土)
 var dayOverrides   = {sagisu:{}, ebie:{}};
-// 臨時営業: extraTypes[shop][dk] = ['cake', 'crepe', ...]
+// 臨時営業: extraTypes[shop][dk] = {cake:'13:00-14:00', crepe:''}
 var extraTypes     = {sagisu:{}, ebie:{}};
 
 function dateKey(d) { return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(); }
@@ -199,8 +199,10 @@ function parseDate(str) {
 function formatDateJP(d) { return (d.getMonth()+1)+'/'+d.getDate(); }
 
 function makeDotHTML(e, hrs, dk) {
-  var hasChange = timeOverrides[shop][dk] && timeOverrides[shop][dk][e.type];
-  var badge = hasChange ? '<span class="dot-badge">変更</span>' : '';
+  var hasExtra  = extraTypes[shop][dk] && (extraTypes[shop][dk][e.type] !== undefined);
+  var hasChange = !hasExtra && timeOverrides[shop][dk] && timeOverrides[shop][dk][e.type];
+  var badge = hasExtra ? '<span class="dot-badge" style="background:#2980b9">臨時</span>'
+            : hasChange ? '<span class="dot-badge">変更</span>' : '';
   if (badge) {
     return '<div class="dot-wrap"><div class="dot '+(DOTCLS[e.type]||'')+'" data-type="'+e.type+'" data-hours="'+hrs+'" role="button" tabindex="0">'+(SVG[e.type]||'')+'</div>'+badge+'</div>';
   }
@@ -282,8 +284,8 @@ function parseAndApplyCSV(text) {
           var cur = new Date(startD);
           while (cur <= endD) {
             var ck = dateKey(cur);
-            if (!extraTypes[shopName][ck]) extraTypes[shopName][ck] = [];
-            if (target && extraTypes[shopName][ck].indexOf(target) === -1) extraTypes[shopName][ck].push(target);
+            if (!extraTypes[shopName][ck]) extraTypes[shopName][ck] = {};
+            if (target) extraTypes[shopName][ck][target] = content || '';
             cur.setDate(cur.getDate()+1);
           }
 
@@ -381,6 +383,9 @@ function loadCSV() {
 
 function getHours(type, d) {
   var dk = dateKey(d);
+  // 臨時営業の時間が設定されていれば最優先
+  var ex = extraTypes[shop][dk];
+  if (ex && ex[type]) return ex[type];
   var ov = timeOverrides[shop][dk];
   if (ov && ov[type]) return ov[type];
   return TYPE_INFO[type] ? TYPE_INFO[type].hours : '';
@@ -452,8 +457,8 @@ var shops = {
       if (cakeDays.indexOf(w)  !== -1) evs.push({type:'cake'});
       if (crepeDays.indexOf(w) !== -1) evs.push({type:'crepe'});
       // 臨時営業：通常表示しない日でも強制追加
-      var extras = extraTypes['sagisu'][dk] || [];
-      extras.forEach(function(t){ if(evs.findIndex(function(e){return e.type===t;})===-1) evs.push({type:t}); });
+      var extras = extraTypes['sagisu'][dk] || {};
+      Object.keys(extras).forEach(function(t){ if(evs.findIndex(function(e){return e.type===t;})===-1) evs.push({type:t}); });
       var off = offTypes['sagisu'][dk] || [];
       return evs.filter(function(e){return off.indexOf(e.type)===-1;});
     }
@@ -496,8 +501,8 @@ var shops = {
         if (cafeDays.indexOf(w)    !== -1) evs.push({type:'cafe'});
       }
       // 臨時営業：通常表示しない日でも強制追加
-      var extras = extraTypes['ebie'][dk] || [];
-      extras.forEach(function(t){ if(evs.findIndex(function(e){return e.type===t;})===-1) evs.push({type:t}); });
+      var extras = extraTypes['ebie'][dk] || {};
+      Object.keys(extras).forEach(function(t){ if(evs.findIndex(function(e){return e.type===t;})===-1) evs.push({type:t}); });
       var off = offTypes['ebie'][dk] || [];
       if (off.indexOf('muffin') === -1 && muffinDays.indexOf(w) !== -1) evs.push({type:'muffin'});
       return evs.filter(function(e){return off.indexOf(e.type)===-1;});
@@ -882,8 +887,9 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     var color=COLORS[type]||'#432f2f';
     var tdEl=dot.closest('td');
     var dk=tdEl?tdEl.getAttribute('data-dk'):'';
-    var hasChange=dk&&timeOverrides[shop][dk]&&timeOverrides[shop][dk][type];
-    var hrsHTML=hrs+(hasChange?'&nbsp;<span style="background:#e67e22;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">変更</span>':'');
+    var hasExtra=dk&&extraTypes[shop][dk]&&(extraTypes[shop][dk][type]!==undefined);
+    var hasChange=!hasExtra&&dk&&timeOverrides[shop][dk]&&timeOverrides[shop][dk][type];
+    var hrsHTML=hrs+(hasExtra?'&nbsp;<span style="background:#2980b9;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">臨時営業</span>':hasChange?'&nbsp;<span style="background:#e67e22;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">変更</span>':'');
     showPopup(DOTCLS[type],SVG[type],color,name,hrsHTML,dot,rurl);
     return;
   }
