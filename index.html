@@ -1071,7 +1071,9 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     e.stopPropagation();
     var type='sugar';
     var hrs=sugarBand.getAttribute('data-hours')||'';
-    var name=TYPE_INFO['sugar']?TYPE_INFO['sugar'].name:'sugar';
+    var name='sugar';
+    var sugarItem = shopItems[shop] ? shopItems[shop].find(function(item){return item.type==='sugar';}) : null;
+    if (sugarItem) name = sugarItem.name;
     var rurl=reserveUrls[shop]['sugar']||'';
     var color=COLORS['sugar']||'#B8860B';
     var dk=sugarBand.getAttribute('data-dk')||'';
