@@ -243,6 +243,8 @@ var timeOverrides  = {sagisu:{}, ebie:{}};
 var reserveUrls    = {sagisu:{}, ebie:{}};
 // 営業曜日設定 dayOverrides[shop][type] = [0,1,2,...] (0=日,1=月,...,6=土)
 var dayOverrides   = {sagisu:{}, ebie:{}};
+// 固定営業対象: shopItems[shop] = [{type, name, days, hours, reserveUrl}]
+var shopItems      = {sagisu:[], ebie:[]};
 // 臨時営業: extraTypes[shop][dk] = {whole_cake:'13:00-14:00', crepe:''}
 var extraTypes     = {sagisu:{}, ebie:{}};
 
@@ -290,6 +292,7 @@ function parseAndApplyCSV(text) {
   offTypes       = {sagisu:{}, ebie:{}};
   timeOverrides  = {sagisu:{}, ebie:{}};
   dayOverrides   = {sagisu:{}, ebie:{}};
+  shopItems      = {sagisu:[], ebie:[]};
   extraTypes     = {sagisu:{}, ebie:{}};
   var rows = text.trim().split('\n');
   for (var i = 1; i < rows.length; i++) {
@@ -338,6 +341,9 @@ function parseAndApplyCSV(text) {
         // 通常営業時間のデフォルト変更
         if (kind === 'time_default' && target && content) {
           if (TYPE_INFO[target]) TYPE_INFO[target].hours = content;
+          // shopItemsのhoursも更新
+          var si = shopItems[shopName] ? shopItems[shopName].findIndex(function(item){ return item.type === target; }) : -1;
+          if (si !== -1) shopItems[shopName][si].hours = content;
           continue;
         }
 
@@ -350,6 +356,14 @@ function parseAndApplyCSV(text) {
               if (dayMap[content[ci]] !== undefined) days.push(dayMap[content[ci]]);
             }
             if (days.length) dayOverrides[shopName][target] = days;
+            // shopItemsに登録（まだなければ追加）
+            var existing = shopItems[shopName].findIndex(function(item){ return item.type === target; });
+            if (existing === -1) {
+              shopItems[shopName].push({type:target, name:targetRaw, days:days, hours:'', reserveUrl:reserveUrl||''});
+            } else {
+              shopItems[shopName][existing].days = days;
+              if (reserveUrl) shopItems[shopName][existing].reserveUrl = reserveUrl;
+            }
           }
           // H列に予約URLがあれば保存
           if (reserveUrl) reserveUrls[shopName][target] = reserveUrl;
@@ -551,29 +565,52 @@ function daysToDotsHTML(days, color) {
 var shops = {
   sagisu: {
     getInfoRows: function() {
-      var cakeDays  = dayOverrides['sagisu']['whole_cake']  || [1,2,5,6,0];
-      var crepeDays = dayOverrides['sagisu']['crepe'] || [2,3,4,5,6];
-      return [
-        {type:'whole_cake',  name:'ホールケーキ', dots:daysToDotsHTML(cakeDays,  COLORS.whole_cake),  hours:TYPE_INFO.whole_cake.hours},
-        {type:'crepe', name:'クレープ',     dots:daysToDotsHTML(crepeDays, COLORS.crepe), hours:TYPE_INFO.crepe.hours}
-      ];
+      var items = shopItems['sagisu'];
+      if (!items || items.length === 0) {
+        // フォールバック（スプシ未読込時）
+        var cakeDays  = dayOverrides['sagisu']['whole_cake']  || [1,2,5,6,0];
+        var crepeDays = dayOverrides['sagisu']['crepe'] || [2,3,4,5,6];
+        return [
+          {type:'whole_cake', name:'ホールケーキ', dots:daysToDotsHTML(cakeDays, COLORS['whole_cake']||'#B85366'), hours:TYPE_INFO['whole_cake']?TYPE_INFO['whole_cake'].hours:''},
+          {type:'crepe', name:'クレープ', dots:daysToDotsHTML(crepeDays, COLORS['crepe']||'#A87C28'), hours:TYPE_INFO['crepe']?TYPE_INFO['crepe'].hours:''}
+        ];
+      }
+      return items.map(function(item) {
+        var days = dayOverrides['sagisu'][item.type] || item.days || [];
+        var color = COLORS[item.type] || '#432f2f';
+        var hours = (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '') || item.hours || '';
+        return {type:item.type, name:item.name, dots:daysToDotsHTML(days, color), hours:hours};
+      });
     },
     getLegend: function() {
-      return [
-        {cls:'dot-whole_cake',  svg:SVG.whole_cake,  label:'ホールケーキ'},
-        {cls:'dot-crepe', svg:SVG.crepe, label:'クレープ'},
+      var items = shopItems['sagisu'];
+      var dotItems = (items && items.length > 0) ? items.map(function(item){
+        return {cls:'dot-'+(item.type), svg:SVG[item.type]||'', label:item.name};
+      }) : [
+        {cls:'dot-whole_cake', svg:SVG['whole_cake'], label:'ホールケーキ'},
+        {cls:'dot-crepe', svg:SVG['crepe'], label:'クレープ'}
+      ];
+      return dotItems.concat([
         {closed:true, label:'臨時休業'},
         {pill:'#fcc800', label:'イベント'}
-      ];
+      ]);
     },
     getEvents: function(d) {
       var dk = dateKey(d);
       var sp = specialEvents['sagisu'][dk]; if (sp) return sp;
       var w = d.getDay(), evs = [];
-      var cakeDays  = dayOverrides['sagisu']['whole_cake']  || [1,2,5,6,0];
-      var crepeDays = dayOverrides['sagisu']['crepe'] || [2,3,4,5,6];
-      if (cakeDays.indexOf(w)  !== -1) evs.push({type:'whole_cake'});
-      if (crepeDays.indexOf(w) !== -1) evs.push({type:'crepe'});
+      var items = shopItems['sagisu'];
+      if (items && items.length > 0) {
+        items.forEach(function(item) {
+          var days = dayOverrides['sagisu'][item.type] || item.days || [];
+          if (days.indexOf(w) !== -1) evs.push({type:item.type});
+        });
+      } else {
+        var cakeDays  = dayOverrides['sagisu']['whole_cake']  || [1,2,5,6,0];
+        var crepeDays = dayOverrides['sagisu']['crepe'] || [2,3,4,5,6];
+        if (cakeDays.indexOf(w)  !== -1) evs.push({type:'whole_cake'});
+        if (crepeDays.indexOf(w) !== -1) evs.push({type:'crepe'});
+      }
       // 臨時営業：通常表示しない日でも強制追加
       var extras = extraTypes['sagisu'][dk] || {};
       Object.keys(extras).forEach(function(t){ if(evs.findIndex(function(e){return e.type===t;})===-1) evs.push({type:t}); });
@@ -583,46 +620,67 @@ var shops = {
   },
   ebie: {
     getInfoRows: function() {
-      var takeoutDays = dayOverrides['ebie']['takeout'] || [1,2,5,6,0];
-      var cafeDays    = dayOverrides['ebie']['cafe']    || [1,2,5,6,0];
-      var cafe2Days   = dayOverrides['ebie']['KIMAGURE_cafe']   || [3,4];
-      var muffinDays  = dayOverrides['ebie']['muffin']  || [1,2,5];
-      return [
-        {type:'takeout', name:'テイクアウト',   dots:daysToDotsHTML(takeoutDays, COLORS.takeout), hours:TYPE_INFO.takeout.hours},
-        {type:'cafe',    name:'イートイン',     dots:daysToDotsHTML(cafeDays,    COLORS.cafe),    hours:TYPE_INFO.cafe.hours},
-        {type:'KIMAGURE_cafe',   name:'気まぐれカフェ', dots:daysToDotsHTML(cafe2Days,   COLORS.KIMAGURE_cafe),   hours:TYPE_INFO.KIMAGURE_cafe.hours},
-        {type:'muffin',  name:'マフィン',       dots:daysToDotsHTML(muffinDays,  COLORS.muffin),  hours:TYPE_INFO.muffin.hours}
-      ];
+      var items = shopItems['ebie'];
+      if (!items || items.length === 0) {
+        var takeoutDays = dayOverrides['ebie']['takeout'] || [1,2,5,6,0];
+        var cafeDays    = dayOverrides['ebie']['cafe']    || [1,2,5,6,0];
+        var cafe2Days   = dayOverrides['ebie']['KIMAGURE_cafe']   || [3,4];
+        var muffinDays  = dayOverrides['ebie']['muffin']  || [1,2,5];
+        return [
+          {type:'takeout', name:'テイクアウト', dots:daysToDotsHTML(takeoutDays, COLORS['takeout']), hours:TYPE_INFO['takeout']?TYPE_INFO['takeout'].hours:''},
+          {type:'cafe',    name:'イートイン',   dots:daysToDotsHTML(cafeDays,    COLORS['cafe']),    hours:TYPE_INFO['cafe']?TYPE_INFO['cafe'].hours:''},
+          {type:'KIMAGURE_cafe', name:'気まぐれカフェ', dots:daysToDotsHTML(cafe2Days, COLORS['KIMAGURE_cafe']), hours:TYPE_INFO['KIMAGURE_cafe']?TYPE_INFO['KIMAGURE_cafe'].hours:''},
+          {type:'muffin',  name:'マフィン',     dots:daysToDotsHTML(muffinDays,  COLORS['muffin']),  hours:TYPE_INFO['muffin']?TYPE_INFO['muffin'].hours:''}
+        ];
+      }
+      return items.map(function(item) {
+        var days = dayOverrides['ebie'][item.type] || item.days || [];
+        var color = COLORS[item.type] || '#432f2f';
+        var hours = (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '') || item.hours || '';
+        return {type:item.type, name:item.name, dots:daysToDotsHTML(days, color), hours:hours};
+      });
     },
     getLegend: function() {
-      return [
-        {cls:'dot-takeout', svg:SVG.takeout, label:'テイクアウト'},
-        {cls:'dot-cafe',    svg:SVG.cafe,    label:'イートイン'},
-        {cls:'dot-KIMAGURE_cafe',   svg:SVG.KIMAGURE_cafe,   label:'気まぐれカフェ'},
-        {cls:'dot-muffin',  svg:SVG.muffin,  label:'マフィン'},
+      var items = shopItems['ebie'];
+      var dotItems = (items && items.length > 0) ? items.map(function(item){
+        return {cls:'dot-'+(item.type), svg:SVG[item.type]||'', label:item.name};
+      }) : [
+        {cls:'dot-takeout', svg:SVG['takeout'], label:'テイクアウト'},
+        {cls:'dot-cafe',    svg:SVG['cafe'],    label:'イートイン'},
+        {cls:'dot-KIMAGURE_cafe', svg:SVG['KIMAGURE_cafe'], label:'気まぐれカフェ'},
+        {cls:'dot-muffin',  svg:SVG['muffin'],  label:'マフィン'}
+      ];
+      return dotItems.concat([
         {closed:true, label:'臨時休業'},
         {pill:'#fcc800', label:'イベント'}
-      ];
+      ]);
     },
     getEvents: function(d) {
       var dk = dateKey(d);
       var sp = specialEvents['ebie'][dk]; if (sp) return sp;
       var w = d.getDay(), evs = [];
-      var takeoutDays = dayOverrides['ebie']['takeout'] || [1,2,5,6,0];
-      var cafeDays    = dayOverrides['ebie']['cafe']    || [1,2,5,6,0];
-      var cafe2Days   = dayOverrides['ebie']['KIMAGURE_cafe']   || [3,4];
-      var muffinDays  = dayOverrides['ebie']['muffin']  || [1,2,5];
-      if (cafe2Days.indexOf(w) !== -1) {
-        evs.push({type:'KIMAGURE_cafe'});
+      var items = shopItems['ebie'];
+      if (items && items.length > 0) {
+        items.forEach(function(item) {
+          var days = dayOverrides['ebie'][item.type] || item.days || [];
+          if (days.indexOf(w) !== -1) evs.push({type:item.type});
+        });
       } else {
-        if (takeoutDays.indexOf(w) !== -1) evs.push({type:'takeout'});
-        if (cafeDays.indexOf(w)    !== -1) evs.push({type:'cafe'});
+        var takeoutDays = dayOverrides['ebie']['takeout'] || [1,2,5,6,0];
+        var cafeDays    = dayOverrides['ebie']['cafe']    || [1,2,5,6,0];
+        var cafe2Days   = dayOverrides['ebie']['KIMAGURE_cafe']   || [3,4];
+        var muffinDays  = dayOverrides['ebie']['muffin']  || [1,2,5];
+        if (cafe2Days.indexOf(w) !== -1) {
+          evs.push({type:'KIMAGURE_cafe'});
+        } else {
+          if (takeoutDays.indexOf(w) !== -1) evs.push({type:'takeout'});
+          if (cafeDays.indexOf(w)    !== -1) evs.push({type:'cafe'});
+        }
       }
       // 臨時営業：通常表示しない日でも強制追加
       var extras = extraTypes['ebie'][dk] || {};
       Object.keys(extras).forEach(function(t){ if(evs.findIndex(function(e){return e.type===t;})===-1) evs.push({type:t}); });
       var off = offTypes['ebie'][dk] || [];
-      if (off.indexOf('muffin') === -1 && muffinDays.indexOf(w) !== -1) evs.push({type:'muffin'});
       return evs.filter(function(e){return off.indexOf(e.type)===-1;});
     }
   }
