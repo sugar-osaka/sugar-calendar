@@ -53,12 +53,20 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .dot{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .dot svg{width:20px;height:20px;flex-shrink:0;pointer-events:none}
 .dot-cake{background:#F5D6DA;color:#B85366}
+.dot-coffee{background:#D9C4B0;color:#6F4E37}
+.dot-cookie{background:#F0DEC0;color:#C68642}
+.dot-gift{background:#F2D6E8;color:#B85C8A}
+.dot-tree{background:#C8E6C9;color:#3A7D44}
+.dot-bouquet{background:#F8D7E8;color:#C45E8A}
+.dot-koinobori{background:#BBDEFB;color:#2980b9}
+.dot-sakura{background:#FADADD;color:#D4829A}
 .dot-crepe{background:#F3E1BD;color:#A87C28}
 .dot-muffin{background:#E6C58B;color:#A6834F}
 .dot-takeout{background:#E8C5B9;color:#C22047}
 .dot-cafe{background:#AEC1CD;color:#6B8294}
 .dot-cafe2{background:#D8C4A7;color:#A68A6F}
 .pill-closed{background:#AF011C;color:#fcebed;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive;cursor:pointer;position:relative;z-index:1}
+.dot-closed{background:#AF011C;color:#fcebed;font-size:14px;font-weight:bold;font-family:'Yomogi',cursive}
 /* イベント帯・臨時休業帯 */
 .event-band,.closed-band{position:absolute;top:32px;left:0;right:0;height:20px;z-index:3;display:flex;align-items:center;padding-left:4px;cursor:pointer;overflow:visible}
 .event-band{background:#fcc800;}
@@ -146,7 +154,9 @@ var maxMonth = now.getMonth() === 11 ? 0 : now.getMonth() + 1;
 
 var COLORS = {
   cake:'#B85366', crepe:'#A87C28', muffin:'#A6834F',
-  takeout:'#C22047', cafe:'#6B8294', cafe2:'#A68A6F'
+  takeout:'#C22047', cafe:'#6B8294', cafe2:'#A68A6F',
+  coffee:'#6F4E37', cookie:'#C68642', gift:'#B85C8A',
+  tree:'#3A7D44', bouquet:'#C45E8A', koinobori:'#2980b9', sakura:'#D4829A'
 };
 
 var SVG = {
@@ -155,12 +165,21 @@ var SVG = {
   muffin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13 L8 21 L16 21 L17 13 Z"/><line x1="10" y1="13" x2="9.5" y2="21"/><line x1="12" y1="13" x2="12" y2="21"/><line x1="14" y1="13" x2="14.5" y2="21"/><path d="M7 13 Q5 13 5 10 Q5 7 8 6 Q9 3 12 3 Q15 3 16 6 Q19 7 19 10 Q19 13 17 13 Q15 14 12 14 Q9 14 7 13 Z"/><path d="M8 7 Q9 5.5 11 6"/><path d="M14 5.5 Q15.5 6.5 15 8"/></svg>',
   takeout:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="15" width="18" height="4" rx="1"/><rect x="3" y="11" width="18" height="4" rx="0.5"/><path d="M3 11 L12 5 L21 11"/><path d="M3 11 Q7 9.5 12 10.5 Q17 9.5 21 11"/><ellipse cx="12" cy="5.5" rx="3" ry="3.5" fill="currentColor" stroke="none"/><path d="M10.5 3 Q12 1.8 13.5 3" stroke="currentColor" stroke-width="1" fill="none"/></svg>',
   cafe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8 L17 8 L15 19 L9 19 Z"/><path d="M17 10 Q21 10 21 14 Q21 18 17 18"/><line x1="5" y1="22" x2="19" y2="22"/><path d="M10 5 Q10 3 12 3 Q12 5 10 5"/></svg>',
-  cafe2:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8 L17 8 L15 19 L9 19 Z"/><path d="M17 10 Q21 10 21 14 Q21 18 17 18"/><line x1="5" y1="22" x2="19" y2="22"/><path d="M9 5 Q11 2 13 5"/></svg>'
+  cafe2:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8 L17 8 L15 19 L9 19 Z"/><path d="M17 10 Q21 10 21 14 Q21 18 17 18"/><line x1="5" y1="22" x2="19" y2="22"/><path d="M9 5 Q11 2 13 5"/></svg>',
+  coffee:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8 L19 8 L17 19 L7 19 Z"/><path d="M19 10 Q23 10 23 14 Q23 18 19 18"/><line x1="3" y1="22" x2="21" y2="22"/><path d="M9 5 Q9 3 11 3 Q11 5 13 5 Q13 3 15 3"/></svg>',
+  cookie:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="9" r="1.2" fill="currentColor" stroke="none"/><circle cx="14" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="8" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="14" cy="14" r="1.2" fill="currentColor" stroke="none"/><circle cx="11" cy="17" r="0.9" fill="currentColor" stroke="none"/></svg>',
+  gift:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="10" width="18" height="11" rx="1.5"/><rect x="2" y="6" width="20" height="4" rx="1"/><line x1="12" y1="6" x2="12" y2="21"/><path d="M12 6 Q10 3 8 4 Q6 5 8 6 Q10 7 12 6"/><path d="M12 6 Q14 3 16 4 Q18 5 16 6 Q14 7 12 6"/></svg>',
+  tree:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 20,16 4,16"/><polygon points="12,7 19,19 5,19"/><rect x="10" y="19" width="4" height="3" rx="0.5"/></svg>',
+  bouquet:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="2.5"/><circle cx="8" cy="10" r="2"/><circle cx="16" cy="10" r="2"/><circle cx="9" cy="5" r="1.8"/><circle cx="15" cy="5" r="1.8"/><path d="M9 12 Q12 14 15 12 L13 22 L11 22 Z"/></svg>',
+  koinobori:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="2" x2="5" y2="22"/><path d="M5 5 Q9 3 13 5 Q17 7 13 9 Q9 11 5 9"/><path d="M5 10 Q8 8 11 10 Q14 12 11 14 Q8 16 5 14"/><circle cx="13.5" cy="7" r="1" fill="currentColor" stroke="none"/><circle cx="11.5" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg>',
+  sakura:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5 Q13.5 2 15 5 Q18 3 17 6 Q20 7 18 9 Q20 12 17 11 Q17 14 14 13 Q13 16 12 13 Q11 16 10 13 Q7 14 7 11 Q4 12 6 9 Q4 7 7 6 Q6 3 9 5 Q10.5 2 12 5Z"/><circle cx="12" cy="9" r="1.5" fill="currentColor" stroke="none"/></svg>'
 };
 
 var DOTCLS = {
   cake:'dot-cake', crepe:'dot-crepe', muffin:'dot-muffin',
-  takeout:'dot-takeout', cafe:'dot-cafe', cafe2:'dot-cafe2'
+  takeout:'dot-takeout', cafe:'dot-cafe', cafe2:'dot-cafe2',
+  coffee:'dot-coffee', cookie:'dot-cookie', gift:'dot-gift',
+  tree:'dot-tree', bouquet:'dot-bouquet', koinobori:'dot-koinobori', sakura:'dot-sakura'
 };
 
 // デフォルト営業時間
@@ -170,7 +189,14 @@ var TYPE_INFO = {
   takeout:{name:'テイクアウト', hours:'12:00-18:00'},
   cafe:   {name:'イートイン',   hours:'13:00-17:30 (L.O.17:00)'},
   cafe2:  {name:'気まぐれカフェ', hours:'12:00-16:30 (L.O.16:00)'},
-  muffin: {name:'マフィン',     hours:'12:00-18:00'}
+  muffin: {name:'マフィン',     hours:'12:00-18:00'},
+  coffee:   {name:'コーヒー',   hours:''},
+  cookie:   {name:'クッキー',   hours:''},
+  gift:     {name:'ギフト',     hours:''},
+  tree:     {name:'ツリー',     hours:''},
+  bouquet:  {name:'花束',       hours:''},
+  koinobori:{name:'こいのぼり', hours:''},
+  sakura:   {name:'桜',         hours:''}
 };
 
 // スプシから読み込むデータ
@@ -444,7 +470,7 @@ var shops = {
       return [
         {cls:'dot-cake',  svg:SVG.cake,  label:'ホールケーキ'},
         {cls:'dot-crepe', svg:SVG.crepe, label:'クレープ'},
-        {pill:'#AF011C', textColor:'#fcebed', label:'臨時休業'},
+        {closed:true, label:'臨時休業'},
         {pill:'#fcc800', label:'イベント'}
       ];
     },
@@ -482,7 +508,7 @@ var shops = {
         {cls:'dot-cafe',    svg:SVG.cafe,    label:'イートイン'},
         {cls:'dot-cafe2',   svg:SVG.cafe2,   label:'気まぐれカフェ'},
         {cls:'dot-muffin',  svg:SVG.muffin,  label:'マフィン'},
-        {pill:'#AF011C', textColor:'#fcebed', label:'臨時休業'},
+        {closed:true, label:'臨時休業'},
         {pill:'#fcc800', label:'イベント'}
       ];
     },
@@ -672,7 +698,9 @@ function render() {
 
   var legendHTML='';
   shops[shop].getLegend().forEach(function(l){
-    if(l.pill){
+    if(l.closed){
+      legendHTML+='<div class="leg"><div class="leg-dot dot-closed" style="font-size:14px;font-weight:bold;font-family:Yomogi,cursive">休</div><span>'+l.label+'</span></div>';
+    } else if(l.pill){
       var pt=l.textColor || (l.pill==='#fcc800'?'#432f2f':'#fff');
       legendHTML+='<div class="leg"><div class="leg-dot" style="background:'+l.pill+';color:'+pt+';font-size:10px;border-radius:10px;padding:0 6px;width:auto;min-width:28px">'+l.label+'</div></div>';
     } else {
@@ -708,39 +736,21 @@ function render() {
             if(e.type==='closed') html+='<div class="pill-closed" data-popup="closed" data-label="'+(e.label||'臨時休業')+'">'+(e.label||'臨時休業')+'</div>';
           });
         } else if(closedBands[shop][dk] && band){
-          // 臨時休業とイベントが同じ日に重なる場合
-          // → この日からrowShiftDownをtrueに（行が変わるまで維持）
-          rowShiftDown = true;
+          // 臨時休業アイコン（休）＋イベント帯
           var cb=closedBands[shop][dk];
-          var cc='closed-band';
-          if(cb.single||cb.isStart&&cb.isEnd) cc='closed-band band-single';
-          else if(cb.isStart) cc='closed-band band-start';
-          else if(cb.isEnd)   cc='closed-band band-end';
-          var showCLabel=(cb.isStart||col===0||day===1)&&!cb.single;
-          var clabel=showCLabel?'<span class="closed-band-label">'+cb.label+'</span>':'';
-          html+='<div class="'+cc+'" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'">'+clabel+'</div>';
-          var bc='event-band shift-down';
+          html+='<div class="dot-row"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" role="button" tabindex="0">休</div></div>';
+          var bc='event-band';
           if(band.isStart) bc+=' band-start';
           if(band.isEnd)   bc+=' band-end';
-          if(band.isStart&&band.isEnd) bc='event-band shift-down band-single';
+          if(band.isStart&&band.isEnd) bc='event-band band-single';
           if(band.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
           var showELabel0=(band.isStart||col===0||day===1)&&!band.single;
           var labelPart=showELabel0?'<span class="event-band-label">'+band.name+'</span>':'';
           html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'">'+labelPart+'</div>';
-          // 臨時休業+イベント重複日: イートイン・テイクアウト等のアイコンは非表示（イベント帯のみ表示）
-          // イベント帯の終端なら次の行ではshift不要
-          if(band.isEnd || (band.isStart&&band.isEnd)) rowShiftDown = false;
         } else if(closedBands[shop][dk]){
+          // 臨時休業アイコン（休）のみ
           var cb=closedBands[shop][dk];
-          var cc='closed-band';
-          if(cb.single) cc='closed-band band-single';
-          else if(cb.isStart&&cb.isEnd) cc='closed-band band-single';
-          else if(cb.isStart) cc='closed-band band-start';
-          else if(cb.isEnd)   cc='closed-band band-end';
-          if(cb.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
-          var showCLabel2=(cb.isStart||col===0||day===1)&&!cb.single;
-          var clabel=showCLabel2?'<span class="closed-band-label">'+cb.label+'</span>':'';
-          html+='<div class="'+cc+'" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'">'+clabel+'</div>';
+          html+='<div class="dot-row"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" role="button" tabindex="0">休</div></div>';
 
         } else if(band){
           // rowShiftDownがtrueの場合（同じ行の前のセルで臨時休業+イベント重複があった）
