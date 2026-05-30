@@ -183,6 +183,8 @@ var timeOverrides  = {sagisu:{}, ebie:{}};
 var reserveUrls    = {sagisu:{}, ebie:{}};
 // 営業曜日設定 dayOverrides[shop][type] = [0,1,2,...] (0=日,1=月,...,6=土)
 var dayOverrides   = {sagisu:{}, ebie:{}};
+// 臨時営業: extraTypes[shop][dk] = ['cake', 'crepe', ...]
+var extraTypes     = {sagisu:{}, ebie:{}};
 
 function dateKey(d) { return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(); }
 
@@ -212,6 +214,7 @@ function parseAndApplyCSV(text) {
   offTypes       = {sagisu:{}, ebie:{}};
   timeOverrides  = {sagisu:{}, ebie:{}};
   dayOverrides   = {sagisu:{}, ebie:{}};
+  extraTypes     = {sagisu:{}, ebie:{}};
   var rows = text.trim().split('\n');
   for (var i = 1; i < rows.length; i++) {
     var cols = rows[i].split(',');
@@ -232,8 +235,9 @@ function parseAndApplyCSV(text) {
           '非表示':'off', '営業時間変更':'time', '臨時休業':'closed',
           'イベント':'event', '固定営業時間':'time_default', '固定営業曜日':'day',
           '固定営業曜日&予約URL':'day',
+          '臨時営業':'extra',
           'off':'off', 'time':'time', 'closed':'closed',
-          'event':'event', 'time_default':'time_default', 'day':'day'
+          'event':'event', 'time_default':'time_default', 'day':'day', 'extra':'extra'
         };
         var kind = kindMap[kindRaw] || kindRaw.toLowerCase();
 
@@ -273,7 +277,11 @@ function parseAndApplyCSV(text) {
         if (!startD) continue;
         var dk = dateKey(startD);
 
-        if (kind === 'off') {
+        if (kind === 'extra') {
+          if (!extraTypes[shopName][dk]) extraTypes[shopName][dk] = [];
+          if (target) extraTypes[shopName][dk].push(target);
+
+        } else if (kind === 'off') {
           if (!offTypes[shopName][dk]) offTypes[shopName][dk] = [];
           offTypes[shopName][dk].push(target);
 
@@ -431,6 +439,9 @@ var shops = {
       var crepeDays = dayOverrides['sagisu']['crepe'] || [2,3,4,5,6];
       if (cakeDays.indexOf(w)  !== -1) evs.push({type:'cake'});
       if (crepeDays.indexOf(w) !== -1) evs.push({type:'crepe'});
+      // 臨時営業：通常表示しない日でも強制追加
+      var extras = extraTypes['sagisu'][dk] || [];
+      extras.forEach(function(t){ if(evs.findIndex(function(e){return e.type===t;})===-1) evs.push({type:t}); });
       var off = offTypes['sagisu'][dk] || [];
       return evs.filter(function(e){return off.indexOf(e.type)===-1;});
     }
@@ -472,6 +483,9 @@ var shops = {
         if (takeoutDays.indexOf(w) !== -1) evs.push({type:'takeout'});
         if (cafeDays.indexOf(w)    !== -1) evs.push({type:'cafe'});
       }
+      // 臨時営業：通常表示しない日でも強制追加
+      var extras = extraTypes['ebie'][dk] || [];
+      extras.forEach(function(t){ if(evs.findIndex(function(e){return e.type===t;})===-1) evs.push({type:t}); });
       var off = offTypes['ebie'][dk] || [];
       if (off.indexOf('muffin') === -1 && muffinDays.indexOf(w) !== -1) evs.push({type:'muffin'});
       return evs.filter(function(e){return off.indexOf(e.type)===-1;});
