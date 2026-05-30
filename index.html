@@ -57,7 +57,7 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .dot-valentine{background:#FCEBED;color:#C0392B}
 .dot-whiteday{background:#E8F4F8;color:#4A90C0}
 .dot-OSHOGATSU{background:#F5F0E8;color:#8B6914}
-.dot-sugar{background:linear-gradient(90deg,#C8956C,#A63F52);color:#fff;width:52px!important;border-radius:10px!important}
+.dot-sugar{background:linear-gradient(90deg,#C8956C,#A63F52);color:#fff}
 .dot-cookie{background:#F0DEC0;color:#C68642}
 .dot-gift{background:#F2D6E8;color:#B85C8A}
 .dot-Christmas{background:#C8E6C9;color:#3A7D44}
@@ -71,6 +71,8 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .dot-KIMAGURE_cafe{background:#D8C4A7;color:#A68A6F}
 .pill-closed{background:#AF011C;color:#fcebed;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive;cursor:pointer;position:relative;z-index:1}
 .dot-closed{background:#AF011C;color:#fcebed;font-size:14px;font-weight:bold;font-family:'Yomogi',cursive}
+.sugar-band{position:absolute;top:32px;left:2px;right:2px;height:20px;z-index:3;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:visible;background:linear-gradient(90deg,#C8956C,#A63F52);border-radius:6px;font-size:12px;font-family:'Caveat Brush',cursive;color:#fff;letter-spacing:0.05em}
+.sugar-band.shift-down{top:55px}
 /* イベント帯・臨時休業帯 */
 .event-band,.closed-band{position:absolute;top:32px;left:0;right:0;height:20px;z-index:3;display:flex;align-items:center;padding-left:4px;cursor:pointer;overflow:visible}
 .event-band{background:#fcc800;}
@@ -261,6 +263,7 @@ function parseDate(str) {
 function formatDateJP(d) { return (d.getMonth()+1)+'/'+d.getDate(); }
 
 function makeDotHTML(e, hrs, dk) {
+  if (e.type === 'sugar') return ''; // sugar帯は別途描画
   var hasExtra  = extraTypes[shop][dk] && (extraTypes[shop][dk][e.type] !== undefined);
   var hasChange = !hasExtra && timeOverrides[shop][dk] && timeOverrides[shop][dk][e.type];
   var badge = hasExtra ? '<span class="dot-badge" style="background:#2980b9">★</span>'
@@ -269,6 +272,11 @@ function makeDotHTML(e, hrs, dk) {
     return '<div class="dot-wrap"><div class="dot '+(DOTCLS[e.type]||'')+'" data-type="'+e.type+'" data-hours="'+hrs+'" role="button" tabindex="0">'+(SVG[e.type]||'')+'</div>'+badge+'</div>';
   }
   return '<div class="dot '+(DOTCLS[e.type]||'')+'" data-type="'+e.type+'" data-hours="'+hrs+'" role="button" tabindex="0">'+(SVG[e.type]||'')+'</div>';
+}
+
+function makeSugarBandHTML(hrs, dk, isShifted) {
+  var shiftCls = isShifted ? ' shift-down' : '';
+  return '<div class="sugar-band'+shiftCls+'" data-type="sugar" data-hours="'+hrs+'" data-dk="'+dk+'" role="button" tabindex="0">sugar</div>';
 }
 
 function parseMasterCSV(text) {
@@ -937,12 +945,25 @@ function render() {
           if(band.isEnd || (band.isStart&&band.isEnd)) rowShiftDown = false;
         } else {
           var evs=shops[shop].getEvents(d);
-          html+='<div class="dot-row">';
-          evs.forEach(function(e){
-            var hrs=getHours(e.type,d);
-            html+=makeDotHTML(e,hrs,dk);
-          });
-          html+='</div>';
+          // sugarがある場合は帯として先に挿入
+          var hasSugar = evs.some(function(e){return e.type==='sugar';});
+          if (hasSugar) {
+            var sugarHrs = getHours('sugar', d);
+            html+='<td class="has-band-start">'.indexOf(html.slice(-20)) >= 0
+              ? makeSugarBandHTML(sugarHrs, dk, false)
+              : makeSugarBandHTML(sugarHrs, dk, false);
+            html=html.replace(/<td([^>]*)>\s*<div class="date-num">/, '<td$1 class="has-band-start"><div class="date-num">');
+          }
+          var nonSugar = evs.filter(function(e){return e.type!=='sugar';});
+          if (nonSugar.length) {
+            var belowCls = hasSugar ? 'dot-row-below' : 'dot-row';
+            html+='<div class="'+belowCls+'">';
+            nonSugar.forEach(function(e){
+              var hrs=getHours(e.type,d);
+              html+=makeDotHTML(e,hrs,dk);
+            });
+            html+='</div>';
+          }
         }
       }
       html+='</td>';
