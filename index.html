@@ -851,9 +851,13 @@ function render() {
   var infoHTML='<div class="info-rows">';
   shops[shop].getInfoRows().forEach(function(r){
     var c=COLORS[r.type];
-    var sv=SVG[r.type].replace('stroke="currentColor"','stroke="'+c+'"');
     infoHTML+='<div class="info-row">';
-    infoHTML+='<div class="info-icon" style="color:'+c+'">'+sv+'</div>';
+    if(r.type==='sugar'){
+      infoHTML+='<div class="info-icon"><div style="background:linear-gradient(90deg,#C8956C,#A63F52);border-radius:4px;padding:1px 5px;font-size:10px;font-family:Caveat Brush,cursive;color:#fff;display:inline-block">sugar</div></div>';
+    } else {
+      var sv=SVG[r.type].replace('stroke="currentColor"','stroke="'+c+'"');
+      infoHTML+='<div class="info-icon" style="color:'+c+'">'+sv+'</div>';
+    }
     infoHTML+='<div class="info-name" style="color:'+c+'">'+r.name+'</div>';
     infoHTML+='<div class="info-days">'+r.dots+'</div>';
     infoHTML+='<div class="info-hours" style="color:'+c+'">/ '+r.hours+'</div>';
@@ -869,6 +873,8 @@ function render() {
     } else if(l.pill){
       var pt=l.textColor || (l.pill==='#fcc800'?'#432f2f':'#fff');
       legendHTML+='<div class="leg"><div class="leg-dot" style="background:'+l.pill+';color:'+pt+';font-size:10px;border-radius:10px;padding:0 6px;width:auto;min-width:28px">'+l.label+'</div></div>';
+    } else if(l.cls === 'dot-sugar'){
+      legendHTML+='<div class="leg"><div style="background:linear-gradient(90deg,#C8956C,#A63F52);border-radius:8px;padding:2px 8px;font-size:11px;font-family:Caveat Brush,cursive;color:#fff;display:inline-flex;align-items:center">sugar</div><span style="margin-left:5px">'+l.label+'</span></div>';
     } else {
       legendHTML+='<div class="leg"><div class="leg-dot '+l.cls+'">'+l.svg+'</div><span>'+l.label+'</span></div>';
     }
