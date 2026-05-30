@@ -321,10 +321,17 @@ function parseAndApplyCSV(text) {
         var targetMap = {
           'ホールケーキ':'cake', 'クレープ':'crepe', 'テイクアウト':'takeout',
           'イートイン':'cafe', '気まぐれカフェ':'cafe2', 'マフィン':'muffin',
+          'コーヒー':'coffee', 'クッキー':'cookie', 'ギフト':'gift',
+          'クリスマス':'tree', 'こどもの日':'koinobori', '桜':'sakura',
+          'バレンタイン':'valentine', 'ホワイトデー':'whiteday',
+          'お正月':'oshogatsu', 'sugar':'sugar',
           'cake':'cake', 'crepe':'crepe', 'takeout':'takeout',
-          'cafe':'cafe', 'cafe2':'cafe2', 'muffin':'muffin'
+          'cafe':'cafe', 'cafe2':'cafe2', 'muffin':'muffin',
+          'coffee':'coffee', 'cookie':'cookie', 'gift':'gift',
+          'tree':'tree', 'koinobori':'koinobori', 'sakura':'sakura',
+          'valentine':'valentine', 'whiteday':'whiteday', 'oshogatsu':'oshogatsu'
         };
-        var target = iconMaster[targetRaw] || targetMap[targetRaw] || targetRaw.toLowerCase();
+        var target = targetMap[targetRaw] || iconMaster[targetRaw] || targetRaw.toLowerCase();
 
         if (shopName !== 'sagisu' && shopName !== 'ebie') continue;
 
@@ -366,12 +373,10 @@ function parseAndApplyCSV(text) {
         } else if (kind === 'off') {
           var endD = parseDate(endDateStr) || startD;
           var cur = new Date(startD);
-          console.log('[off] shop='+shopName+' target='+target+' start='+dateStr+' end='+endDateStr);
           while (cur <= endD) {
             var ck = dateKey(cur);
             if (!offTypes[shopName][ck]) offTypes[shopName][ck] = [];
             if (target && offTypes[shopName][ck].indexOf(target) === -1) offTypes[shopName][ck].push(target);
-            console.log('[off] registered: '+ck+' -> '+JSON.stringify(offTypes[shopName][ck]));
             cur.setDate(cur.getDate()+1);
           }
 
