@@ -53,7 +53,11 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .dot{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .dot svg{width:20px;height:20px;flex-shrink:0;pointer-events:none}
 .dot-cake{background:#F5D6DA;color:#B85366}
-.dot-coffee{background:#D9C4B0;color:#6F4E37}
+.dot-coffee{background:#E8EDD5;color:#7A8C3E}
+.dot-valentine{background:#FCEBED;color:#C0392B}
+.dot-whiteday{background:#E8F4F8;color:#4A90C0}
+.dot-oshogatsu{background:#F5F0E8;color:#8B6914}
+.dot-sugar{background:#FDF8EC;color:#B8860B}
 .dot-cookie{background:#F0DEC0;color:#C68642}
 .dot-gift{background:#F2D6E8;color:#B85C8A}
 .dot-tree{background:#C8E6C9;color:#3A7D44}
@@ -142,8 +146,29 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
 // ============================================================
 // スプレッドシートCSV URL
 // ============================================================
-var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTPofFfru7LP5csztEsj2BlMcfl6NeVuTw9_cUwAyw_bn948b-Ro2cYQQ6tWIpeLZegaqaOcnFblFUD/pub?output=csv';
+var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTPofFfru7LP5csztEsj2BlMcfl6NeVuTw9_cUwAyw_bn948b-Ro2cYQQ6tWIpeLZegaqaOcnFblFUD/pub?gid=0&single=true&output=csv';
+var MASTER_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTPofFfru7LP5csztEsj2BlMcfl6NeVuTw9_cUwAyw_bn948b-Ro2cYQQ6tWIpeLZegaqaOcnFblFUD/pub?gid=160892631&single=true&output=csv';
 
+var iconMaster = {};
+var ICON_NAME_MAP = {
+  "ホールケーキ": "cake",
+  "クレープ": "crepe",
+  "テイクアウト": "takeout",
+  "カフェ": "cafe",
+  "イートイン": "cafe",
+  "気まぐれカフェ": "cafe2",
+  "マフィン": "muffin",
+  "コーヒー": "coffee",
+  "クッキー": "cookie",
+  "ギフト": "gift",
+  "クリスマス": "tree",
+  "こどもの日": "koinobori",
+  "桜": "sakura",
+  "バレンタイン": "valentine",
+  "ホワイトデー": "whiteday",
+  "お正月": "oshogatsu",
+  "sugar": "sugar"
+};
 var shop = 'sagisu';
 var now = new Date();
 var year = now.getFullYear();
@@ -155,8 +180,9 @@ var maxMonth = now.getMonth() === 11 ? 0 : now.getMonth() + 1;
 var COLORS = {
   cake:'#B85366', crepe:'#A87C28', muffin:'#A6834F',
   takeout:'#C22047', cafe:'#6B8294', cafe2:'#A68A6F',
-  coffee:'#6F4E37', cookie:'#C68642', gift:'#B85C8A',
-  tree:'#3A7D44', bouquet:'#C45E8A', koinobori:'#2980b9', sakura:'#D4829A'
+  coffee:'#7A8C3E', cookie:'#C68642', gift:'#B85C8A',
+  tree:'#3A7D44', koinobori:'#2980b9', sakura:'#D4829A',
+  valentine:'#C0392B', whiteday:'#4A90C0', oshogatsu:'#8B6914', sugar:'#B8860B'
 };
 
 var SVG = {
@@ -171,15 +197,20 @@ var SVG = {
   gift:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="10" width="18" height="11" rx="1.5"/><rect x="2" y="6" width="20" height="4" rx="1"/><line x1="12" y1="6" x2="12" y2="21"/><path d="M12 6 Q10 3 8 4 Q6 5 8 6 Q10 7 12 6"/><path d="M12 6 Q14 3 16 4 Q18 5 16 6 Q14 7 12 6"/></svg>',
   tree:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 20,16 4,16"/><polygon points="12,7 19,19 5,19"/><rect x="10" y="19" width="4" height="3" rx="0.5"/></svg>',
   bouquet:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="2.5"/><circle cx="8" cy="10" r="2"/><circle cx="16" cy="10" r="2"/><circle cx="9" cy="5" r="1.8"/><circle cx="15" cy="5" r="1.8"/><path d="M9 12 Q12 14 15 12 L13 22 L11 22 Z"/></svg>',
-  koinobori:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="2" x2="5" y2="22"/><path d="M5 5 Q9 3 13 5 Q17 7 13 9 Q9 11 5 9"/><path d="M5 10 Q8 8 11 10 Q14 12 11 14 Q8 16 5 14"/><circle cx="13.5" cy="7" r="1" fill="currentColor" stroke="none"/><circle cx="11.5" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg>',
-  sakura:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5 Q13.5 2 15 5 Q18 3 17 6 Q20 7 18 9 Q20 12 17 11 Q17 14 14 13 Q13 16 12 13 Q11 16 10 13 Q7 14 7 11 Q4 12 6 9 Q4 7 7 6 Q6 3 9 5 Q10.5 2 12 5Z"/><circle cx="12" cy="9" r="1.5" fill="currentColor" stroke="none"/></svg>'
+  koinobori:'<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="1" x2="3" y2="27"/><circle cx="3" cy="1.8" r="1.6" fill="currentColor" stroke="none"/><path d="M3 5 L5 4.5 Q16 3.5 22 7 Q25 9 22 11.5 Q16 15 5 14 L3 13.5 Z" fill="currentColor" stroke="none"/><path d="M22 7 L26 6 L22 10" fill="currentColor" stroke="none"/><circle cx="7" cy="9" r="1.6" fill="white" stroke="none"/><path d="M11 6.5 Q15 8 15 9.5 Q15 11 11 12" stroke="white" stroke-width="1.1" fill="none"/><path d="M3 16 L5 15.5 Q14 14.5 20 17.5 Q23 19.5 20 22 Q14 25.5 5 24.5 L3 24 Z" fill="currentColor" stroke="none"/><path d="M20 17.5 L23 16.5 L20 21" fill="currentColor" stroke="none"/><circle cx="7" cy="20" r="1.4" fill="white" stroke="none"/><path d="M11 17.5 Q14 19 14 20.5 Q14 22 11 22.5" stroke="white" stroke-width="1.1" fill="none"/></svg>',
+  sakura:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(12,12)"><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(0)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(72)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(144)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(216)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(288)"/><circle cx="0" cy="0" r="1.8"/></g></svg>',
+  valentine:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19 Q5 13 5 8 Q5 5 7.5 4 Q10 3 12 6 Q14 3 16.5 4 Q19 5 19 8 Q19 13 12 19 Z"/></svg>',
+  whiteday:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19 Q5 13 5 8 Q5 5 7.5 4 Q10 3 12 6 Q14 3 16.5 4 Q19 5 19 8 Q19 13 12 19 Z"/></svg>',
+  oshogatsu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="19" width="12" height="3" rx="1"/><rect x="7" y="16" width="10" height="3" rx="0.5"/><ellipse cx="12" cy="13" rx="5" ry="3.5"/><circle cx="12" cy="8" r="3"/><circle cx="12" cy="5.5" r="1.2" fill="currentColor" stroke="none"/><line x1="12" y1="4.3" x2="12" y2="3.5"/></svg>',
+  sugar:'<svg viewBox="0 0 44 44"><text x="50%" y="57%" font-size="12" font-family="Caveat Brush,cursive" fill="currentColor" stroke="none" text-anchor="middle" dominant-baseline="middle">sugar</text></svg>'
 };
 
 var DOTCLS = {
   cake:'dot-cake', crepe:'dot-crepe', muffin:'dot-muffin',
   takeout:'dot-takeout', cafe:'dot-cafe', cafe2:'dot-cafe2',
   coffee:'dot-coffee', cookie:'dot-cookie', gift:'dot-gift',
-  tree:'dot-tree', bouquet:'dot-bouquet', koinobori:'dot-koinobori', sakura:'dot-sakura'
+  tree:'dot-tree', koinobori:'dot-koinobori', sakura:'dot-sakura',
+  valentine:'dot-valentine', whiteday:'dot-whiteday', oshogatsu:'dot-oshogatsu', sugar:'dot-sugar'
 };
 
 // デフォルト営業時間
@@ -190,13 +221,16 @@ var TYPE_INFO = {
   cafe:   {name:'イートイン',   hours:'13:00-17:30 (L.O.17:00)'},
   cafe2:  {name:'気まぐれカフェ', hours:'12:00-16:30 (L.O.16:00)'},
   muffin: {name:'マフィン',     hours:'12:00-18:00'},
-  coffee:   {name:'コーヒー',   hours:''},
-  cookie:   {name:'クッキー',   hours:''},
-  gift:     {name:'ギフト',     hours:''},
-  tree:     {name:'ツリー',     hours:''},
-  bouquet:  {name:'花束',       hours:''},
-  koinobori:{name:'こいのぼり', hours:''},
-  sakura:   {name:'桜',         hours:''}
+  coffee:    {name:'コーヒー',     hours:''},
+  cookie:    {name:'クッキー',     hours:''},
+  gift:      {name:'ギフト',       hours:''},
+  tree:      {name:'クリスマス', hours:''},
+  koinobori: {name:'こどもの日',  hours:''},
+  sakura:    {name:'桜',           hours:''},
+  valentine: {name:'バレンタイン', hours:''},
+  whiteday:  {name:'ホワイトデー',  hours:''},
+  oshogatsu: {name:'お正月',     hours:''},
+  sugar:     {name:'sugar',       hours:''}
 };
 
 // スプシから読み込むデータ
@@ -233,6 +267,20 @@ function makeDotHTML(e, hrs, dk) {
     return '<div class="dot-wrap"><div class="dot '+(DOTCLS[e.type]||'')+'" data-type="'+e.type+'" data-hours="'+hrs+'" role="button" tabindex="0">'+(SVG[e.type]||'')+'</div>'+badge+'</div>';
   }
   return '<div class="dot '+(DOTCLS[e.type]||'')+'" data-type="'+e.type+'" data-hours="'+hrs+'" role="button" tabindex="0">'+(SVG[e.type]||'')+'</div>';
+}
+
+function parseMasterCSV(text) {
+  iconMaster = {};
+  var rows = text.trim().split('\n');
+  for (var i = 1; i < rows.length; i++) {
+    var cols = rows[i].split(',');
+    var name    = (cols[0]||'').trim();
+    var iconKey = (cols[1]||'').trim();
+    if (name && iconKey) iconMaster[name] = iconKey;
+  }
+  Object.keys(ICON_NAME_MAP).forEach(function(k){
+    if (!iconMaster[k]) iconMaster[k] = ICON_NAME_MAP[k];
+  });
 }
 
 function parseAndApplyCSV(text) {
@@ -276,7 +324,7 @@ function parseAndApplyCSV(text) {
           'cake':'cake', 'crepe':'crepe', 'takeout':'takeout',
           'cafe':'cafe', 'cafe2':'cafe2', 'muffin':'muffin'
         };
-        var target = targetMap[targetRaw] || targetRaw.toLowerCase();
+        var target = iconMaster[targetRaw] || targetMap[targetRaw] || targetRaw.toLowerCase();
 
         if (shopName !== 'sagisu' && shopName !== 'ebie') continue;
 
@@ -379,32 +427,63 @@ function parseAndApplyCSV(text) {
 function loadCSV() {
   var CACHE_KEY = 'sugar_csv';
   var CACHE_TIME_KEY = 'sugar_csv_time';
-  var CACHE_DURATION = 5 * 60 * 1000; // 5分
-  // 強制リロード時はキャッシュをクリア
+  var MASTER_CACHE_KEY = 'sugar_master_csv';
+  var MASTER_CACHE_TIME_KEY = 'sugar_master_csv_time';
+  var CACHE_DURATION = 5 * 60 * 1000;
   try {
     if (performance && performance.navigation && performance.navigation.type === 1) {
       sessionStorage.removeItem(CACHE_KEY);
       sessionStorage.removeItem(CACHE_TIME_KEY);
+      sessionStorage.removeItem(MASTER_CACHE_KEY);
+      sessionStorage.removeItem(MASTER_CACHE_TIME_KEY);
     }
   } catch(e) {}
-  try {
-    var cached = sessionStorage.getItem(CACHE_KEY);
-    var cachedTime = sessionStorage.getItem(CACHE_TIME_KEY);
-    if (cached && cachedTime && (Date.now() - parseInt(cachedTime)) < CACHE_DURATION) {
-      parseAndApplyCSV(cached);
-      return;
-    }
-  } catch(e) {}
-  fetch(CSV_URL)
-    .then(function(r){ return r.text(); })
-    .then(function(text){
-      try {
-        sessionStorage.setItem(CACHE_KEY, text);
-        sessionStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
-      } catch(e) {}
-      parseAndApplyCSV(text);
-    })
-    .catch(function(){ render(); });
+
+  function loadMaster() {
+    try {
+      var cached = sessionStorage.getItem(MASTER_CACHE_KEY);
+      var cachedTime = sessionStorage.getItem(MASTER_CACHE_TIME_KEY);
+      if (cached && cachedTime && (Date.now() - parseInt(cachedTime)) < CACHE_DURATION) {
+        parseMasterCSV(cached);
+        return Promise.resolve();
+      }
+    } catch(e) {}
+    return fetch(MASTER_URL)
+      .then(function(r){ return r.text(); })
+      .then(function(text){
+        try {
+          sessionStorage.setItem(MASTER_CACHE_KEY, text);
+          sessionStorage.setItem(MASTER_CACHE_TIME_KEY, Date.now().toString());
+        } catch(e) {}
+        parseMasterCSV(text);
+      })
+      .catch(function(){
+        Object.keys(ICON_NAME_MAP).forEach(function(k){ iconMaster[k] = ICON_NAME_MAP[k]; });
+      });
+  }
+
+  function loadCalendar() {
+    try {
+      var cached = sessionStorage.getItem(CACHE_KEY);
+      var cachedTime = sessionStorage.getItem(CACHE_TIME_KEY);
+      if (cached && cachedTime && (Date.now() - parseInt(cachedTime)) < CACHE_DURATION) {
+        parseAndApplyCSV(cached);
+        return;
+      }
+    } catch(e) {}
+    fetch(CSV_URL)
+      .then(function(r){ return r.text(); })
+      .then(function(text){
+        try {
+          sessionStorage.setItem(CACHE_KEY, text);
+          sessionStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+        } catch(e) {}
+        parseAndApplyCSV(text);
+      })
+      .catch(function(){ render(); });
+  }
+
+  loadMaster().then(function(){ loadCalendar(); }).catch(function(){ loadCalendar(); });
 }
 
 function getHours(type, d) {
