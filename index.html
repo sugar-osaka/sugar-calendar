@@ -736,9 +736,8 @@ function render() {
             if(e.type==='closed') html+='<div class="pill-closed" data-popup="closed" data-label="'+(e.label||'臨時休業')+'">'+(e.label||'臨時休業')+'</div>';
           });
         } else if(closedBands[shop][dk] && band){
-          // 臨時休業アイコン（休）＋イベント帯
+          // イベント帯を上に、休アイコンをその下に
           var cb=closedBands[shop][dk];
-          html+='<div class="dot-row"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" role="button" tabindex="0">休</div></div>';
           var bc='event-band';
           if(band.isStart) bc+=' band-start';
           if(band.isEnd)   bc+=' band-end';
@@ -747,6 +746,7 @@ function render() {
           var showELabel0=(band.isStart||col===0||day===1)&&!band.single;
           var labelPart=showELabel0?'<span class="event-band-label">'+band.name+'</span>':'';
           html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'">'+labelPart+'</div>';
+          html+='<div class="dot-row-below"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" role="button" tabindex="0">休</div></div>';
         } else if(closedBands[shop][dk]){
           // 臨時休業アイコン（休）のみ
           var cb=closedBands[shop][dk];
