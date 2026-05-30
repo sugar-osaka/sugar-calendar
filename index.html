@@ -261,7 +261,7 @@ function formatDateJP(d) { return (d.getMonth()+1)+'/'+d.getDate(); }
 function makeDotHTML(e, hrs, dk) {
   var hasExtra  = extraTypes[shop][dk] && (extraTypes[shop][dk][e.type] !== undefined);
   var hasChange = !hasExtra && timeOverrides[shop][dk] && timeOverrides[shop][dk][e.type];
-  var badge = hasExtra ? '<span class="dot-badge" style="background:#2980b9">臨時</span>'
+  var badge = hasExtra ? '<span class="dot-badge" style="background:#2980b9">★</span>'
             : hasChange ? '<span class="dot-badge">変更</span>' : '';
   if (badge) {
     return '<div class="dot-wrap"><div class="dot '+(DOTCLS[e.type]||'')+'" data-type="'+e.type+'" data-hours="'+hrs+'" role="button" tabindex="0">'+(SVG[e.type]||'')+'</div>'+badge+'</div>';
@@ -989,7 +989,7 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     if (hasExtra && extraTypes[shop][dk][type] && extraTypes[shop][dk][type].label) {
       name = extraTypes[shop][dk][type].label;
     }
-    var hrsHTML=hrs+(hasExtra?'&nbsp;<span style="background:#2980b9;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">臨時営業</span>':hasChange?'&nbsp;<span style="background:#e67e22;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">変更</span>':'');
+    var hrsHTML=hrs+(hasExtra?'&nbsp;<span style="background:#2980b9;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">★</span>':hasChange?'&nbsp;<span style="background:#e67e22;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">変更</span>':'');
     showPopup(DOTCLS[type],SVG[type],color,name,hrsHTML,dot,rurl);
     return;
   }
