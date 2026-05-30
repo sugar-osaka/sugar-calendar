@@ -366,10 +366,12 @@ function parseAndApplyCSV(text) {
         } else if (kind === 'off') {
           var endD = parseDate(endDateStr) || startD;
           var cur = new Date(startD);
+          console.log('[off] shop='+shopName+' target='+target+' start='+dateStr+' end='+endDateStr);
           while (cur <= endD) {
             var ck = dateKey(cur);
             if (!offTypes[shopName][ck]) offTypes[shopName][ck] = [];
             if (target && offTypes[shopName][ck].indexOf(target) === -1) offTypes[shopName][ck].push(target);
+            console.log('[off] registered: '+ck+' -> '+JSON.stringify(offTypes[shopName][ck]));
             cur.setDate(cur.getDate()+1);
           }
 
