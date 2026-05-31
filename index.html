@@ -815,27 +815,26 @@ function drawCalendarLines() {
     var dk = td.getAttribute('data-dk') || '';
     var day1 = dk ? parseInt(dk.split('-').pop(), 10) === 1 : false;
 
-    // 複数イベント帯対応：band-start/singleを全て取得
-    var startBands = Array.from(td.querySelectorAll('.event-band.band-start, .event-band.band-single'));
-    var closedBand = td.querySelector('.closed-band.band-start, .closed-band.band-single');
+    // 描画すべき帯をリストアップ
     var targets = [];
-
-    if (startBands.length > 0) {
-      startBands.forEach(function(b){ targets.push({target:b, isEvent:true}); });
-    } else if (col === 0 || day1) {
-      // 日曜・月初は途中の帯もラベル表示
-      var midBands = Array.from(td.querySelectorAll('.event-band'));
-      midBands.forEach(function(b){ targets.push({target:b, isEvent:true}); });
-    }
-    if (closedBand) {
-      targets.push({target:closedBand, isEvent:false});
-    } else if (targets.length === 0) {
+    // イベント帯：band-startまたは（日曜・月初の）途中帯
+    var allEventBands = Array.from(td.querySelectorAll('.event-band'));
+    allEventBands.forEach(function(b){
+      var isStart = b.classList.contains('band-start') || b.classList.contains('band-single');
+      if(isStart || col === 0 || day1){
+        targets.push({target:b, isEvent:true});
+      }
+    });
+    // 臨時休業帯
+    var closedBand = td.querySelector('.closed-band.band-start, .closed-band.band-single');
+    if(closedBand){ targets.push({target:closedBand, isEvent:false}); }
+    else if(!closedBand && (col===0||day1)){
       var midClosed = td.querySelector('.closed-band');
-      if (midClosed && (col === 0 || day1)) targets.push({target:midClosed, isEvent:false});
+      if(midClosed) targets.push({target:midClosed, isEvent:false});
     }
-    if (!targets.length) return;
+    if(!targets.length) return;
 
-    targets.forEach(function(item) {
+    targets.forEach(function(item){
       var target = item.target;
       var isEvent = item.isEvent;
       var band = isEvent ? target : null;
@@ -882,10 +881,24 @@ function drawCalendarLines() {
     var maxWidth = maxCols * cellW - 8;
     var clipW = Math.min(totalWidth - 8, maxWidth);
 
-      var topStyle = target.style.top ? parseInt(target.style.top) : (target.classList.contains('shift-down') ? 55 : 32);
+      // topスタイルからy位置を取得（複数帯の場合は個別のtop値を使用）
+      var topOffset = target.style.top ? parseInt(target.style.top) : (isShifted ? 55 : 32);
+      var yActual = tdRect.top - wrapRect.top + topOffset + 14;
+      // 幅計算：同じdata-nameの帯の終端を探す
+      var totalWidthActual = 0;
+      var targetName = isEvent ? (target.getAttribute('data-name')||'') : '';
+      for (var i2 = startIdx; i2 < allTds.length; i2++) {
+        var curTd2 = allTds[i2];
+        var matchBands = Array.from(curTd2.querySelectorAll(isEvent ? '.event-band' : '.closed-band'));
+        var mb = isEvent ? matchBands.find(function(b){ return b.getAttribute('data-name')===targetName; }) : matchBands[0];
+        if (!mb) break;
+        totalWidthActual += curTd2.getBoundingClientRect().width;
+        if (mb.classList.contains('band-end') || mb.classList.contains('band-single')) break;
+      }
+      var clipWActual = Math.min(totalWidthActual - 8, maxWidth);
       var clipId = 'clip-band-' + startIdx + '-' + tdIdx + '-' + (name||'x').charCodeAt(0);
-      bandTexts += '<clipPath id="' + clipId + '"><rect x="' + (x-2) + '" y="' + (y-14-topStyle+bandTop) + '" width="' + clipW + '" height="20"/></clipPath>';
-      bandTexts += '<text x="' + x + '" y="' + (y-bandTop+topStyle) + '" font-size="11" font-family="Yomogi,cursive" fill="' + color + '" clip-path="url(#' + clipId + ')" style="pointer-events:none">' + name + '</text>';
+      bandTexts += '<clipPath id="' + clipId + '"><rect x="' + (x-2) + '" y="' + (yActual-14) + '" width="' + clipWActual + '" height="20"/></clipPath>';
+      bandTexts += '<text x="' + x + '" y="' + yActual + '" font-size="11" font-family="Yomogi,cursive" fill="' + color + '" clip-path="url(#' + clipId + ')" style="pointer-events:none">' + name + '</text>';
     }); // targets.forEach終わり
   }); // allTds.forEach終わり
 
