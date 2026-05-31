@@ -484,14 +484,15 @@ function parseAndApplyCSV(text) {
             var ck = dateKey(cur);
             var isStart = cur.toDateString() === startD.toDateString();
             var isEnd   = cur.toDateString() === endD.toDateString();
-            eventBands[shopName][ck] = {
+            if(!eventBands[shopName][ck]) eventBands[shopName][ck] = [];
+            eventBands[shopName][ck].push({
               name: content,
               hours: eventHours,
               period: periodText,
               isStart: isStart,
               isEnd: isEnd,
               reserveUrl: reserveUrl
-            };
+            });
             cur.setDate(cur.getDate()+1);
           }
         }
@@ -940,23 +941,26 @@ function render() {
         html+='<div class="date-num">'+day+'</div>';
         var dk=dateKey(d);
         var sp=specialEvents[shop][dk];
-        var band=eventBands[shop][dk];
+        var bands=eventBands[shop][dk];
+        var band=bands && bands.length ? bands[0] : null;
 
         if(sp){
           sp.forEach(function(e){
             if(e.type==='closed') html+='<div class="pill-closed" data-popup="closed" data-label="'+(e.label||'臨時休業')+'">'+(e.label||'臨時休業')+'</div>';
           });
         } else if(closedBands[shop][dk] && band){
-          // イベント帯を上に、休アイコンをその下に
+          // イベント帯を上に、休アイコンをその下に（複数帯対応）
           var cb=closedBands[shop][dk];
-          var bc='event-band';
-          if(band.isStart) bc+=' band-start';
-          if(band.isEnd)   bc+=' band-end';
-          if(band.isStart&&band.isEnd) bc='event-band band-single';
-          if(band.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
-          var showELabel0=(band.isStart||col===0||day===1)&&!band.single;
-          var labelPart=showELabel0?'<span class="event-band-label">'+band.name+'</span>':'';
-          html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'">'+labelPart+'</div>';
+          bands.forEach(function(b){
+            var bc='event-band';
+            if(b.isStart) bc+=' band-start';
+            if(b.isEnd)   bc+=' band-end';
+            if(b.isStart&&b.isEnd) bc='event-band band-single';
+            if(b.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
+            var showELabel0=(b.isStart||col===0||day===1)&&!b.single;
+            var labelPart=showELabel0?'<span class="event-band-label">'+b.name+'</span>':'';
+            html+='<div class="'+bc+'" data-popup="event" data-name="'+b.name+'" data-period="'+b.period+'" data-hours="'+b.hours+'" data-reserve="'+(b.reserveUrl||'')+'">'+labelPart+'</div>';
+          });
           html+='<div class="dot-row-below"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" role="button" tabindex="0">休</div></div>';
         } else if(closedBands[shop][dk]){
           // 臨時休業アイコン（休）のみ
@@ -964,21 +968,27 @@ function render() {
           html+='<div class="dot-row"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" role="button" tabindex="0">休</div></div>';
 
         } else if(band){
-          // rowShiftDownがtrueの場合（同じ行の前のセルで臨時休業+イベント重複があった）
+          // 複数イベント帯対応：1本目は通常、2本目以降は下にずらす
           var needsShift = rowShiftDown;
-          var bc = needsShift ? 'event-band shift-down' : 'event-band';
-          if(band.isStart) bc+=' band-start';
-          if(band.isEnd)   bc+=' band-end';
-          if(band.isStart&&band.isEnd) bc=(needsShift?'event-band shift-down':'event-band')+' band-single';
-          if(band.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
-          var showELabel2=(band.isStart||col===0||day===1)&&!band.single;
-          var labelPart=showELabel2?'<span class="event-band-label">'+band.name+'</span>':'';
-          html+='<div class="'+bc+'" data-popup="event" data-name="'+band.name+'" data-period="'+band.period+'" data-hours="'+band.hours+'" data-reserve="'+(band.reserveUrl||'')+'">'+labelPart+'</div>';
+          bands.forEach(function(b, bi){
+            var topOffset = bi * 24; // 2本目以降は24pxずつ下に
+            var bc = (needsShift || bi > 0) ? 'event-band shift-down' : 'event-band';
+            if(bi > 0) bc = 'event-band'; // 2本目はshift-downクラスではなくstyle直接指定
+            if(b.isStart) bc+=' band-start';
+            if(b.isEnd)   bc+=' band-end';
+            if(b.isStart&&b.isEnd) bc=(needsShift&&bi===0?'event-band shift-down':'event-band')+' band-single';
+            if(b.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
+            var showELabel2=(b.isStart||col===0||day===1)&&!b.single;
+            var labelPart=showELabel2?'<span class="event-band-label">'+b.name+'</span>':'';
+            var styleStr = bi > 0 ? ' style="margin-top:2px"' : '';
+            html+='<div class="'+bc+'"'+styleStr+' data-popup="event" data-name="'+b.name+'" data-period="'+b.period+'" data-hours="'+b.hours+'" data-reserve="'+(b.reserveUrl||'')+'">'+labelPart+'</div>';
+          });
 
           // 通常アイコンも表示
           var evs=shops[shop].getEvents(d);
           if(evs.length){
-            var belowCls = needsShift ? 'dot-row-below double-band' : 'dot-row-below';
+            var bandCount = bands.length;
+            var belowCls = (needsShift || bandCount > 1) ? 'dot-row-below double-band' : 'dot-row-below';
             html+='<div class="'+belowCls+'">';
             evs.forEach(function(e){
               var hrs=getHours(e.type,d);
