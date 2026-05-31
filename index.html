@@ -1108,11 +1108,19 @@ function render() {
     if(day>last.getDate()&&row>=4) break;
   }
   var calEl = document.getElementById('cal');
-  // 一瞬フェードアウトしてから新しいHTMLに差し替え
+  // 初回読み込み時はトランジションなし、月切り替え時はフェード
+  var isFirstRender = !calEl.innerHTML;
+  if (isFirstRender) calEl.style.transition = 'none';
   calEl.style.opacity = '0';
   requestAnimationFrame(function(){
     calEl.innerHTML = html;
-    calEl.style.opacity = '1';
+    if (isFirstRender) {
+      calEl.style.opacity = '1';
+      // トランジションを再有効化（次回の月切り替えから効く）
+      setTimeout(function(){ calEl.style.transition = ''; }, 50);
+    } else {
+      calEl.style.opacity = '1';
+    }
   });
   // SVGを即座にクリアして古いテキストの残像を防ぐ
   var calSvg = document.getElementById('cal-lines');
