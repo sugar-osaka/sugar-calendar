@@ -36,7 +36,7 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .nav button{background:none;border:1.5px solid var(--theme-soft);border-radius:50%;width:30px;height:30px;cursor:pointer;color:var(--theme);display:flex;align-items:center;justify-content:center;font-size:18px}
 .month{font-size:26px;color:var(--theme);min-width:140px;text-align:center;font-family:'Caveat Brush',cursive}
 .cal-wrap{position:relative}
-.cal{width:100%;border-collapse:collapse;table-layout:fixed}
+.cal{width:100%;border-collapse:collapse;table-layout:fixed;transition:opacity 0.15s ease}
 .cal th{font-size:14px;color:#ccc;padding:6px 0 8px;text-align:center;font-weight:400;font-family:'Caveat Brush',cursive}
 .cal th.sun{color:var(--theme)}
 .cal th.sat{color:var(--theme);opacity:0.5}
@@ -1107,7 +1107,13 @@ function render() {
     html+='</tr>';
     if(day>last.getDate()&&row>=4) break;
   }
-  document.getElementById('cal').innerHTML=html;
+  var calEl = document.getElementById('cal');
+  // 一瞬フェードアウトしてから新しいHTMLに差し替え
+  calEl.style.opacity = '0';
+  requestAnimationFrame(function(){
+    calEl.innerHTML = html;
+    calEl.style.opacity = '1';
+  });
   // SVGを即座にクリアして古いテキストの残像を防ぐ
   var calSvg = document.getElementById('cal-lines');
   if (calSvg) calSvg.innerHTML = '';
