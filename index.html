@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>sugar 営業カレンダー</title>
-<link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Yomogi&display=swap" rel="stylesheet">
@@ -115,6 +114,12 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
 .popup-icon svg{width:100%;height:100%;display:block}
 .popup-reserve{display:inline-block;margin-top:6px;padding:4px 10px;background:var(--theme,#e8383d);color:#fff;border-radius:20px;font-size:11px;font-family:'Yomogi',cursive;text-decoration:none;line-height:1.4}
 .popup-reserve.hidden{display:none}
+.cal-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 0;gap:12px;color:#ccc;font-family:'Yomogi',cursive;font-size:13px}
+.cal-loading-dots{display:flex;gap:6px}
+.cal-loading-dots span{width:8px;height:8px;border-radius:50%;background:var(--theme,#A63F52);opacity:0.3;animation:calDot 1.2s ease-in-out infinite}
+.cal-loading-dots span:nth-child(2){animation-delay:0.2s}
+.cal-loading-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes calDot{0%,80%,100%{opacity:0.3;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
 </style>
 </head>
 <body>
@@ -136,6 +141,10 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
   <div class="cal-wrap">
     <svg id="cal-lines" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible" xmlns="http://www.w3.org/2000/svg"></svg>
     <table class="cal" id="cal"></table>
+    <div class="cal-loading" id="cal-loading">
+      <div class="cal-loading-dots"><span></span><span></span><span></span></div>
+      <div>読み込み中...</div>
+    </div>
   </div>
   <div class="legend-wrap"><div class="legend" id="legend"></div></div>
 </div>
@@ -1049,6 +1058,8 @@ function render() {
     if(day>last.getDate()&&row>=4) break;
   }
   document.getElementById('cal').innerHTML=html;
+  var loadingEl = document.getElementById('cal-loading');
+  if (loadingEl) loadingEl.style.display = 'none';
   setTimeout(function(){ drawCalendarLines();
  }, 100);
 }
@@ -1249,7 +1260,66 @@ window.addEventListener('resize',function(){
 });
 
 if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
-  document.fonts.ready.then(function(){ loadCSV(); }).catch(function(){ loadCSV(); });
+  // フォント読み込みとCSV取得を並行して開始し、両方終わったら描画
+  var csvLoaded = false;
+  var fontsLoaded = false;
+  var csvData = null;
+  var masterData = null;
+
+  function tryRenderAfterBoth() {
+    if (csvLoaded && fontsLoaded) {
+      if (masterData) parseMasterCSV(masterData);
+      if (csvData) parseAndApplyCSV(csvData);
+      else render();
+    }
+  }
+
+  // フォント読み込み（並行）
+  document.fonts.ready.then(function(){ fontsLoaded = true; tryRenderAfterBoth(); })
+    .catch(function(){ fontsLoaded = true; tryRenderAfterBoth(); });
+
+  // CSV取得（並行）
+  var CACHE_KEY = 'sugar_csv';
+  var CACHE_TIME_KEY = 'sugar_csv_time';
+  var MASTER_CACHE_KEY = 'sugar_master_csv';
+  var MASTER_CACHE_TIME_KEY = 'sugar_master_csv_time';
+  var CACHE_DURATION = 5 * 60 * 1000;
+  try {
+    if (performance && performance.navigation && performance.navigation.type === 1) {
+      sessionStorage.removeItem(CACHE_KEY); sessionStorage.removeItem(CACHE_TIME_KEY);
+      sessionStorage.removeItem(MASTER_CACHE_KEY); sessionStorage.removeItem(MASTER_CACHE_TIME_KEY);
+    }
+  } catch(e) {}
+
+  var masterPromise;
+  try {
+    var mc = sessionStorage.getItem(MASTER_CACHE_KEY), mct = sessionStorage.getItem(MASTER_CACHE_TIME_KEY);
+    if (mc && mct && (Date.now() - parseInt(mct)) < CACHE_DURATION) {
+      masterData = mc; masterPromise = Promise.resolve();
+    }
+  } catch(e) {}
+  if (!masterPromise) {
+    masterPromise = fetch(MASTER_URL).then(function(r){ return r.text(); }).then(function(t){
+      try { sessionStorage.setItem(MASTER_CACHE_KEY, t); sessionStorage.setItem(MASTER_CACHE_TIME_KEY, Date.now().toString()); } catch(e) {}
+      masterData = t;
+    }).catch(function(){ Object.keys(ICON_NAME_MAP).forEach(function(k){ iconMaster[k] = ICON_NAME_MAP[k]; }); });
+  }
+
+  masterPromise.then(function(){
+    try {
+      var cc = sessionStorage.getItem(CACHE_KEY), cct = sessionStorage.getItem(CACHE_TIME_KEY);
+      if (cc && cct && (Date.now() - parseInt(cct)) < CACHE_DURATION) {
+        csvData = cc; csvLoaded = true; tryRenderAfterBoth(); return;
+      }
+    } catch(e) {}
+    fetch(CSV_URL).then(function(r){ return r.text(); }).then(function(t){
+      try { sessionStorage.setItem(CACHE_KEY, t); sessionStorage.setItem(CACHE_TIME_KEY, Date.now().toString()); } catch(e) {}
+      csvData = t; csvLoaded = true; tryRenderAfterBoth();
+    }).catch(function(){ csvLoaded = true; tryRenderAfterBoth(); });
+  }).catch(function(){
+    csvLoaded = true; fontsLoaded = true; tryRenderAfterBoth();
+  });
+
 } else {
   // iOS Safari等でfonts APIが使えない場合のフォールバック
   loadCSV();
