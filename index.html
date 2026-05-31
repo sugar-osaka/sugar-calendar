@@ -67,12 +67,16 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .dot-Christmas{background:#C8E6C9;color:#3A7D44}
 .dot-bouquet{background:#F8D7E8;color:#C45E8A}
 .dot-KODOMO_NO_HI{background:#BBDEFB;color:#2980b9}
-.dot-HINAMATSURI{background:#FADADD;color:#D4829A}
+.dot-HINAMATSURI{background:#D4607A;color:#FFD6E0}
 .dot-crepe{background:#F3E1BD;color:#A87C28}
 .dot-muffin{background:#E6C58B;color:#A6834F}
 .dot-takeout{background:#E8C5B9;color:#C22047}
 .dot-cafe{background:#AEC1CD;color:#6B8294}
 .dot-KIMAGURE_cafe{background:#D8C4A7;color:#A68A6F}
+.dot-mothers_day{background:#F8D7E8;color:#C45E8A}
+.dot-fathers_day{background:#E3F2FD;color:#1565C0}
+.dot-SETSUBUN{background:#FFF0D6;color:#C45000}
+.dot-chiffon_cake{background:#FDF3E0;color:#B8860B}
 .pill-closed{background:#AF011C;color:#fcebed;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive;cursor:pointer;position:relative;z-index:1}
 .dot-closed{background:#AF011C;color:#fcebed;font-size:14px;font-weight:bold;font-family:'Yomogi',cursive}
 .sugar-band{position:absolute;top:32px;left:2px;right:2px;height:20px;z-index:3;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:visible;background:linear-gradient(90deg,#C8956C,#A63F52);border-radius:6px;font-size:12px;font-family:'Caveat Brush',cursive;color:#fff;letter-spacing:0.05em}
@@ -177,7 +181,11 @@ var ICON_NAME_MAP = {
   "スコーン": "scone",
   "花火": "sumer",
   "ハロウィン": "Halloween",
-  "ひなまつり": "HINAMATSURI"
+  "ひなまつり": "HINAMATSURI",
+  "母の日": "mothers_day",
+  "父の日": "fathers_day",
+  "節分": "SETSUBUN",
+  "シフォンケーキ": "chiffon_cake"
 };
 var shop = 'sagisu';
 var now = new Date();
@@ -191,9 +199,10 @@ var COLORS = {
   whole_cake:'#B85366', crepe:'#A87C28', muffin:'#A6834F',
   takeout:'#C22047', cafe:'#6B8294', KIMAGURE_cafe:'#A68A6F',
   coffee_cup:'#7A8C3E', cookie:'#C68642', gift:'#B85C8A',
-  Christmas:'#3A7D44', KODOMO_NO_HI:'#2980b9', HINAMATSURI:'#D4829A',
+  Christmas:'#3A7D44', KODOMO_NO_HI:'#2980b9', HINAMATSURI:'#FFD6E0',
   valentine:'#C0392B', whiteday:'#4A90C0', OSHOGATSU:'#8B6914', sugar:'#B8860B',
-  scone:'#6B7A3E', sumer:'#FF8C55', Halloween:'#C07800', HINAMATSURI:'#FFD6E0'
+  scone:'#6B7A3E', sumer:'#FF8C55', Halloween:'#C07800', HINAMATSURI:'#FFD6E0',
+  mothers_day:'#C45E8A', fathers_day:'#1565C0', SETSUBUN:'#C45000', chiffon_cake:'#B8860B'
 };
 
 var SVG = {
@@ -209,11 +218,18 @@ var SVG = {
   Christmas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 20,16 4,16"/><polygon points="12,7 19,19 5,19"/><rect x="10" y="19" width="4" height="3" rx="0.5"/></svg>',
   bouquet:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="2.5"/><circle cx="8" cy="10" r="2"/><circle cx="16" cy="10" r="2"/><circle cx="9" cy="5" r="1.8"/><circle cx="15" cy="5" r="1.8"/><path d="M9 12 Q12 14 15 12 L13 22 L11 22 Z"/></svg>',
   KODOMO_NO_HI:'<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="1" x2="3" y2="27"/><circle cx="3" cy="1.8" r="1.6" fill="currentColor" stroke="none"/><path d="M3 5 L5 4.5 Q16 3.5 22 7 Q25 9 22 11.5 Q16 15 5 14 L3 13.5 Z" fill="currentColor" stroke="none"/><path d="M22 7 L26 6 L22 10" fill="currentColor" stroke="none"/><circle cx="7" cy="9" r="1.6" fill="white" stroke="none"/><path d="M11 6.5 Q15 8 15 9.5 Q15 11 11 12" stroke="white" stroke-width="1.1" fill="none"/><path d="M3 16 L5 15.5 Q14 14.5 20 17.5 Q23 19.5 20 22 Q14 25.5 5 24.5 L3 24 Z" fill="currentColor" stroke="none"/><path d="M20 17.5 L23 16.5 L20 21" fill="currentColor" stroke="none"/><circle cx="7" cy="20" r="1.4" fill="white" stroke="none"/><path d="M11 17.5 Q14 19 14 20.5 Q14 22 11 22.5" stroke="white" stroke-width="1.1" fill="none"/></svg>',
-  HINAMATSURI:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(12,12)"><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(0)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(72)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(144)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(216)"/><ellipse cx="0" cy="-5" rx="2.6" ry="4" transform="rotate(288)"/><circle cx="0" cy="0" r="1.8"/></g></svg>',
+  HINAMATSURI:'<svg viewBox="0 0 24 24"><g transform="translate(12,12)"><path d="M0,0 Q-3,-3 -3.5,-6 Q-4,-9.5 0,-10.5 Q4,-9.5 3.5,-6 Q3,-3 0,0 Z" fill="currentColor" transform="rotate(0)"/><path d="M0,0 Q-3,-3 -3.5,-6 Q-4,-9.5 0,-10.5 Q4,-9.5 3.5,-6 Q3,-3 0,0 Z" fill="currentColor" transform="rotate(72)"/><path d="M0,0 Q-3,-3 -3.5,-6 Q-4,-9.5 0,-10.5 Q4,-9.5 3.5,-6 Q3,-3 0,0 Z" fill="currentColor" transform="rotate(144)"/><path d="M0,0 Q-3,-3 -3.5,-6 Q-4,-9.5 0,-10.5 Q4,-9.5 3.5,-6 Q3,-3 0,0 Z" fill="currentColor" transform="rotate(216)"/><path d="M0,0 Q-3,-3 -3.5,-6 Q-4,-9.5 0,-10.5 Q4,-9.5 3.5,-6 Q3,-3 0,0 Z" fill="currentColor" transform="rotate(288)"/><circle cx="0" cy="0" r="2.4" fill="currentColor"/><line x1="0" y1="0" x2="-2.5" y2="-5" stroke="#D4607A" stroke-width="0.6" stroke-linecap="round"/><circle cx="-2.5" cy="-5.3" r="0.6" fill="#D4607A"/><line x1="0" y1="0" x2="0.5" y2="-4.2" stroke="#D4607A" stroke-width="0.6" stroke-linecap="round"/><circle cx="0.5" cy="-4.5" r="0.55" fill="#D4607A"/><line x1="0" y1="0" x2="2.2" y2="-3" stroke="#D4607A" stroke-width="0.6" stroke-linecap="round"/><circle cx="2.2" cy="-3.3" r="0.5" fill="#D4607A"/></g></svg>',
   valentine:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19 Q5 13 5 8 Q5 5 7.5 4 Q10 3 12 6 Q14 3 16.5 4 Q19 5 19 8 Q19 13 12 19 Z"/></svg>',
   whiteday:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19 Q5 13 5 8 Q5 5 7.5 4 Q10 3 12 6 Q14 3 16.5 4 Q19 5 19 8 Q19 13 12 19 Z"/></svg>',
   OSHOGATSU:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="19" width="12" height="3" rx="1"/><rect x="7" y="16" width="10" height="3" rx="0.5"/><ellipse cx="12" cy="13" rx="5" ry="3.5"/><circle cx="12" cy="8" r="3"/><circle cx="12" cy="5.5" r="1.2" fill="currentColor" stroke="none"/><line x1="12" y1="4.3" x2="12" y2="3.5"/></svg>',
-  sugar:'<svg viewBox="0 0 52 24"><text x="50%" y="55%" font-size="13" font-family="Caveat Brush,cursive" fill="#ffffff" stroke="none" text-anchor="middle" dominant-baseline="middle">sugar</text></svg>'
+  sugar:'<svg viewBox="0 0 52 24"><text x="50%" y="55%" font-size="13" font-family="Caveat Brush,cursive" fill="#ffffff" stroke="none" text-anchor="middle" dominant-baseline="middle">sugar</text></svg>',
+  mothers_day:'<svg viewBox="0 0 100 100" fill="none"><g transform="rotate(-15,50,50)"><path d="M38,40 C32,40 28,34 32,28 C33,25 36,22 39,21 C40,18 42,16 44,18 C45,15 47,14 49,16 C50,13 52,13 53,16 C55,14 57,15 57,18 C59,16 62,17 62,20 C65,21 68,24 68,28 C72,34 68,40 62,40 C59,45 55,47 50,46 C45,47 41,45 38,40 Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M50,25 C53,23 57,22 60,23" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M40,27 C46,30 50,28 54,30" stroke="white" stroke-width="2.5" stroke-linecap="round"/><path d="M50,37 C53,35 57,34 62,35" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M45,45 C46,49 48,50 50,50 C52,50 54,49 55,45" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="50" y1="50" x2="50" y2="85" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M50,65 Q40,60 38,68 Q44,70 50,65 Z" fill="currentColor"/><path d="M50,73 Q61,68 63,76 Q56,78 50,73 Z" fill="currentColor"/></g></svg>',
+  fathers_day:'<svg viewBox="0 0 100 100" fill="none"><path d="M44,14 C42,10 58,10 56,14 L53,22 L64,68 L50,85 L36,68 L47,22 Z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M46,22 L54,22" stroke="white" stroke-width="3.5" stroke-linecap="round"/></svg>',
+  SETSUBUN:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="4.5"/><path d="M9.5 7.5 Q10 6 12 6 Q14 6 14.5 7.5"/><path d="M10 8.5 Q10 10 10.5 10.5"/><path d="M14 8.5 Q14 10 13.5 10.5"/><path d="M10 10.5 Q12 12 14 10.5"/><circle cx="8.5" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8" r="1" fill="currentColor" stroke="none"/><ellipse cx="12" cy="8.5" rx="1.2" ry="0.5" fill="currentColor" stroke="none"/><path d="M7 17 Q12 15 17 17 L19 22 L5 22 Z"/><path d="M9 17 L9 16 Q12 14.5 15 16 L15 17"/></svg>',
+  scone:'<svg viewBox="0 0 100 100" fill="none"><path d="M32,72 C24,70 20,54 25,44 C30,34 40,28 50,26 C60,24 72,30 76,42 C80,52 78,68 68,72 C58,76 40,74 32,72 Z" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M24,54 C34,50 48,57 60,52 C70,48 74,53 76,50" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>',
+  Halloween:'<svg viewBox="0 0 100 100" fill="none"><path d="M50,28 L50,20 C50,18 48,18 48,18 C46,18 46,20 46,20 L46,28" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M40,28 C22,26 18,48 22,62 C26,76 44,78 50,72 C56,78 74,76 78,62 C82,48 78,26 60,28" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M36,40 C35.5,35 41,27 50,27 C59,27 64.5,35 64,40" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/><path d="M38,68 C40,72 46,74 50,74 C54,74 60,72 62,68" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/><polygon points="30,50 46,50 38,37" fill="currentColor"/><polygon points="54,50 70,50 62,37" fill="currentColor"/><polygon points="47,55 53,55 50,50" fill="currentColor"/><path d="M28,54 C32,68 68,68 72,54 C66,58 64,55 60,56 L60,60 L54,60 L54,57 L46,57 L46,60 L40,60 L40,56 C36,55 34,58 28,54 Z" fill="currentColor"/></svg>',
+  sumer:'<svg viewBox="0 0 100 100"><path d="M50,40 C48.5,36 48.5,30 50,28 C51.5,30 51.5,36 50,40 Z" fill="#FF8C55" transform="rotate(0,50,50)"/><path d="M50,40 C48.5,36 48.5,30 50,28 C51.5,30 51.5,36 50,40 Z" fill="#FFD84D" transform="rotate(36,50,50)"/><path d="M50,40 C48.5,36 48.5,30 50,28 C51.5,30 51.5,36 50,40 Z" fill="#FF8C55" transform="rotate(72,50,50)"/><path d="M50,40 C48.5,36 48.5,30 50,28 C51.5,30 51.5,36 50,40 Z" fill="#FF6B9E" transform="rotate(108,50,50)"/><path d="M50,40 C48.5,36 48.5,30 50,28 C51.5,30 51.5,36 50,40 Z" fill="#FFD84D" transform="rotate(144,50,50)"/><path d="M50,40 C48.5,36 48.5,30 50,28 C51.5,30 51.5,36 50,40 Z" fill="#FF8C55" transform="rotate(180,50,50)"/><path d="M50,40 C48.5,36 48.5,30 50,28 C51.5,30 51.5,36 50,40 Z" fill="#FFD84D" transform="rotate(216,50,50)"/><path d="M50,40 C48.5,36 48.5,30 50,28 C51.5,30 51.5,36 50,40 Z" fill="#FF6B9E" transform="rotate(252,50,50)"/><path d="M50,40 C48.5,36 48.5,30 50,28 C51.5,30 51.5,36 50,40 Z" fill="#FF8C55" transform="rotate(288,50,50)"/><path d="M50,40 C48.5,36 48.5,30 50,28 C51.5,30 51.5,36 50,40 Z" fill="#FFD84D" transform="rotate(324,50,50)"/><ellipse cx="50" cy="9" rx="1.5" ry="3" fill="#FF8C55" transform="rotate(0,50,50)"/><ellipse cx="50" cy="9" rx="1.5" ry="3" fill="#FFD84D" transform="rotate(36,50,50)"/><ellipse cx="50" cy="9" rx="1.5" ry="3" fill="#FF8C55" transform="rotate(72,50,50)"/><ellipse cx="50" cy="9" rx="1.5" ry="3" fill="#FF6B9E" transform="rotate(108,50,50)"/><ellipse cx="50" cy="9" rx="1.5" ry="3" fill="#FFD84D" transform="rotate(144,50,50)"/><ellipse cx="50" cy="9" rx="1.5" ry="3" fill="#FF8C55" transform="rotate(180,50,50)"/><ellipse cx="50" cy="9" rx="1.5" ry="3" fill="#FFD84D" transform="rotate(216,50,50)"/><ellipse cx="50" cy="9" rx="1.5" ry="3" fill="#FF6B9E" transform="rotate(252,50,50)"/><ellipse cx="50" cy="9" rx="1.5" ry="3" fill="#FF8C55" transform="rotate(288,50,50)"/><ellipse cx="50" cy="9" rx="1.5" ry="3" fill="#FFD84D" transform="rotate(324,50,50)"/><path d="M50,22 C49.3,19 49.3,16 50,14 C50.7,16 50.7,19 50,22 Z" fill="#FFD84D" transform="rotate(18,50,50)"/><path d="M50,20 C49.3,17.5 49.3,15 50,13 C50.7,15 50.7,17.5 50,20 Z" fill="#FF8C55" transform="rotate(58,50,50)"/><path d="M50,23 C49.3,20 49.3,17 50,15 C50.7,17 50.7,20 50,23 Z" fill="#FF6B9E" transform="rotate(95,50,50)"/><path d="M50,21 C49.3,18.5 49.3,16 50,14 C50.7,16 50.7,18.5 50,21 Z" fill="#FFD84D" transform="rotate(130,50,50)"/><path d="M50,22 C49.3,19 49.3,16 50,14 C50.7,16 50.7,19 50,22 Z" fill="#FF8C55" transform="rotate(170,50,50)"/><path d="M50,20 C49.3,17.5 49.3,15 50,13 C50.7,15 50.7,17.5 50,20 Z" fill="#FF6B9E" transform="rotate(205,50,50)"/><path d="M50,23 C49.3,20 49.3,17 50,15 C50.7,17 50.7,20 50,23 Z" fill="#FFD84D" transform="rotate(245,50,50)"/><path d="M50,21 C49.3,18.5 49.3,16 50,14 C50.7,16 50.7,18.5 50,21 Z" fill="#FF8C55" transform="rotate(290,50,50)"/></svg>',
+  chiffon_cake:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="9" rx="8" ry="3"/><path d="M4 9 L4 16 Q4 20 12 20 Q20 20 20 16 L20 9"/><ellipse cx="12" cy="16.5" rx="3" ry="1.5"/><path d="M9 9 L9 17"/><path d="M15 9 L15 17"/><path d="M6 10 Q5 12 5 14"/><path d="M18 10 Q19 12 19 14"/></svg>'
 };
 
 var DOTCLS = {
@@ -222,7 +238,8 @@ var DOTCLS = {
   coffee_cup:'dot-coffee_cup', cookie:'dot-cookie', gift:'dot-gift',
   Christmas:'dot-Christmas', KODOMO_NO_HI:'dot-KODOMO_NO_HI', HINAMATSURI:'dot-HINAMATSURI',
   valentine:'dot-valentine', whiteday:'dot-whiteday', OSHOGATSU:'dot-OSHOGATSU', sugar:'dot-sugar',
-  scone:'dot-scone', sumer:'dot-sumer', Halloween:'dot-Halloween', HINAMATSURI:'dot-HINAMATSURI'
+  scone:'dot-scone', sumer:'dot-sumer', Halloween:'dot-Halloween', HINAMATSURI:'dot-HINAMATSURI',
+  mothers_day:'dot-mothers_day', fathers_day:'dot-fathers_day', SETSUBUN:'dot-SETSUBUN', chiffon_cake:'dot-chiffon_cake'
 };
 
 // デフォルト営業時間
@@ -246,7 +263,11 @@ var TYPE_INFO = {
   scone:     {name:'スコーン',     hours:''},
   sumer:     {name:'花火',         hours:''},
   Halloween: {name:'ハロウィン',   hours:''},
-  HINAMATSURI:{name:'ひなまつり',  hours:''}
+  HINAMATSURI:{name:'ひなまつり',  hours:''},
+  mothers_day:{name:'母の日',      hours:''},
+  fathers_day:{name:'父の日',      hours:''},
+  SETSUBUN:   {name:'節分',        hours:''},
+  chiffon_cake:{name:'シフォンケーキ', hours:''}
 };
 
 // スプシから読み込むデータ
@@ -354,7 +375,9 @@ function parseAndApplyCSV(text) {
           'cafe':'cafe', 'KIMAGURE_cafe':'KIMAGURE_cafe', 'muffin':'muffin',
           'coffee_cup':'coffee_cup', 'cookie':'cookie', 'gift':'gift',
           'Christmas':'Christmas', 'KODOMO_NO_HI':'KODOMO_NO_HI', 'HINAMATSURI':'HINAMATSURI',
-          'valentine':'valentine', 'whiteday':'whiteday', 'OSHOGATSU':'OSHOGATSU'
+          'valentine':'valentine', 'whiteday':'whiteday', 'OSHOGATSU':'OSHOGATSU',
+          '母の日':'mothers_day', '父の日':'fathers_day', '節分':'SETSUBUN', 'シフォンケーキ':'chiffon_cake',
+          'mothers_day':'mothers_day', 'fathers_day':'fathers_day', 'SETSUBUN':'SETSUBUN', 'chiffon_cake':'chiffon_cake'
         };
         var target = targetMap[targetRaw] || iconMaster[targetRaw] || targetRaw.toLowerCase();
 
