@@ -76,7 +76,6 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .dot-fathers_day{background:#E3F2FD;color:#1565C0}
 .dot-SETSUBUN{background:#FFF0D6;color:#C45000}
 .dot-chiffon_cake{background:#E4F4EC;color:#2E7D52}
-.pill-closed{background:#AF011C;color:#fcebed;padding:3px 7px;border-radius:10px;font-size:11px;display:inline-block;margin-bottom:2px;font-family:'Yomogi',cursive;cursor:pointer;position:relative;z-index:1}
 .dot-closed{background:#AF011C;color:#fcebed;font-size:14px;font-weight:bold;font-family:'Yomogi',cursive}
 .sugar-band{position:absolute;top:32px;left:2px;right:2px;height:20px;z-index:3;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:visible;background:linear-gradient(90deg,#C8956C,#A63F52);border-radius:6px;font-size:12px;font-family:'Caveat Brush',cursive;color:#fff;letter-spacing:0.05em}
 .sugar-band.shift-down{top:55px}
@@ -181,7 +180,6 @@ var ICON_NAME_MAP = {
   "スコーン": "scone",
   "花火": "sumer",
   "ハロウィン": "Halloween",
-  "ひなまつり": "HINAMATSURI",
   "母の日": "mothers_day",
   "父の日": "fathers_day",
   "節分": "SETSUBUN",
@@ -201,7 +199,7 @@ var COLORS = {
   coffee_cup:'#7A8C3E', cookie:'#C68642', gift:'#B85C8A',
   Christmas:'#3A7D44', KODOMO_NO_HI:'#2980b9', HINAMATSURI:'#FFD6E0',
   valentine:'#C0392B', whiteday:'#4A90C0', OSHOGATSU:'#8B6914', sugar:'#B8860B',
-  scone:'#6B7A3E', sumer:'#FF8C55', Halloween:'#C07800', HINAMATSURI:'#FFD6E0',
+  scone:'#6B7A3E', sumer:'#FF8C55', Halloween:'#C07800',
   mothers_day:'#C45E8A', fathers_day:'#1565C0', SETSUBUN:'#C45000', chiffon_cake:'#2E7D52'
 };
 
@@ -236,8 +234,6 @@ var DOTCLS = {
   takeout:'dot-takeout', cafe:'dot-cafe', KIMAGURE_cafe:'dot-KIMAGURE_cafe',
   coffee_cup:'dot-coffee_cup', cookie:'dot-cookie', gift:'dot-gift',
   Christmas:'dot-Christmas', KODOMO_NO_HI:'dot-KODOMO_NO_HI', HINAMATSURI:'dot-HINAMATSURI',
-  valentine:'dot-valentine', whiteday:'dot-whiteday', OSHOGATSU:'dot-OSHOGATSU', sugar:'dot-sugar',
-  scone:'dot-scone', sumer:'dot-sumer', Halloween:'dot-Halloween', HINAMATSURI:'dot-HINAMATSURI',
   mothers_day:'dot-mothers_day', fathers_day:'dot-fathers_day', SETSUBUN:'dot-SETSUBUN', chiffon_cake:'dot-chiffon_cake'
 };
 
@@ -254,7 +250,6 @@ var TYPE_INFO = {
   gift:      {name:'ギフト',       hours:''},
   Christmas:      {name:'クリスマス', hours:''},
   KODOMO_NO_HI: {name:'こどもの日',  hours:''},
-  HINAMATSURI:    {name:'桜',           hours:''},
   valentine: {name:'バレンタイン', hours:''},
   whiteday:  {name:'ホワイトデー',  hours:''},
   OSHOGATSU: {name:'お正月',     hours:''},
@@ -749,8 +744,6 @@ var shops = {
   }
 };
 
-var SHOP_THEME = {sagisu:'#A63F52', ebie:'#7A9A60'};
-
 function setShop(s) {
   shop = s;
   var wrap = document.getElementById('wrap');
@@ -771,9 +764,6 @@ function changeMonth(d) {
   year=ny; month=nmo; render();
 }
 
-function updateBandTextWidths() {
-  // テキストははみ出し表示のため幅制限なし
-}
 
 function drawCalendarLines() {
   var cal = document.getElementById('cal');
@@ -1002,9 +992,7 @@ function render() {
           var hasSugar = evs.some(function(e){return e.type==='sugar';});
           if (hasSugar) {
             var sugarHrs = getHours('sugar', d);
-            html+='<td class="has-band-start">'.indexOf(html.slice(-20)) >= 0
-              ? makeSugarBandHTML(sugarHrs, dk, false)
-              : makeSugarBandHTML(sugarHrs, dk, false);
+            html += makeSugarBandHTML(sugarHrs, dk, false);
             html=html.replace(/<td([^>]*)>\s*<div class="date-num">/, '<td$1 class="has-band-start"><div class="date-num">');
           }
           var nonSugar = evs.filter(function(e){return e.type!=='sugar';});
@@ -1026,7 +1014,8 @@ function render() {
     if(day>last.getDate()&&row>=4) break;
   }
   document.getElementById('cal').innerHTML=html;
-  setTimeout(function(){ drawCalendarLines(); updateBandTextWidths(); }, 100);
+  setTimeout(function(){ drawCalendarLines();
+ }, 100);
 }
 
 // ポップアップ
@@ -1217,9 +1206,11 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
 });
 
 window.addEventListener('resize',function(){
-  if(!popupAnchorEl) return;
-  var card=document.getElementById('popup-card');
-  if(card.classList.contains('is-visible')) positionPopupNear(popupAnchorEl,card);
+  if(popupAnchorEl){
+    var card=document.getElementById('popup-card');
+    if(card.classList.contains('is-visible')) positionPopupNear(popupAnchorEl,card);
+  }
+  setTimeout(drawCalendarLines,100);
 });
 
 if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
@@ -1228,7 +1219,6 @@ if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then =
   // iOS Safari等でfonts APIが使えない場合のフォールバック
   loadCSV();
 }
-window.addEventListener('resize',function(){setTimeout(drawCalendarLines,100);});
 </script>
 </body>
 </html>
