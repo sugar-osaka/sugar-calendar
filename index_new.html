@@ -1162,10 +1162,10 @@ function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl,
   }
   var memoEl=document.getElementById('popup-memo');
   if(memo){
-    memoEl.textContent=memo;
+    memoEl.innerHTML=memo.split('|').map(function(s){return s.trim();}).filter(Boolean).join('<br>');
     memoEl.classList.add('has-memo');
   } else {
-    memoEl.textContent='';
+    memoEl.innerHTML='';
     memoEl.classList.remove('has-memo');
   }
   card.classList.remove('is-visible');
