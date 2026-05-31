@@ -1108,10 +1108,12 @@ function render() {
     if(day>last.getDate()&&row>=4) break;
   }
   document.getElementById('cal').innerHTML=html;
+  // SVGを即座にクリアして古いテキストの残像を防ぐ
+  var calSvg = document.getElementById('cal-lines');
+  if (calSvg) calSvg.innerHTML = '';
   var loadingEl = document.getElementById('cal-loading');
   if (loadingEl) loadingEl.style.display = 'none';
-  setTimeout(function(){ drawCalendarLines();
- }, 100);
+  setTimeout(function(){ drawCalendarLines(); }, 100);
 }
 
 // ポップアップ
