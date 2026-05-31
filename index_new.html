@@ -117,6 +117,13 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
 .popup-reserve.hidden{display:none}
 .popup-memo{margin-top:7px;padding-top:7px;border-top:1px solid #f0ebe8;font-size:12px;color:#888;font-family:'Yomogi',cursive;line-height:1.6;display:none}
 .popup-memo.has-memo{display:block}
+.sagisu-notice{font-size:11px;color:#A63F52;background:#F9EFF1;border-radius:8px;padding:8px 32px 8px 12px;margin-bottom:1rem;text-align:center;font-family:'Yomogi',cursive;line-height:1.7;position:relative;overflow:hidden}
+.shop-ebie .sagisu-notice{display:none}
+.sagisu-notice-body{max-height:3em;overflow:hidden;position:relative;transition:max-height 0.3s ease}
+.sagisu-notice-body::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1.2em;background:linear-gradient(to bottom,transparent,#F9EFF1);pointer-events:none;transition:opacity 0.3s}
+.sagisu-notice.is-open .sagisu-notice-body{max-height:6em}
+.sagisu-notice.is-open .sagisu-notice-body::after{opacity:0}
+.sagisu-notice-toggle{position:absolute;top:8px;right:8px;background:none;border:none;color:#A63F52;cursor:pointer;padding:0;opacity:0.7;line-height:1;width:16px;height:16px}
 </style>
 </head>
 <body>
@@ -128,6 +135,10 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
   <div class="tabs">
     <button class="tab active" onclick="setShop('sagisu')">sagisu</button>
     <button class="tab" onclick="setShop('ebie')">ebie</button>
+  </div>
+  <div class="sagisu-notice" id="sagisu-notice">
+    <button class="sagisu-notice-toggle" id="sagisu-notice-toggle" onclick="toggleSagisuNotice()"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="#A63F52" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="sagisu-notice-body">sagisu店では、事前のご予約はお受け付けしておりません。<br>（当日のご来店/お電話でのお取り置きは可能です＾＾）<br>事前のご予約は【ebie店】にてお願いします。</div>
   </div>
   <div class="shop-info-top" id="shop-info-top"></div>
   <div class="nav">
@@ -748,6 +759,21 @@ var shops = {
     }
   }
 };
+
+var SVG_DOWN = '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="#A63F52" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var SVG_UP   = '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><polyline points="3,11 8,5 13,11" stroke="#A63F52" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function toggleSagisuNotice() {
+  var notice = document.getElementById('sagisu-notice');
+  var btn = document.getElementById('sagisu-notice-toggle');
+  if (notice.classList.contains('is-open')) {
+    notice.classList.remove('is-open');
+    btn.innerHTML = SVG_DOWN;
+  } else {
+    notice.classList.add('is-open');
+    btn.innerHTML = SVG_UP;
+  }
+}
 
 function setShop(s) {
   shop = s;
