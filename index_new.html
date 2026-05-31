@@ -124,6 +124,12 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
 .sagisu-notice.is-open .sagisu-notice-body{max-height:6em}
 .sagisu-notice.is-open .sagisu-notice-body::after{opacity:0}
 .sagisu-notice-toggle{position:absolute;top:8px;right:8px;background:none;border:none;color:#A63F52;cursor:pointer;padding:0;opacity:0.7;line-height:1;width:16px;height:16px}
+.cal-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 0;gap:12px;color:#ccc;font-family:'Yomogi',cursive;font-size:13px}
+.cal-loading-dots{display:flex;gap:6px}
+.cal-loading-dots span{width:8px;height:8px;border-radius:50%;background:var(--theme,#A63F52);opacity:0.3;animation:calDot 1.2s ease-in-out infinite}
+.cal-loading-dots span:nth-child(2){animation-delay:0.2s}
+.cal-loading-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes calDot{0%,80%,100%{opacity:0.3;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
 </style>
 </head>
 <body>
@@ -149,6 +155,10 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
   <div class="cal-wrap">
     <svg id="cal-lines" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible" xmlns="http://www.w3.org/2000/svg"></svg>
     <table class="cal" id="cal"></table>
+    <div class="cal-loading" id="cal-loading">
+      <div class="cal-loading-dots"><span></span><span></span><span></span></div>
+      <div>LOADING...</div>
+    </div>
   </div>
   <div class="legend-wrap"><div class="legend" id="legend"></div></div>
 </div>
@@ -1076,6 +1086,8 @@ function render() {
     if(day>last.getDate()&&row>=4) break;
   }
   document.getElementById('cal').innerHTML=html;
+  var loadingEl = document.getElementById('cal-loading');
+  if (loadingEl) loadingEl.style.display = 'none';
   setTimeout(function(){ drawCalendarLines();
  }, 100);
 }
