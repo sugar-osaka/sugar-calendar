@@ -1090,14 +1090,12 @@ function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl,
     // イベント：legendと同じピル型
     iconEl.style.background='#fcc800';
     iconEl.style.color='#432f2f';
-    iconEl.style.fontSize='10px';
+    iconEl.style.fontSize='9px';
     iconEl.style.borderRadius='10px';
     iconEl.style.padding='0 4px';
     iconEl.style.minWidth='28px';
     iconEl.style.justifyContent='center';
-    iconEl.style.lineHeight='1.2';
-    iconEl.style.textAlign='center';
-    iconEl.innerHTML='イベ<br>ント';
+    iconEl.textContent='イベント';
   } else if(iconSVG && iconColor){
     if(!iconCls) iconEl.style.background=iconColor+'22';
     var colored = iconSVG
