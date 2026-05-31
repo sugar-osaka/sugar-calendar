@@ -148,9 +148,9 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
   </div>
   <div class="shop-info-top" id="shop-info-top"></div>
   <div class="nav">
-    <button onclick="changeMonth(-1)">&#8249;</button>
+    <button id="nav-prev" onclick="changeMonth(-1)">&#8249;</button>
     <div class="month" id="month-label"></div>
-    <button onclick="changeMonth(1)">&#8250;</button>
+    <button id="nav-next" onclick="changeMonth(1)">&#8250;</button>
   </div>
   <div class="cal-wrap">
     <svg id="cal-lines" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible" xmlns="http://www.w3.org/2000/svg"></svg>
@@ -964,6 +964,12 @@ function drawCalendarLines() {
 function render() {
   var labs=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   document.getElementById('month-label').textContent=labs[month]+' '+year;
+
+  // 矢印の表示制御：今月は左を非表示、来月は右を非表示
+  var isCurrentMonth = (year === now.getFullYear() && month === now.getMonth());
+  var isMaxMonth = (year === maxYear && month === maxMonth);
+  document.getElementById('nav-prev').style.visibility = isCurrentMonth ? 'hidden' : 'visible';
+  document.getElementById('nav-next').style.visibility = isMaxMonth ? 'hidden' : 'visible';
 
   var infoHTML='<div class="info-rows">';
   shops[shop].getInfoRows().forEach(function(r){
