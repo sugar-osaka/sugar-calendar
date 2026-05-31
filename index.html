@@ -931,9 +931,9 @@ function drawCalendarLines() {
     var maxWidth = maxCols * cellW - 8;
     var clipW = Math.min(totalWidth - 8, maxWidth);
 
-      // topスタイルからy位置を取得（複数帯の場合は個別のtop値を使用）
-      var topOffset = target.style.top ? parseInt(target.style.top) : (isShifted ? 55 : 32);
-      var yActual = tdRect.top - wrapRect.top + topOffset + 14;
+      // y位置をDOM要素の実際の位置から直接取得（style.topの計算誤差を防ぐ）
+      var targetRect = target.getBoundingClientRect();
+      var yActual = targetRect.top - wrapRect.top + targetRect.height / 2 + 2;
       // 幅計算：同じdata-nameの帯の終端を探す
       var totalWidthActual = 0;
       var targetName = isEvent ? (target.getAttribute('data-name')||'') : '';
