@@ -382,6 +382,15 @@ function parseAndApplyCSV(text) {
           'Halloween':'Halloween', 'scone':'scone', 'sumer':'sumer', 'bouquet':'bouquet'
         };
         var target = targetMap[targetRaw] || iconMaster[targetRaw] || targetRaw.toLowerCase();
+        if(targetRaw && !targetMap[targetRaw] && !iconMaster[targetRaw]) console.warn('[sugar] unmapped targetRaw:', JSON.stringify(targetRaw), '→', target, 'kind:', kind, 'shop:', shopName);
+        // 大文字小文字正規化：小文字で来た場合も正しいキーに変換
+        var keyNorm = {
+          'halloween':'Halloween', 'hinamatsuri':'HINAMATSURI', 'kodomo_no_hi':'KODOMO_NO_HI',
+          'oshogatsu':'OSHOGATSU', 'kimagure_cafe':'KIMAGURE_cafe', 'christmas':'Christmas',
+          'setsubun':'SETSUBUN', 'mothers_day':'mothers_day', 'fathers_day':'fathers_day',
+          'chiffon_cake':'chiffon_cake', 'whole_cake':'whole_cake', 'coffee_cup':'coffee_cup'
+        };
+        if (keyNorm[target]) target = keyNorm[target];
 
         if (shopName !== 'sagisu' && shopName !== 'ebie') continue;
 
