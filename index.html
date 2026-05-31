@@ -869,7 +869,10 @@ function drawCalendarLines() {
     allEventBands.forEach(function(b){
       var isStart = b.classList.contains('band-start') || b.classList.contains('band-single');
       if(isStart || col === 0 || day1){
-        targets.push({target:b, isEvent:true});
+        // 同じdata-nameがすでに追加済みならスキップ
+        var bName = b.getAttribute('data-name')||'';
+        var already = targets.some(function(t){ return t.isEvent && t.target.getAttribute('data-name')===bName; });
+        if(!already) targets.push({target:b, isEvent:true});
       }
     });
     // 臨時休業帯
@@ -937,7 +940,9 @@ function drawCalendarLines() {
       for (var i2 = startIdx; i2 < allTds.length; i2++) {
         var curTd2 = allTds[i2];
         var matchBands = Array.from(curTd2.querySelectorAll(isEvent ? '.event-band' : '.closed-band'));
-        var mb = isEvent ? matchBands.find(function(b){ return b.getAttribute('data-name')===targetName; }) : matchBands[0];
+        var mb = isEvent
+          ? matchBands.find(function(b){ return b.getAttribute('data-name')===targetName; })
+          : matchBands[0];
         if (!mb) break;
         totalWidthActual += curTd2.getBoundingClientRect().width;
         if (mb.classList.contains('band-end') || mb.classList.contains('band-single')) break;
