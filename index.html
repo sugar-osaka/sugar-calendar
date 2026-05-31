@@ -980,7 +980,7 @@ function render() {
             if(b.isStart) html=html.replace(/<td class="([^"]*)">\s*$/, '<td class="$1 has-band-start">');
             var showELabel2=(b.isStart||col===0||day===1)&&!b.single;
             var labelPart=showELabel2?'<span class="event-band-label">'+b.name+'</span>':'';
-            var styleStr = bi > 0 ? ' style="margin-top:2px"' : '';
+            var styleStr = bi > 0 ? ' style="top:'+(32 + bi * 23)+'px"' : '';
             html+='<div class="'+bc+'"'+styleStr+' data-popup="event" data-name="'+b.name+'" data-period="'+b.period+'" data-hours="'+b.hours+'" data-reserve="'+(b.reserveUrl||'')+'">'+labelPart+'</div>';
           });
 
@@ -989,7 +989,8 @@ function render() {
           if(evs.length){
             var bandCount = bands.length;
             var belowCls = (needsShift || bandCount > 1) ? 'dot-row-below double-band' : 'dot-row-below';
-            html+='<div class="'+belowCls+'">';
+            var belowStyle = bandCount > 1 ? ' style="margin-top:'+(24 + (bandCount-1)*23)+'px"' : '';
+            html+='<div class="'+belowCls+'"'+belowStyle+'>';
             evs.forEach(function(e){
               var hrs=getHours(e.type,d);
               html+=makeDotHTML(e,hrs,dk);
