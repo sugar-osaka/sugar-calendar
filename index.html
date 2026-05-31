@@ -811,29 +811,35 @@ function drawCalendarLines() {
   var bandTexts = '';
   var allTds = Array.prototype.slice.call(cal.querySelectorAll('tbody td'));
   allTds.forEach(function(td, tdIdx) {
-    // band-start/single の場合は通常通り
-    var band = td.querySelector('.event-band.band-start, .event-band.band-single');
-    var closedBand = td.querySelector('.closed-band.band-start, .closed-band.band-single');
+    var col = tdIdx % 7;
+    var dk = td.getAttribute('data-dk') || '';
+    var day1 = dk ? parseInt(dk.split('-').pop(), 10) === 1 : false;
 
-    // band-start/single でない場合でも、日曜(col=0)または1日ならラベルを追加
-    var isEvent = false;
-    var target = null;
-    if (band || closedBand) {
-      target = band || closedBand;
-      isEvent = !!band;
-    } else {
-      // 日曜か1日かチェック
-      var col = tdIdx % 7;
-      var dk = td.getAttribute('data-dk') || '';
-      var day1 = dk ? parseInt(dk.split('-').pop(), 10) === 1 : false;
-      if (col === 0 || day1) {
-        var midBand = td.querySelector('.event-band');
-        var midClosed = td.querySelector('.closed-band');
-        if (midBand) { target = midBand; isEvent = true; }
-        else if (midClosed) { target = midClosed; isEvent = false; }
-      }
+    // 複数イベント帯対応：band-start/singleを全て取得
+    var startBands = Array.from(td.querySelectorAll('.event-band.band-start, .event-band.band-single'));
+    var closedBand = td.querySelector('.closed-band.band-start, .closed-band.band-single');
+    var targets = [];
+
+    if (startBands.length > 0) {
+      startBands.forEach(function(b){ targets.push({target:b, isEvent:true}); });
+    } else if (col === 0 || day1) {
+      // 日曜・月初は途中の帯もラベル表示
+      var midBands = Array.from(td.querySelectorAll('.event-band'));
+      midBands.forEach(function(b){ targets.push({target:b, isEvent:true}); });
     }
-    if (!target) return;
+    if (closedBand) {
+      targets.push({target:closedBand, isEvent:false});
+    } else if (targets.length === 0) {
+      var midClosed = td.querySelector('.closed-band');
+      if (midClosed && (col === 0 || day1)) targets.push({target:midClosed, isEvent:false});
+    }
+    if (!targets.length) return;
+
+    targets.forEach(function(item) {
+      var target = item.target;
+      var isEvent = item.isEvent;
+      var band = isEvent ? target : null;
+      var closedBandItem = isEvent ? null : target;
 
     var name = isEvent
       ? (target.getAttribute('data-name') || '')
@@ -876,10 +882,12 @@ function drawCalendarLines() {
     var maxWidth = maxCols * cellW - 8;
     var clipW = Math.min(totalWidth - 8, maxWidth);
 
-    var clipId = 'clip-band-' + startIdx + '-' + tdIdx;
-    bandTexts += '<clipPath id="' + clipId + '"><rect x="' + (x-2) + '" y="' + (y-14) + '" width="' + clipW + '" height="20"/></clipPath>';
-    bandTexts += '<text x="' + x + '" y="' + y + '" font-size="11" font-family="Yomogi,cursive" fill="' + color + '" clip-path="url(#' + clipId + ')" style="pointer-events:none">' + name + '</text>';
-  });
+      var topStyle = target.style.top ? parseInt(target.style.top) : (target.classList.contains('shift-down') ? 55 : 32);
+      var clipId = 'clip-band-' + startIdx + '-' + tdIdx + '-' + (name||'x').charCodeAt(0);
+      bandTexts += '<clipPath id="' + clipId + '"><rect x="' + (x-2) + '" y="' + (y-14-topStyle+bandTop) + '" width="' + clipW + '" height="20"/></clipPath>';
+      bandTexts += '<text x="' + x + '" y="' + (y-bandTop+topStyle) + '" font-size="11" font-family="Yomogi,cursive" fill="' + color + '" clip-path="url(#' + clipId + ')" style="pointer-events:none">' + name + '</text>';
+    }); // targets.forEach終わり
+  }); // allTds.forEach終わり
 
   svg.innerHTML = paths + bandTexts;
 }
