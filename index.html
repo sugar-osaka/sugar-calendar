@@ -532,61 +532,70 @@ function loadCSV() {
   var CACHE_TIME_KEY = 'sugar_csv_time';
   var MASTER_CACHE_KEY = 'sugar_master_csv';
   var MASTER_CACHE_TIME_KEY = 'sugar_master_csv_time';
-  var CACHE_DURATION = 5 * 60 * 1000;
+  var CACHE_DURATION = 5 * 60 * 1000; // 5分
+
+  // キャッシュ読み書きをlocalStorageで行う（タブを閉じても残る）
+  function cacheGet(key) {
+    try { return localStorage.getItem(key); } catch(e) { return null; }
+  }
+  function cacheSet(key, value) {
+    try { localStorage.setItem(key, value); } catch(e) {}
+  }
+
+  // 強制リロード時はキャッシュを無効化
   try {
     if (performance && performance.navigation && performance.navigation.type === 1) {
-      sessionStorage.removeItem(CACHE_KEY);
-      sessionStorage.removeItem(CACHE_TIME_KEY);
-      sessionStorage.removeItem(MASTER_CACHE_KEY);
-      sessionStorage.removeItem(MASTER_CACHE_TIME_KEY);
+      cacheSet(CACHE_TIME_KEY, '0');
+      cacheSet(MASTER_CACHE_TIME_KEY, '0');
     }
   } catch(e) {}
 
-  function loadMaster() {
-    try {
-      var cached = sessionStorage.getItem(MASTER_CACHE_KEY);
-      var cachedTime = sessionStorage.getItem(MASTER_CACHE_TIME_KEY);
-      if (cached && cachedTime && (Date.now() - parseInt(cachedTime)) < CACHE_DURATION) {
-        parseMasterCSV(cached);
-        return Promise.resolve();
-      }
-    } catch(e) {}
-    return fetch(MASTER_URL)
-      .then(function(r){ return r.text(); })
-      .then(function(text){
-        try {
-          sessionStorage.setItem(MASTER_CACHE_KEY, text);
-          sessionStorage.setItem(MASTER_CACHE_TIME_KEY, Date.now().toString());
-        } catch(e) {}
-        parseMasterCSV(text);
-      })
-      .catch(function(){
-        Object.keys(ICON_NAME_MAP).forEach(function(k){ iconMaster[k] = ICON_NAME_MAP[k]; });
+  var cachedMaster   = cacheGet(MASTER_CACHE_KEY);
+  var cachedMasterTime = parseInt(cacheGet(MASTER_CACHE_TIME_KEY)||'0');
+  var cachedCSV      = cacheGet(CACHE_KEY);
+  var cachedCSVTime  = parseInt(cacheGet(CACHE_TIME_KEY)||'0');
+  var now            = Date.now();
+  var masterFresh    = cachedMaster  && (now - cachedMasterTime)  < CACHE_DURATION;
+  var csvFresh       = cachedCSV     && (now - cachedCSVTime)     < CACHE_DURATION;
+
+  // ① キャッシュがあれば即座に表示
+  if (masterFresh && csvFresh) {
+    parseMasterCSV(cachedMaster);
+    parseAndApplyCSV(cachedCSV);
+  } else if (cachedMaster && cachedCSV) {
+    // キャッシュは古いが存在する → まず古いデータで即表示
+    parseMasterCSV(cachedMaster);
+    parseAndApplyCSV(cachedCSV);
+  }
+
+  // ② バックグラウンドで最新データを取得（キャッシュが古い or ない場合）
+  if (!masterFresh || !csvFresh) {
+    var fetchMaster = masterFresh
+      ? Promise.resolve(cachedMaster)
+      : fetch(MASTER_URL).then(function(r){ return r.text(); }).then(function(t){
+          cacheSet(MASTER_CACHE_KEY, t);
+          cacheSet(MASTER_CACHE_TIME_KEY, Date.now().toString());
+          return t;
+        }).catch(function(){
+          Object.keys(ICON_NAME_MAP).forEach(function(k){ iconMaster[k] = ICON_NAME_MAP[k]; });
+          return cachedMaster || '';
+        });
+
+    fetchMaster.then(function(masterText){
+      if (masterText) parseMasterCSV(masterText);
+
+      if (csvFresh) return; // CSVはまだ新鮮なので取得不要
+
+      fetch(CSV_URL).then(function(r){ return r.text(); }).then(function(t){
+        cacheSet(CACHE_KEY, t);
+        cacheSet(CACHE_TIME_KEY, Date.now().toString());
+        // 取得完了後に再描画（古いデータで表示中だった場合に更新）
+        parseAndApplyCSV(t);
+      }).catch(function(){
+        if (!cachedCSV) render(); // キャッシュも取得も失敗した場合のみ空描画
       });
+    });
   }
-
-  function loadCalendar() {
-    try {
-      var cached = sessionStorage.getItem(CACHE_KEY);
-      var cachedTime = sessionStorage.getItem(CACHE_TIME_KEY);
-      if (cached && cachedTime && (Date.now() - parseInt(cachedTime)) < CACHE_DURATION) {
-        parseAndApplyCSV(cached);
-        return;
-      }
-    } catch(e) {}
-    fetch(CSV_URL)
-      .then(function(r){ return r.text(); })
-      .then(function(text){
-        try {
-          sessionStorage.setItem(CACHE_KEY, text);
-          sessionStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
-        } catch(e) {}
-        parseAndApplyCSV(text);
-      })
-      .catch(function(){ render(); });
-  }
-
-  loadMaster().then(function(){ loadCalendar(); }).catch(function(){ loadCalendar(); });
 }
 
 function getHours(type, d) {
@@ -1302,9 +1311,9 @@ window.addEventListener('resize',function(){
 });
 
 if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
-  document.fonts.ready.then(function(){ loadCSV(); }).catch(function(){ loadCSV(); });
+  // キャッシュがあれば即描画、フォント完了後も問題なし
+  loadCSV();
 } else {
-  // iOS Safari等でfonts APIが使えない場合のフォールバック
   loadCSV();
 }
 </script>
