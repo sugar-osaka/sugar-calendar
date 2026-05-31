@@ -952,7 +952,7 @@ function drawCalendarLines() {
         if (mb.classList.contains('band-end') || mb.classList.contains('band-single')) break;
       }
       var clipWActual = Math.min(totalWidthActual - 8, maxWidth);
-      var clipId = 'clip-band-' + startIdx + '-' + tdIdx + '-' + (name||'x').charCodeAt(0);
+      var clipId = 'clip-band-' + startIdx + '-' + tdIdx + '-' + (name||'x').charCodeAt(0) + '-' + topOffset;
       bandTexts += '<clipPath id="' + clipId + '"><rect x="' + (x-2) + '" y="' + (yActual-14) + '" width="' + clipWActual + '" height="20"/></clipPath>';
       bandTexts += '<text x="' + x + '" y="' + yActual + '" font-size="11" font-family="Yomogi,cursive" fill="' + color + '" clip-path="url(#' + clipId + ')" style="pointer-events:none">' + name + '</text>';
     }); // targets.forEach終わり
