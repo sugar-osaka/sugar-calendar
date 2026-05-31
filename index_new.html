@@ -361,9 +361,11 @@ function parseAndApplyCSV(text) {
 
     // 種別マッピング
     var kindMap = {
-      '固定営業':'fixed', '臨時休業':'closed', '臨時営業':'extra',
-      'イベント':'event', '非表示':'off', '営業時間変更':'time',
+      '固定営業':'fixed', '臨時休業':'closed', '非表示':'off', '営業時間変更':'time',
+      '臨時営業&イベント(アイコン表示)':'extra',
+      'イベント(帯表示)':'event',
       // 旧種別も念のため対応
+      '臨時営業':'extra', 'イベント':'event',
       '固定営業時間':'fixed', '固定営業曜日':'fixed', '固定営業曜日&予約URL':'fixed'
     };
     var kind = kindMap[kindRaw] || kindRaw.toLowerCase();
