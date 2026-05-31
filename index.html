@@ -1095,6 +1095,7 @@ function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl,
     iconEl.style.padding='0 4px';
     iconEl.style.minWidth='28px';
     iconEl.style.justifyContent='center';
+    iconEl.style.whiteSpace='nowrap';
     iconEl.textContent='イベント';
   } else if(iconSVG && iconColor){
     if(!iconCls) iconEl.style.background=iconColor+'22';
