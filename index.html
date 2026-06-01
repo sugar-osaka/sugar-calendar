@@ -124,6 +124,27 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
 .sagisu-notice.is-open .sagisu-notice-body{max-height:6em}
 .sagisu-notice.is-open .sagisu-notice-body::after{opacity:0}
 .sagisu-notice-toggle{position:absolute;top:8px;right:8px;background:none;border:none;color:#A63F52;cursor:pointer;padding:0;opacity:0.7;line-height:1;width:16px;height:16px}
+.ebie-info{display:none;margin-bottom:1rem}
+.shop-ebie .ebie-info{display:block}
+.sagisu-info{margin-bottom:1rem}
+.shop-ebie .sagisu-info{display:none}
+.ebie-accordion{border:1.5px solid var(--theme-soft);border-radius:8px;overflow:hidden;margin-bottom:8px;font-family:'Yomogi',cursive;font-size:11px}
+.ebie-accordion-header{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;cursor:pointer;background:#fff;color:var(--theme);font-size:12px;font-weight:600;user-select:none}
+.ebie-accordion-header svg{flex-shrink:0;transition:transform 0.2s}
+.ebie-accordion.is-open .ebie-accordion-header svg{transform:rotate(180deg)}
+.ebie-accordion-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease;background:#fff}
+.ebie-accordion.is-open .ebie-accordion-body{max-height:800px}
+.ebie-accordion-inner{padding:10px 12px 14px;color:#7a5c4a;line-height:1.9;border-top:1px solid var(--theme-soft);font-size:11px}
+.ebie-accordion-inner a{color:var(--theme);text-decoration:none}
+.ebie-note{color:#b09a8a;font-size:10px;display:block;margin-top:4px;text-align:right}
+.ebie-period-title{font-weight:600;display:inline;margin-bottom:6px;color:var(--theme);background:linear-gradient(transparent 50%, var(--theme-soft) 50%);padding:0 2px;line-height:2.2}
+.ebie-period-item{display:block;padding-left:2em;text-indent:-0.8em;line-height:1.7}
+.ebie-period-item b{color:var(--theme)}
+.ebie-right{display:flex;justify-content:flex-end;margin-top:8px}
+.ebie-reserve-btn{display:inline-block;padding:5px 14px;background:var(--theme);color:#fff!important;border-radius:20px;font-size:11px;text-decoration:none;line-height:1.6}
+.ebie-icon-row{display:flex;justify-content:flex-end;gap:14px;margin-top:10px}
+.ebie-icon-link{display:flex;align-items:center;color:var(--theme);text-decoration:none}
+.ebie-icon-link svg{width:28px;height:28px}
 .cal-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 0;gap:12px;color:#ccc;font-family:'Yomogi',cursive;font-size:13px}
 .cal-loading-dots{display:flex;gap:6px}
 .cal-loading-dots span{width:8px;height:8px;border-radius:50%;background:var(--theme,#A63F52);opacity:0.3;animation:calDot 1.2s ease-in-out infinite}
@@ -142,9 +163,101 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
     <button class="tab active" onclick="setShop('sagisu')">sagisu</button>
     <button class="tab" onclick="setShop('ebie')">ebie</button>
   </div>
+  <div class="sagisu-info" id="sagisu-info">
+    <div class="ebie-accordion" id="sagisu-acc-1">
+      <div class="ebie-accordion-header" onclick="toggleEbieAccordion('sagisu-acc-1')">
+        <span>sagisu店について</span>
+        <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="ebie-accordion-body">
+        <div class="ebie-accordion-inner">
+          大阪府大阪市福島区鷺洲1-11-3
+          <span style="font-size:10px;color:#9a7a6a;line-height:2;display:block;margin-top:4px;padding-left:1.5em">
+            ▶︎ 千日前線「野田阪神駅」、阪神本線「野田駅」から徒歩約8分
+          </span>
+          <div class="ebie-icon-row">
+            <a class="ebie-icon-link" href="https://maps.app.goo.gl/y86T3drr2LLqtZCZ7" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            </a>
+            <a class="ebie-icon-link" href="https://www.instagram.com/sugar_fukushima/" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="sagisu-notice" id="sagisu-notice">
     <button class="sagisu-notice-toggle" id="sagisu-notice-toggle" onclick="toggleSagisuNotice()"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="#A63F52" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="sagisu-notice-body">sagisu店では、事前のご予約はお受け付けしておりません。<br>（当日のご来店/お電話でのお取り置きは可能です＾＾）<br>事前のご予約は【ebie店】にてお願いします。</div>
+  </div>
+  <div class="ebie-info" id="ebie-info">
+    <!-- ① ebie店について -->
+    <div class="ebie-accordion" id="ebie-acc-1">
+      <div class="ebie-accordion-header" onclick="toggleEbieAccordion('ebie-acc-1')">
+        <span>ebie店について</span>
+        <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="ebie-accordion-body">
+        <div class="ebie-accordion-inner">
+          大阪府大阪市福島区海老江5-3-10 西本ビル1階<br>
+          <span style="font-size:10px;color:#9a7a6a;line-height:2;display:block;margin-top:4px;padding-left:1.5em">
+            ▶︎ JR東西線「海老江駅」2番出口から徒歩約1分<br>
+            ▶︎ 千日前線「野田阪神駅」、阪神本線「野田駅」から徒歩約5分
+          </span>
+          <div class="ebie-icon-row">
+            <a class="ebie-icon-link" href="https://maps.app.goo.gl/p5q52sH4MQPigsN2A" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            </a>
+            <a class="ebie-icon-link" href="https://www.instagram.com/sugar_ebie/" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ② テイクアウトのご予約 -->
+    <div class="ebie-accordion" id="ebie-acc-2">
+      <div class="ebie-accordion-header" onclick="toggleEbieAccordion('ebie-acc-2')">
+        <span>テイクアウトのご予約について</span>
+        <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="ebie-accordion-body">
+        <div class="ebie-accordion-inner">
+          <span class="ebie-period-title">ご予約可能期間</span><br>
+          <span class="ebie-period-item"><b>＜カットケーキ＞</b> 前日 13:00 〜 当日 9:00</span>
+          <span class="ebie-period-item"><b>＜ホールケーキ＞</b> 30日前 〜 7日前 18:00</span>
+          <span class="ebie-period-item"><b>＜焼き菓子＞</b> 7日前 13:00 〜 当日 9:00</span>
+          <span class="ebie-period-item"><b>＜マフィン＞</b> 前日 13:00 〜 当日 8:00</span>
+          <div class="ebie-right">
+            <a class="ebie-reserve-btn" href="https://www.tablecheck.com/ja/cafesugar-fukushima-pickup/reserve/message" target="_blank" rel="noopener noreferrer">テイクアウトご予約ページ</a>
+          </div>
+          <span class="ebie-note">※営業時間は下記カレンダーにてご確認ください</span>
+        </div>
+      </div>
+    </div>
+    <!-- ③ イートインのご予約 -->
+    <div class="ebie-accordion" id="ebie-acc-3">
+      <div class="ebie-accordion-header" onclick="toggleEbieAccordion('ebie-acc-3')">
+        <span>イートインのご予約について</span>
+        <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="ebie-accordion-body">
+        <div class="ebie-accordion-inner">
+          <span class="ebie-period-title">ご予約可能期間</span><br>
+          <span class="ebie-period-item"><b>＜事前ご予約＞</b> 前日 13:00 〜 当日 9:00</span>
+          <span class="ebie-period-item"><b>＜当日席のみ＞</b> 当日 11:00 〜 ご来店30分前</span>
+          <br>
+          <span class="ebie-period-title">「気まぐれカフェ」</span><br>
+          <span style="padding-left:2em;display:block">普段とは違う<b>【限定メニュー】</b>をお楽しみいただけます</span>
+          <span style="padding-left:2em;color:#9a7a6a;font-size:10px;display:block">※ご予約は「お席のみ」となります。</span>
+          <div class="ebie-right">
+            <a class="ebie-reserve-btn" href="https://www.tablecheck.com/ja/cafesugar-fukushima/reserve/message" target="_blank" rel="noopener noreferrer">イートインご予約ページ</a>
+          </div>
+          <span class="ebie-note">※営業時間は下記カレンダーにてご確認ください</span>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="shop-info-top" id="shop-info-top"></div>
   <div class="nav">
@@ -792,6 +905,11 @@ function toggleSagisuNotice() {
     notice.classList.add('is-open');
     btn.innerHTML = SVG_UP;
   }
+}
+
+function toggleEbieAccordion(id) {
+  var acc = document.getElementById(id);
+  if (acc) acc.classList.toggle('is-open');
 }
 
 function setShop(s) {
