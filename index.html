@@ -119,7 +119,7 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
 .popup-icon svg{width:100%;height:100%;display:block}
 .popup-reserve{display:inline-block;margin-top:6px;padding:4px 10px;background:var(--theme,#e8383d);color:#fff;border-radius:20px;font-size:11px;font-family:'Yomogi',cursive;text-decoration:none;line-height:1.4}
 .popup-reserve.hidden{display:none}
-.popup-memo{margin-top:7px;padding-top:7px;padding-bottom:7px;border-top:1px solid #f0ebe8;border-bottom:1px solid #f0ebe8;font-size:12px;color:#888;font-family:'Yomogi',cursive;line-height:1.6;display:none}
+.popup-memo{margin-top:7px;padding-top:7px;border-top:1px solid #f0ebe8;font-size:12px;color:#888;font-family:'Yomogi',cursive;line-height:1.6;display:none}
 .popup-memo.has-memo{display:block}
 .sagisu-notice{font-size:11px;color:#A63F52;background:#F9EFF1;border-radius:8px;padding:8px 32px 8px 12px;margin-bottom:1rem;text-align:center;font-family:'Yomogi',cursive;line-height:1.7;position:relative;overflow:hidden}
 .shop-ebie .sagisu-notice{display:none}
@@ -303,13 +303,13 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
     <button class="sagisu-notice-toggle" id="sagisu-notice-toggle" onclick="toggleSagisuNotice()"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="#A63F52" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="sagisu-notice-body">sagisu店では、事前のご予約はお受け付けしておりません。<br>（当日のご来店/お電話でのお取り置きは可能です＾＾）<br>事前のご予約は【ebie店】にてお願いします。</div>
   </div>
-  <div class="shop-info-top" id="shop-info-top"></div>
   <p style="font-size:11px;letter-spacing:0.2em;color:#432f2f;text-align:center;margin-bottom:0.5rem;font-family:'Yomogi',cursive">営業カレンダー</p>
   <div class="nav">
     <button id="nav-prev" onclick="changeMonth(-1)">&#8249;</button>
     <div class="month" id="month-label"></div>
     <button id="nav-next" onclick="changeMonth(1)">&#8250;</button>
   </div>
+  <div class="shop-info-top" id="shop-info-top"></div>
   <div class="cal-wrap">
     <svg id="cal-lines" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible" xmlns="http://www.w3.org/2000/svg"></svg>
     <table class="cal" id="cal"></table>
@@ -1416,9 +1416,16 @@ function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl,
       memoEl.appendChild(document.createTextNode(line));
     });
     memoEl.classList.add('has-memo');
-    reserveWrap.style.borderTop='none';
-    reserveWrap.style.paddingTop='0';
-    reserveWrap.style.marginTop='7px';
+    if(safeUrl){
+      memoEl.style.borderBottom='1px solid #f0ebe8';
+      memoEl.style.paddingBottom='7px';
+      reserveWrap.style.borderTop='none';
+      reserveWrap.style.paddingTop='0';
+      reserveWrap.style.marginTop='7px';
+    } else {
+      memoEl.style.borderBottom='none';
+      memoEl.style.paddingBottom='0';
+    }
   } else {
     memoEl.textContent='';
     memoEl.classList.remove('has-memo');
