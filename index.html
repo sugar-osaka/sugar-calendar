@@ -47,8 +47,10 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .cal td.sun .date-num{color:var(--theme)}
 .cal td.sat .date-num{color:var(--theme);opacity:0.5}
 .cal td.other.sun .date-num,.cal td.other.sat .date-num{color:#eee}
+.cal td.holiday .date-num{color:var(--theme)}
+.cal td.other.holiday .date-num{color:#eee}
+.holiday-name{font-size:7px;color:var(--theme);line-height:1.2;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-family:'Yomogi',cursive}
 .date-num{font-size:20px;margin-bottom:3px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-family:'Caveat Brush',cursive;position:relative;z-index:1}
-.dot-row{display:flex;gap:4px;flex-wrap:wrap;position:relative;z-index:1;justify-content:center}
 .dot-wrap{position:relative;display:inline-block}
 .dot-badge{position:absolute;bottom:-3px;right:-6px;background:#e67e22;color:#fff;font-size:7px;font-weight:bold;padding:1px 3px;border-radius:3px;white-space:nowrap;line-height:1.4;z-index:2;pointer-events:none}
 .dot{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -178,7 +180,7 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
         <div class="ebie-accordion-inner">
           大阪府大阪市福島区鷺洲1-11-3
           <span style="font-size:11px;color:#9a7a6a;line-height:2;display:block;margin-top:4px;padding-left:1.5em;text-shadow:0 0 0.2px #9a7a6a">
-            ▶︎ 千日前線「野田阪神駅」、阪神本線「野田駅」から徒歩約8分
+            ▶︎ 千日前線「野田阪神駅」・阪神本線「野田駅」から徒歩約8分
           </span>
           <div class="ebie-icon-row">
             <a class="ebie-icon-link" href="https://maps.app.goo.gl/y86T3drr2LLqtZCZ7" target="_blank" rel="noopener noreferrer">
@@ -462,6 +464,39 @@ var shopItems      = {sagisu:[], ebie:[]};
 var extraTypes     = {sagisu:{}, ebie:{}};
 // メモ: memoData[shop][dk][type] = 'メモテキスト' または memoData[shop]['fixed'][type] = 'テキスト'
 var memoData       = {sagisu:{fixed:{}, event:{}, closed:{}, time:{}, extra:{}}, ebie:{fixed:{}, event:{}, closed:{}, time:{}, extra:{}}};
+
+// 祝日データ
+var holidayData = {}; // { 'YYYY-M-D': '祝日名' }
+
+function loadHolidays() {
+  var HOLIDAY_CACHE_KEY = 'sugar_holidays';
+  var HOLIDAY_CACHE_TIME_KEY = 'sugar_holidays_time';
+  var HOLIDAY_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24時間
+  try {
+    var cached = localStorage.getItem(HOLIDAY_CACHE_KEY);
+    var cachedTime = parseInt(localStorage.getItem(HOLIDAY_CACHE_TIME_KEY)||'0');
+    if (cached && (Date.now() - cachedTime) < HOLIDAY_CACHE_DURATION) {
+      holidayData = JSON.parse(cached);
+      return Promise.resolve();
+    }
+  } catch(e) {}
+  return fetch('https://holidays-jp.github.io/api/v1/date.json')
+    .then(function(r){ return r.json(); })
+    .then(function(json){
+      // { 'YYYY-MM-DD': '祝日名' } → { 'YYYY-M-D': '祝日名' } に変換
+      holidayData = {};
+      Object.keys(json).forEach(function(k){
+        var p = k.split('-');
+        var key = parseInt(p[0])+'-'+parseInt(p[1])+'-'+parseInt(p[2]);
+        holidayData[key] = json[k];
+      });
+      try {
+        localStorage.setItem(HOLIDAY_CACHE_KEY, JSON.stringify(holidayData));
+        localStorage.setItem(HOLIDAY_CACHE_TIME_KEY, Date.now().toString());
+      } catch(e) {}
+    })
+    .catch(function(){ holidayData = {}; });
+}
 
 function dateKey(d) { return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(); }
 
@@ -1149,14 +1184,19 @@ function render() {
       var d=new Date(year,month,day);
       var isOther=day<1||day>last.getDate();
       var isToday=d.toDateString()===today.toDateString();
+      var holidayKey = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+      var holidayName = !isOther ? (holidayData[holidayKey]||'') : '';
+      var isHoliday = !!holidayName;
       var cls='';
       if(isOther) cls+=' other';
       if(isToday) cls+=' today';
       if(col===0) cls+=' sun';
       if(col===6) cls+=' sat';
+      if(isHoliday) cls+=' holiday';
       html+='<td class="'+cls.trim()+'" data-dk="'+dateKey(d)+'">';
       if(!isOther){
         html+='<div class="date-num">'+day+'</div>';
+        if(holidayName) html+='<div class="holiday-name">'+holidayName+'</div>';
         var dk=dateKey(d);
         var sp=specialEvents[shop][dk];
         var bands=eventBands[shop][dk];
@@ -1472,10 +1512,10 @@ window.addEventListener('resize',function(){
 });
 
 if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
-  // キャッシュがあれば即描画、フォント完了後も問題なし
-  loadCSV();
+  // フォントと祝日データとCSVを並行取得
+  loadHolidays().then(function(){ loadCSV(); }).catch(function(){ loadCSV(); });
 } else {
-  loadCSV();
+  loadHolidays().then(function(){ loadCSV(); }).catch(function(){ loadCSV(); });
 }
 </script>
 </body>
