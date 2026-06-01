@@ -119,7 +119,7 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
 .popup-icon svg{width:100%;height:100%;display:block}
 .popup-reserve{display:inline-block;margin-top:6px;padding:4px 10px;background:var(--theme,#e8383d);color:#fff;border-radius:20px;font-size:11px;font-family:'Yomogi',cursive;text-decoration:none;line-height:1.4}
 .popup-reserve.hidden{display:none}
-.popup-memo{margin-top:7px;padding-top:7px;border-top:1px solid #f0ebe8;font-size:12px;color:#888;font-family:'Yomogi',cursive;line-height:1.6;display:none}
+.popup-memo{margin-top:7px;padding-top:7px;padding-bottom:7px;border-top:1px solid #f0ebe8;border-bottom:1px solid #f0ebe8;font-size:12px;color:#888;font-family:'Yomogi',cursive;line-height:1.6;display:none}
 .popup-memo.has-memo{display:block}
 .sagisu-notice{font-size:11px;color:#A63F52;background:#F9EFF1;border-radius:8px;padding:8px 32px 8px 12px;margin-bottom:1rem;text-align:center;font-family:'Yomogi',cursive;line-height:1.7;position:relative;overflow:hidden}
 .shop-ebie .sagisu-notice{display:none}
@@ -328,10 +328,12 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
       <div class="popup-text">
         <div class="popup-name" id="popup-name"></div>
         <div class="popup-hours" id="popup-hours"></div>
-        <a class="popup-reserve" id="popup-reserve" href="#" target="_blank" rel="noopener noreferrer">予約はこちら →</a>
       </div>
     </div>
     <div class="popup-memo" id="popup-memo"></div>
+    <div id="popup-reserve-wrap" style="display:none;text-align:right;margin-top:7px;padding-top:7px;border-top:1px solid #f0ebe8">
+      <a class="popup-reserve" id="popup-reserve" href="#" target="_blank" rel="noopener noreferrer">予約はこちら →</a>
+    </div>
   </div>
 </div>
 <script>
@@ -1396,14 +1398,15 @@ function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl,
   document.getElementById('popup-name').textContent=name;
   document.getElementById('popup-hours').innerHTML=hoursText;
   var reserveEl=document.getElementById('popup-reserve');
+  var reserveWrap=document.getElementById('popup-reserve-wrap');
   var safeUrl = (reserveUrl && /^https?:\/\//i.test(reserveUrl)) ? reserveUrl : '';
   if(safeUrl){
     reserveEl.href=safeUrl;
     reserveEl.textContent=(btnText||'予約はこちら')+' →';
-    reserveEl.classList.remove('hidden');
+    reserveWrap.style.display='block';
   } else {
     reserveEl.href='#';
-    reserveEl.classList.add('hidden');
+    reserveWrap.style.display='none';
   }
   var memoEl=document.getElementById('popup-memo');
   if(memo){
@@ -1413,9 +1416,15 @@ function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl,
       memoEl.appendChild(document.createTextNode(line));
     });
     memoEl.classList.add('has-memo');
+    reserveWrap.style.borderTop='none';
+    reserveWrap.style.paddingTop='0';
+    reserveWrap.style.marginTop='7px';
   } else {
     memoEl.textContent='';
     memoEl.classList.remove('has-memo');
+    reserveWrap.style.borderTop='1px solid #f0ebe8';
+    reserveWrap.style.paddingTop='7px';
+    reserveWrap.style.marginTop='7px';
   }
   card.classList.remove('is-visible');
   lockPageScroll();
