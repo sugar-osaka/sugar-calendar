@@ -809,13 +809,7 @@ var shops = {
     getInfoRows: function() {
       var items = shopItems['sagisu'];
       if (!items || items.length === 0) {
-        // フォールバック（スプシ未読込時）
-        var cakeDays  = dayOverrides['sagisu']['whole_cake']  || [1,2,5,6,0];
-        var crepeDays = dayOverrides['sagisu']['crepe'] || [2,3,4,5,6];
-        return [
-          {type:'whole_cake', name:'ホールケーキ', dots:daysToDotsHTML(cakeDays, COLORS['whole_cake']||'#B85366'), hours:TYPE_INFO['whole_cake']?TYPE_INFO['whole_cake'].hours:''},
-          {type:'crepe', name:'クレープ', dots:daysToDotsHTML(crepeDays, COLORS['crepe']||'#A87C28'), hours:TYPE_INFO['crepe']?TYPE_INFO['crepe'].hours:''}
-        ];
+        return [];
       }
       return items.map(function(item) {
         var days = dayOverrides['sagisu'][item.type] || item.days || [];
@@ -848,10 +842,7 @@ var shops = {
           if (days.indexOf(w) !== -1) evs.push({type:item.type});
         });
       } else {
-        var cakeDays  = dayOverrides['sagisu']['whole_cake']  || [1,2,5,6,0];
-        var crepeDays = dayOverrides['sagisu']['crepe'] || [2,3,4,5,6];
-        if (cakeDays.indexOf(w)  !== -1) evs.push({type:'whole_cake'});
-        if (crepeDays.indexOf(w) !== -1) evs.push({type:'crepe'});
+        // スプシ未読込時は何も表示しない
       }
       // 臨時営業：通常表示しない日でも強制追加
       var extras = extraTypes['sagisu'][dk] || {};
@@ -868,16 +859,7 @@ var shops = {
     getInfoRows: function() {
       var items = shopItems['ebie'];
       if (!items || items.length === 0) {
-        var takeoutDays = dayOverrides['ebie']['takeout'] || [1,2,5,6,0];
-        var cafeDays    = dayOverrides['ebie']['cafe']    || [1,2,5,6,0];
-        var cafe2Days   = dayOverrides['ebie']['KIMAGURE_cafe']   || [3,4];
-        var muffinDays  = dayOverrides['ebie']['muffin']  || [1,2,5];
-        return [
-          {type:'takeout', name:'テイクアウト', dots:daysToDotsHTML(takeoutDays, COLORS['takeout']), hours:TYPE_INFO['takeout']?TYPE_INFO['takeout'].hours:''},
-          {type:'cafe',    name:'イートイン',   dots:daysToDotsHTML(cafeDays,    COLORS['cafe']),    hours:TYPE_INFO['cafe']?TYPE_INFO['cafe'].hours:''},
-          {type:'KIMAGURE_cafe', name:'気まぐれカフェ', dots:daysToDotsHTML(cafe2Days, COLORS['KIMAGURE_cafe']), hours:TYPE_INFO['KIMAGURE_cafe']?TYPE_INFO['KIMAGURE_cafe'].hours:''},
-          {type:'muffin',  name:'マフィン',     dots:daysToDotsHTML(muffinDays,  COLORS['muffin']),  hours:TYPE_INFO['muffin']?TYPE_INFO['muffin'].hours:''}
-        ];
+        return [];
       }
       return items.map(function(item) {
         var days = dayOverrides['ebie'][item.type] || item.days || [];
@@ -912,16 +894,7 @@ var shops = {
           if (days.indexOf(w) !== -1) evs.push({type:item.type});
         });
       } else {
-        var takeoutDays = dayOverrides['ebie']['takeout'] || [1,2,5,6,0];
-        var cafeDays    = dayOverrides['ebie']['cafe']    || [1,2,5,6,0];
-        var cafe2Days   = dayOverrides['ebie']['KIMAGURE_cafe']   || [3,4];
-        var muffinDays  = dayOverrides['ebie']['muffin']  || [1,2,5];
-        if (cafe2Days.indexOf(w) !== -1) {
-          evs.push({type:'KIMAGURE_cafe'});
-        } else {
-          if (takeoutDays.indexOf(w) !== -1) evs.push({type:'takeout'});
-          if (cafeDays.indexOf(w)    !== -1) evs.push({type:'cafe'});
-        }
+        // スプシ未読込時は何も表示しない
       }
       // 臨時営業：通常表示しない日でも強制追加
       var extras = extraTypes['ebie'][dk] || {};
@@ -1393,10 +1366,14 @@ function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl,
   }
   var memoEl=document.getElementById('popup-memo');
   if(memo){
-    memoEl.innerHTML=memo.split('|').map(function(s){return s.trim();}).filter(Boolean).join('<br>');
+    memoEl.textContent='';
+    memo.split('|').map(function(s){return s.trim();}).filter(Boolean).forEach(function(line, i){
+      if(i > 0) memoEl.appendChild(document.createElement('br'));
+      memoEl.appendChild(document.createTextNode(line));
+    });
     memoEl.classList.add('has-memo');
   } else {
-    memoEl.innerHTML='';
+    memoEl.textContent='';
     memoEl.classList.remove('has-memo');
   }
   card.classList.remove('is-visible');
