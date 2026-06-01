@@ -17,6 +17,9 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .header img{width:160px;height:auto;display:block;margin:0 auto 6px}
 .header p{font-size:11px;letter-spacing:0.2em;color:#432f2f;margin-top:4px;font-family:'Yomogi',cursive}
 .tabs{display:flex;gap:0;justify-content:center;margin-bottom:1rem;border:1.5px solid var(--theme-soft);border-radius:20px;overflow:hidden;width:fit-content;margin-left:auto;margin-right:auto}
+.tabs-fixed{display:none;position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(250,250,248,0.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:8px 0 calc(8px + env(safe-area-inset-bottom));box-shadow:0 -2px 12px rgba(0,0,0,0.08)}
+.tabs-fixed.is-visible{display:flex;justify-content:center}
+.tabs-fixed .tabs{margin-bottom:0}
 .tab{padding:8px 22px;font-size:15px;cursor:pointer;background:#fff;color:#ccc;border:none;transition:all 0.15s;font-family:'Caveat Brush',cursive}
 .tab:first-child{border-right:1.5px solid var(--theme-soft)}
 .tab.active{background:var(--theme);color:#fff}
@@ -334,6 +337,12 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
     </div>
   </div>
   <div class="legend-wrap"><div class="legend" id="legend"></div></div>
+</div>
+<div class="tabs-fixed" id="tabs-fixed">
+  <div class="tabs" style="margin-bottom:0">
+    <button class="tab active" id="tab-fixed-sagisu" onclick="setShop('sagisu')">sagisu</button>
+    <button class="tab" id="tab-fixed-ebie" onclick="setShop('ebie')">ebie</button>
+  </div>
 </div>
 <div class="popup-overlay" id="popup-overlay" aria-hidden="true">
   <div class="popup-card" id="popup-card" role="dialog" aria-modal="true" aria-labelledby="popup-name">
@@ -990,6 +999,10 @@ function setShop(s) {
   var tabs = document.querySelectorAll('.tab');
   tabs[0].classList.toggle('active', s==='sagisu');
   tabs[1].classList.toggle('active', s==='ebie');
+  var fixedSagisu = document.getElementById('tab-fixed-sagisu');
+  var fixedEbie = document.getElementById('tab-fixed-ebie');
+  if(fixedSagisu) fixedSagisu.classList.toggle('active', s==='sagisu');
+  if(fixedEbie) fixedEbie.classList.toggle('active', s==='ebie');
   render();
 }
 
@@ -1542,6 +1555,20 @@ window.addEventListener('resize',function(){
   }
   setTimeout(drawCalendarLines,100);
 });
+
+(function(){
+  var tabsEl = document.querySelector('.tabs');
+  var fixedEl = document.getElementById('tabs-fixed');
+  function onScroll(){
+    var rect = tabsEl.getBoundingClientRect();
+    if(rect.bottom < 0){
+      fixedEl.classList.add('is-visible');
+    } else {
+      fixedEl.classList.remove('is-visible');
+    }
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+})();
 
 if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
   // フォントと祝日データとCSVを並行取得
