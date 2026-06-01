@@ -49,7 +49,8 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .cal td.other.sun .date-num,.cal td.other.sat .date-num{color:#eee}
 .cal td.holiday .date-num{color:var(--theme)}
 .cal td.other.holiday .date-num{color:#eee}
-.holiday-name{font-size:7px;color:var(--theme);line-height:1.2;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-family:'Yomogi',cursive}
+.date-num-wrap{display:flex;align-items:center;gap:3px;margin-bottom:3px}
+.holiday-name{font-size:9px;color:var(--theme);line-height:1.2;font-family:'Yomogi',cursive;text-shadow:0 0 0.3px var(--theme);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px}
 .date-num{font-size:20px;margin-bottom:3px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-family:'Caveat Brush',cursive;position:relative;z-index:1}
 .dot-wrap{position:relative;display:inline-block}
 .dot-badge{position:absolute;bottom:-3px;right:-6px;background:#e67e22;color:#fff;font-size:7px;font-weight:bold;padding:1px 3px;border-radius:3px;white-space:nowrap;line-height:1.4;z-index:2;pointer-events:none}
@@ -1195,8 +1196,11 @@ function render() {
       if(isHoliday) cls+=' holiday';
       html+='<td class="'+cls.trim()+'" data-dk="'+dateKey(d)+'">';
       if(!isOther){
-        html+='<div class="date-num">'+day+'</div>';
-        if(holidayName) html+='<div class="holiday-name">'+holidayName+'</div>';
+        if(holidayName){
+          html+='<div class="date-num-wrap"><div class="date-num">'+day+'</div><span class="holiday-name">'+holidayName+'</span></div>';
+        } else {
+          html+='<div class="date-num">'+day+'</div>';
+        }
         var dk=dateKey(d);
         var sp=specialEvents[shop][dk];
         var bands=eventBands[shop][dk];
