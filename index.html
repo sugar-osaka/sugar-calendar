@@ -134,8 +134,11 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
 .shop-ebie .sagisu-info{display:none}
 .ebie-accordion{border:1.5px solid var(--theme-soft);border-radius:8px;overflow:hidden;margin-bottom:8px;font-family:'Yomogi',cursive;font-size:11px}
 .ebie-accordion-header{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;cursor:pointer;background:#fff;color:var(--theme);font-size:12px;font-weight:600;user-select:none}
-.ebie-accordion-header svg{flex-shrink:0;transition:transform 0.2s}
-.ebie-accordion.is-open .ebie-accordion-header svg{transform:rotate(180deg)}
+.ebie-accordion-header svg{flex-shrink:0}
+.ebie-accordion-header .chevron{transition:transform 0.2s}
+.ebie-accordion.is-open .ebie-accordion-header .chevron{transform:rotate(180deg)}
+.header-icons{display:flex;align-items:center;gap:8px;margin-left:auto;margin-right:8px;color:var(--theme);opacity:0.4}
+.header-icons svg{stroke:var(--theme)}
 .ebie-accordion-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease;background:#fff}
 .ebie-accordion.is-open .ebie-accordion-body{max-height:800px}
 .ebie-accordion-inner{padding:10px 12px 14px;color:#7a5c4a;line-height:1.9;border-top:1px solid var(--theme-soft);font-size:11px}
@@ -176,7 +179,12 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
     <div class="ebie-accordion" id="sagisu-acc-1">
       <div class="ebie-accordion-header" onclick="toggleEbieAccordion('sagisu-acc-1')">
         <span>sagisu店について</span>
-        <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="header-icons">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+          <span style="font-size:7px;font-family:Arial,sans-serif;font-weight:900;line-height:1.2;text-align:center;letter-spacing:-0.3px;color:var(--theme)">Uber<br>Eats</span>
+        </span>
+        <svg class="chevron" viewBox="0 0 16 16" fill="none" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="ebie-accordion-body">
         <div class="ebie-accordion-inner">
@@ -209,7 +217,12 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
     <div class="ebie-accordion" id="ebie-acc-1">
       <div class="ebie-accordion-header" onclick="toggleEbieAccordion('ebie-acc-1')">
         <span>ebie店について</span>
-        <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="header-icons">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+          <span style="font-size:7px;font-family:Arial,sans-serif;font-weight:900;line-height:1.2;text-align:center;letter-spacing:-0.3px;color:var(--theme)">Uber<br>Eats</span>
+        </span>
+        <svg class="chevron" viewBox="0 0 16 16" fill="none" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="ebie-accordion-body">
         <div class="ebie-accordion-inner">
@@ -241,7 +254,7 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
     <div class="ebie-accordion" id="ebie-acc-2">
       <div class="ebie-accordion-header" onclick="toggleEbieAccordion('ebie-acc-2')">
         <span>テイクアウトのご予約について</span>
-        <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg class="chevron" viewBox="0 0 16 16" fill="none" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="ebie-accordion-body">
         <div class="ebie-accordion-inner">
@@ -261,7 +274,7 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
     <div class="ebie-accordion" id="ebie-acc-3">
       <div class="ebie-accordion-header" onclick="toggleEbieAccordion('ebie-acc-3')">
         <span>イートインのご予約について</span>
-        <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg class="chevron" viewBox="0 0 16 16" fill="none" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="ebie-accordion-body">
         <div class="ebie-accordion-inner">
@@ -283,7 +296,7 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
   <div class="ebie-accordion" id="online-acc" style="margin-bottom:1rem">
     <div class="ebie-accordion-header" onclick="toggleEbieAccordion('online-acc')">
       <span>オンラインショップについて</span>
-      <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg class="chevron" viewBox="0 0 16 16" fill="none" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
     <div class="ebie-accordion-body">
       <div class="ebie-accordion-inner" style="text-shadow:0 0 0.2px #7a5c4a">sugarの焼菓子やマフィンなどを、オンラインにて気軽にご注文いただけます。<br>
