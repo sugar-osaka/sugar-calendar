@@ -1568,7 +1568,8 @@ window.addEventListener('resize',function(){
   var fixedEl = document.getElementById('tabs-fixed');
   function onScroll(){
     var rect = tabsEl.getBoundingClientRect();
-    if(rect.top <= 0){
+    // 元のタブが画面上部に完全に隠れたら固定タブを表示
+    if(rect.bottom <= 0){
       fixedEl.classList.add('is-visible');
     } else {
       fixedEl.classList.remove('is-visible');
