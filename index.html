@@ -1566,18 +1566,13 @@ window.addEventListener('resize',function(){
 (function(){
   var tabsEl = document.querySelector('.tabs');
   var fixedEl = document.getElementById('tabs-fixed');
+  fixedEl.style.display = 'block';
   function onScroll(){
     var rect = tabsEl.getBoundingClientRect();
     if(rect.bottom < 0){
-      fixedEl.style.display = 'block';
-      requestAnimationFrame(function(){
-        fixedEl.classList.add('is-visible');
-      });
+      fixedEl.classList.add('is-visible');
     } else {
       fixedEl.classList.remove('is-visible');
-      setTimeout(function(){
-        if(!fixedEl.classList.contains('is-visible')) fixedEl.style.display = 'none';
-      }, 300);
     }
   }
   window.addEventListener('scroll', onScroll, {passive:true});
