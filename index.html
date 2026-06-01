@@ -105,7 +105,6 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .leg-dot{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .leg-dot svg{width:20px;height:20px}
 html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
-body.popup-open{position:fixed;width:100%;left:0;right:0}
 .popup-overlay{position:fixed;top:-3px;left:0;right:0;bottom:-3px;width:100%;min-height:100vh;min-height:100dvh;min-height:-webkit-fill-available;background:rgba(0,0,0,0.25);z-index:100;margin:0;padding:0;border:none;opacity:0;visibility:hidden;transition:opacity 0.15s,visibility 0.15s;-webkit-tap-highlight-color:transparent}
 .popup-overlay.is-open{opacity:1;visibility:visible}
 .popup-card{position:fixed;left:0;top:0;z-index:101;background:#fff;border-radius:12px;padding:10px 12px 12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);font-family:'Yomogi',cursive;width:auto;max-width:min(280px,calc(100vw - 16px));opacity:0;visibility:hidden;transform:scale(0.96);transition:opacity 0.12s,transform 0.12s,visibility 0.12s;pointer-events:none}
@@ -1309,13 +1308,10 @@ function lockPageScroll(){
   popupScrollY=window.scrollY||window.pageYOffset;
   document.documentElement.classList.add('popup-open');
   document.body.classList.add('popup-open');
-  document.body.style.top='-'+popupScrollY+'px';
 }
 function unlockPageScroll(){
   document.documentElement.classList.remove('popup-open');
   document.body.classList.remove('popup-open');
-  document.body.style.top='';
-  window.scrollTo(0,popupScrollY);
 }
 function positionPopupNear(anchorEl,card){
   var gapH=-6,gapV=-6,margin=8;
