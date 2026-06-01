@@ -1568,11 +1568,12 @@ window.addEventListener('resize',function(){
   var fixedEl = document.getElementById('tabs-fixed');
   function onScroll(){
     var rect = tabsEl.getBoundingClientRect();
-    // 元のタブが画面上部に完全に隠れたら固定タブを表示
-    if(rect.bottom <= 0){
+    if(rect.top <= 0){
       fixedEl.classList.add('is-visible');
+      tabsEl.style.opacity = '0';
     } else {
       fixedEl.classList.remove('is-visible');
+      tabsEl.style.opacity = '1';
     }
   }
   window.addEventListener('scroll', onScroll, {passive:true});
