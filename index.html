@@ -157,7 +157,6 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
 <div class="wrap shop-sagisu" id="wrap">
   <div class="header">
     <img src="logo.png" alt="sugar logo">
-    <p>営業カレンダー</p>
   </div>
   <div class="tabs">
     <button class="tab active" onclick="setShop('sagisu')">sagisu</button>
@@ -186,10 +185,6 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
         </div>
       </div>
     </div>
-  </div>
-  <div class="sagisu-notice" id="sagisu-notice">
-    <button class="sagisu-notice-toggle" id="sagisu-notice-toggle" onclick="toggleSagisuNotice()"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="#A63F52" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    <div class="sagisu-notice-body">sagisu店では、事前のご予約はお受け付けしておりません。<br>（当日のご来店/お電話でのお取り置きは可能です＾＾）<br>事前のご予約は【ebie店】にてお願いします。</div>
   </div>
   <div class="ebie-info" id="ebie-info">
     <!-- ① ebie店について -->
@@ -259,7 +254,33 @@ body.popup-open{position:fixed;width:100%;left:0;right:0}
       </div>
     </div>
   </div>
+  <div class="ebie-accordion" id="online-acc" style="margin-bottom:1rem">
+    <div class="ebie-accordion-header" onclick="toggleEbieAccordion('online-acc')">
+      <span>オンラインショップについて</span>
+      <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="ebie-accordion-body">
+      <div class="ebie-accordion-inner">
+        sugar の焼菓子・マフィン・シフォンケーキなどを、<br>
+        オンラインにてご注文いただけます。<br>
+        <br>
+        大切な方への贈り物や、ちょっと特別な日のおやつとして。<br>
+        ギフト発送も承っております＾＾<br>
+        <br>
+        オンラインショップ限定の商品も随時ご用意しておりますので<br>
+        ぜひのぞいてみてください。
+        <div class="ebie-right">
+          <a class="ebie-reserve-btn" href="https://sugargift.theshop.jp/" target="_blank" rel="noopener noreferrer">オンラインショップページ</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sagisu-notice" id="sagisu-notice">
+    <button class="sagisu-notice-toggle" id="sagisu-notice-toggle" onclick="toggleSagisuNotice()"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><polyline points="3,5 8,11 13,5" stroke="#A63F52" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="sagisu-notice-body">sagisu店では、事前のご予約はお受け付けしておりません。<br>（当日のご来店/お電話でのお取り置きは可能です＾＾）<br>事前のご予約は【ebie店】にてお願いします。</div>
+  </div>
   <div class="shop-info-top" id="shop-info-top"></div>
+  <p style="font-size:11px;letter-spacing:0.2em;color:#432f2f;text-align:center;margin-bottom:0.5rem;font-family:'Yomogi',cursive">営業カレンダー</p>
   <div class="nav">
     <button id="nav-prev" onclick="changeMonth(-1)">&#8249;</button>
     <div class="month" id="month-label"></div>
