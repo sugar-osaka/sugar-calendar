@@ -124,6 +124,8 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
 .popup-icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;overflow:hidden}
 .popup-icon svg{width:100%;height:100%;display:block}
 .popup-reserve{display:inline-block;margin-top:6px;padding:4px 10px;background:var(--theme,#e8383d);color:#fff;border-radius:20px;font-size:11px;font-family:'Yomogi',cursive;text-decoration:none;line-height:1.4}
+.shop-sagisu .popup-reserve{background:#A63F52}
+.shop-ebie .popup-reserve{background:#7A9A60}
 .popup-reserve.hidden{display:none}
 .popup-memo{margin-top:7px;padding-top:7px;border-top:1px solid #f0ebe8;font-size:12px;color:#888;font-family:'Yomogi',cursive;line-height:1.6;display:none}
 .popup-memo.has-memo{display:block}
@@ -331,6 +333,7 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
     <button id="nav-next" onclick="changeMonth(1)">&#8250;</button>
   </div>
   <div class="shop-info-top" id="shop-info-top"></div>
+  <p style="font-size:11px;color:#b09a8a;text-align:left;margin-bottom:0.6rem;font-family:'Yomogi',cursive;text-shadow:0 0 0.2px #b09a8a">✦ カレンダーのアイコンで詳細をご確認いただけます</p>
   <div class="cal-wrap">
     <svg id="cal-lines" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible" xmlns="http://www.w3.org/2000/svg"></svg>
     <table class="cal" id="cal"></table>
@@ -1014,6 +1017,8 @@ function setShop(s) {
     fixedWrap.classList.remove('shop-sagisu','shop-ebie');
     fixedWrap.classList.add('shop-'+s);
   }
+  var reserveEl = document.getElementById('popup-reserve');
+  if(reserveEl) reserveEl.style.background = s==='ebie' ? '#7A9A60' : '#A63F52';
   render();
 }
 
