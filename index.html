@@ -403,7 +403,7 @@ var ICON_NAME_MAP = {
   "節分": "SETSUBUN",
   "シフォンケーキ": "chiffon_cake"
 };
-var shop = 'sagisu';
+var shop = (new URLSearchParams(window.location.search).get('shop') === 'ebie') ? 'ebie' : 'sagisu';
 var now = new Date();
 var year = now.getFullYear();
 var month = now.getMonth();
@@ -1595,6 +1595,7 @@ if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then =
 } else {
   loadHolidays().then(function(){ loadCSV(); }).catch(function(){ loadCSV(); });
 }
+if(shop === 'ebie') setShop('ebie');
 </script>
 </body>
 </html>
