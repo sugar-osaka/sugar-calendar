@@ -191,7 +191,7 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
 @keyframes calDot{0%,80%,100%{opacity:0.3;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
 .home-btn{display:inline-flex;align-items:center;gap:4px;text-decoration:none;color:var(--theme);font-size:11px;font-family:'Yomogi',cursive;text-shadow:0 0 0.3px var(--theme)}
 .home-btn svg{width:14px;height:14px;stroke:var(--theme);fill:none}
-.header-wrap{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.header-wrap{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-top:0.5rem;position:relative;z-index:60}
 .header-wrap .header{margin-bottom:0;text-align:center;flex:1}
 .home-btn-bottom{display:block;text-align:center;margin-top:1.4rem;padding:10px;text-decoration:none;font-size:12px;font-family:'Yomogi',cursive;color:#b09a8a;text-shadow:0 0 0.3px #b09a8a;letter-spacing:0.1em}
 </style>
@@ -949,15 +949,17 @@ function switchEbieTab(tab) {
     var p = document.getElementById('ebie-panel-'+t);
     if (p) p.classList.remove('is-active');
   });
-  document.querySelectorAll('.ebie-tab-btn').forEach(function(btn, i) {
-    if (i===0) return;
+  var ebieInfo = document.getElementById('ebie-info');
+  if (!ebieInfo) return;
+  var btns = ebieInfo.querySelectorAll('.ebie-tab-btn:not(.is-link)');
+  btns.forEach(function(btn) {
     btn.classList.remove('is-active');
     var ind = btn.querySelector('.ebie-tab-indicator');
     if (ind) ind.textContent = "▼";
   });
   if (!isAlreadyActive) {
     if (panel) panel.classList.add('is-active');
-    var activeBtn = document.querySelectorAll('.ebie-tab-btn')[tab==='takeout' ? 1 : 2];
+    var activeBtn = tab==='takeout' ? btns[0] : btns[1];
     activeBtn.classList.add('is-active');
     var ind = activeBtn.querySelector('.ebie-tab-indicator');
     if (ind) ind.textContent = '▲';
