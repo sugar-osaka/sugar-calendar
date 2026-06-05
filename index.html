@@ -123,7 +123,8 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
 .popup-close:hover{color:var(--theme)}
 .popup-icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;overflow:hidden}
 .popup-icon svg{width:100%;height:100%;display:block}
-.popup-reserve{display:inline-block;margin-top:6px;padding:4px 10px;background:var(--theme,#e8383d);color:#fff;border-radius:20px;font-size:11px;font-family:'Yomogi',cursive;text-decoration:none;line-height:1.4}
+.popup-reserve{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 10px;background:var(--theme,#e8383d);color:#fff;border-radius:20px;font-size:11px;font-family:'Yomogi',cursive;text-decoration:none;line-height:1.4}
+.popup-reserve svg{width:11px;height:11px;stroke:#fff;fill:none;flex-shrink:0;opacity:0.85}
 .shop-sagisu .popup-reserve{background:#A63F52}
 .shop-ebie .popup-reserve{background:#7A9A60}
 .popup-reserve.hidden{display:none}
@@ -156,7 +157,8 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
 .ebie-period-item{display:block;padding-left:2em;text-indent:-0.8em;line-height:1.7;font-size:11px;text-shadow:0 0 0.2px #7a5c4a}
 .ebie-period-item b{color:var(--theme)}
 .ebie-right{display:flex;justify-content:flex-end;margin-top:20px}
-.ebie-reserve-btn{display:inline-block;padding:5px 14px;background:var(--theme);color:#fff!important;border-radius:20px;font-size:11px;text-decoration:none;line-height:1.6}
+.ebie-reserve-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 14px;background:var(--theme);color:#fff!important;border-radius:20px;font-size:11px;text-decoration:none;line-height:1.6}
+.ebie-reserve-btn svg{width:11px;height:11px;stroke:#fff;fill:none;flex-shrink:0;opacity:0.85}
 .ebie-icon-row{display:flex;justify-content:flex-end;gap:24px;margin-top:10px;align-items:flex-end;padding-top:0;padding-right:8px}
 .ebie-tab-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px}
 .ebie-tab-btn{display:flex;flex-direction:row;align-items:center;justify-content:center;padding:8px 6px;min-height:52px;border-radius:8px;border:1.5px solid var(--theme-soft);background:#fff;color:var(--theme);font-family:'Yomogi',cursive;font-size:10px;cursor:pointer;text-align:center;line-height:1.5;text-decoration:none;transition:background 0.15s,color 0.15s;text-shadow:0 0 0.2px var(--theme);gap:3px;position:relative}
@@ -229,7 +231,7 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
         <span class="ebie-period-item"><b>＜焼菓子＞</b> 7日前 13:00 〜 当日 9:00</span>
         <span class="ebie-period-item"><b>＜マフィン＞</b> 前日 13:00 〜 当日 8:00</span>
         <div class="ebie-right">
-          <a class="ebie-reserve-btn" href="https://www.tablecheck.com/ja/cafesugar-fukushima-pickup/reserve/message" target="_blank" rel="noopener noreferrer">テイクアウトご予約ページ</a>
+          <a class="ebie-reserve-btn" href="https://www.tablecheck.com/ja/cafesugar-fukushima-pickup/reserve/message" target="_blank" rel="noopener noreferrer">テイクアウトご予約ページ<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
         </div>
         <span class="ebie-note">※営業時間は下記カレンダーにてご確認ください</span>
       </div>
@@ -245,7 +247,7 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
         <span style="padding-left:2em;display:block">普段とは違う<b>【限定メニュー】</b>をお楽しみいただけます</span>
         <span style="padding-left:2em;display:block;color:#9a7a6a">※ご予約は「事前ご予約＆お席のみ」となります。</span>
         <div class="ebie-right">
-          <a class="ebie-reserve-btn" href="https://www.tablecheck.com/ja/cafesugar-fukushima/reserve/message" target="_blank" rel="noopener noreferrer">イートインご予約ページ</a>
+          <a class="ebie-reserve-btn" href="https://www.tablecheck.com/ja/cafesugar-fukushima/reserve/message" target="_blank" rel="noopener noreferrer">イートインご予約ページ<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
         </div>
         <span class="ebie-note">※営業時間は下記カレンダーにてご確認ください</span>
       </div>
@@ -295,7 +297,7 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
     </div>
     <div class="popup-memo" id="popup-memo"></div>
     <div id="popup-reserve-wrap" style="display:none;text-align:right;margin-top:7px;padding-top:7px;border-top:1px solid #f0ebe8">
-      <a class="popup-reserve" id="popup-reserve" href="#" target="_blank" rel="noopener noreferrer">予約はこちら →</a>
+      <a class="popup-reserve" id="popup-reserve" href="#" target="_blank" rel="noopener noreferrer">予約はこちら<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
     </div>
   </div>
 </div>
@@ -1412,7 +1414,7 @@ function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl,
   var safeUrl = (reserveUrl && /^https?:\/\//i.test(reserveUrl)) ? reserveUrl : '';
   if(safeUrl){
     reserveEl.href=safeUrl;
-    reserveEl.textContent=(btnText||'予約はこちら')+' →';
+    reserveEl.innerHTML=(btnText||'予約はこちら')+'<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;stroke:#fff;fill:none;flex-shrink:0;opacity:0.85;vertical-align:middle;margin-left:3px"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
     reserveWrap.style.display='block';
   } else {
     reserveEl.href='#';
