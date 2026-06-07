@@ -306,7 +306,7 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
     </div>
     <div class="popup-memo" id="popup-memo"></div>
     <div id="popup-reserve-wrap" style="display:none;text-align:right;margin-top:7px;padding-top:7px;border-top:1px solid #f0ebe8">
-      <a class="popup-reserve" id="popup-reserve" href="#" target="_blank" rel="noopener noreferrer">予約はこちら<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      <a class="popup-reserve" id="popup-reserve" href="#" target="_blank" rel="noopener noreferrer">ご予約ページ<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
     </div>
   </div>
 </div>
@@ -1423,7 +1423,7 @@ function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl,
   var safeUrl = (reserveUrl && /^https?:\/\//i.test(reserveUrl)) ? reserveUrl : '';
   if(safeUrl){
     reserveEl.href=safeUrl;
-    reserveEl.innerHTML=(btnText||'予約はこちら')+'<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;stroke:#fff;fill:none;flex-shrink:0;opacity:0.85;vertical-align:middle;margin-left:3px"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+    reserveEl.innerHTML=(btnText||'ご予約ページ')+'<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;stroke:#fff;fill:none;flex-shrink:0;opacity:0.85;vertical-align:middle;margin-left:3px"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
     reserveWrap.style.display='block';
   } else {
     reserveEl.href='#';
