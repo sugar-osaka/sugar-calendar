@@ -305,7 +305,8 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
       </div>
     </div>
     <div class="popup-memo" id="popup-memo"></div>
-    <div id="popup-reserve-wrap" style="display:none;text-align:right;margin-top:7px;padding-top:7px;border-top:1px solid #f0ebe8">
+    <div id="popup-reserve-wrap" style="display:none;align-items:center;justify-content:space-between;margin-top:7px;padding-top:7px;border-top:1px solid #f0ebe8">
+      <a id="popup-insta" href="https://www.instagram.com/cafe.sugar.ebie/" target="_blank" rel="noopener noreferrer" style="display:none;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);flex-shrink:0" aria-label="Instagram"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none"/></svg></a>
       <a class="popup-reserve" id="popup-reserve" href="#" target="_blank" rel="noopener noreferrer">ご予約ページ<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
     </div>
   </div>
@@ -1356,7 +1357,7 @@ function positionPopupNear(anchorEl,card){
   card.style.left=Math.round(left)+'px';
   card.style.top=Math.round(top)+'px';
 }
-function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl,btnText,memo){
+function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl,btnText,memo,showInsta){
   popupAnchorEl=anchorEl;
   var overlay=document.getElementById('popup-overlay');
   var card=document.getElementById('popup-card');
@@ -1426,10 +1427,17 @@ function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl,
   var reserveEl=document.getElementById('popup-reserve');
   var reserveWrap=document.getElementById('popup-reserve-wrap');
   var safeUrl = (reserveUrl && /^https?:\/\//i.test(reserveUrl)) ? reserveUrl : '';
-  if(safeUrl){
-    reserveEl.href=safeUrl;
-    reserveEl.innerHTML=(btnText||'ご予約ページ')+'<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;stroke:#fff;fill:none;flex-shrink:0;opacity:0.85;vertical-align:middle;margin-left:3px"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
-    reserveWrap.style.display='block';
+  var instaEl = document.getElementById('popup-insta');
+  if(instaEl){ instaEl.style.display = showInsta ? 'flex' : 'none'; }
+  if(safeUrl || showInsta){
+    if(safeUrl){
+      reserveEl.href=safeUrl;
+      reserveEl.innerHTML=(btnText||'ご予約ページ')+'<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;stroke:#fff;fill:none;flex-shrink:0;opacity:0.85;vertical-align:middle;margin-left:3px"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+      reserveEl.style.display='';
+    } else {
+      reserveEl.style.display='none';
+    }
+    reserveWrap.style.display='flex';
   } else {
     reserveEl.href='#';
     reserveWrap.style.display='none';
@@ -1523,7 +1531,7 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     var dotMemo = hasExtra ? ((extraTypes[shop][dk][type]&&extraTypes[shop][dk][type].memo)||'')
                 : hasChange ? ((memoData[shop].time[dk]&&memoData[shop].time[dk][type])||'')
                 : (memoData[shop].fixed[type]||'');
-    showPopup(DOTCLS[type],SVG[type],color,name,hrsHTML,dot,rurl,undefined,dotMemo);
+    showPopup(DOTCLS[type],SVG[type],color,name,hrsHTML,dot,rurl,undefined,dotMemo,type==='マフィン');
     return;
   }
   var band=e.target.closest('[data-popup="event"]');
