@@ -983,6 +983,7 @@ function switchEbieTab(tab) {
 
 function setShop(s) {
   shop = s;
+  history.replaceState(null, '', s === 'ebie' ? '?shop=ebie' : '?');
   var wrap = document.getElementById('wrap');
   wrap.classList.remove('shop-sagisu','shop-ebie');
   wrap.classList.add('shop-'+s);
@@ -1497,7 +1498,7 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     var dk=sugarBand.getAttribute('data-dk')||'';
     var hasExtra=dk&&extraTypes[shop][dk]&&(extraTypes[shop][dk][type]!==undefined);
     if(hasExtra && extraTypes[shop][dk][type] && extraTypes[shop][dk][type].label) name=extraTypes[shop][dk][type].label;
-    var hrsHTML=hrs+(hasExtra?'&nbsp;<span style="background:#2980b9;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">★</span>':'');
+    var hrsHTML=(hrs?'【営業時間】':'')+hrs+(hasExtra?'&nbsp;<span style="background:#2980b9;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">★</span>':'');
     var sugarMemo = (hasExtra && extraTypes[shop][dk] && extraTypes[shop][dk][type]) ? (extraTypes[shop][dk][type].memo||'') : (memoData[shop].fixed['sugar']||'');
     showPopup(DOTCLS[type],SVG[type],color,name,hrsHTML,sugarBand,rurl,undefined,sugarMemo);
     return;
@@ -1518,7 +1519,7 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     if (hasExtra && extraTypes[shop][dk][type] && extraTypes[shop][dk][type].label) {
       name = extraTypes[shop][dk][type].label;
     }
-    var hrsHTML=hrs+(hasExtra?'&nbsp;<span style="background:#2980b9;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">★</span>':hasChange?'&nbsp;<span style="background:#e67e22;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">変更</span>':'');
+    var hrsHTML=(hrs?'【営業時間】':'')+hrs+(hasExtra?'&nbsp;<span style="background:#2980b9;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">★</span>':hasChange?'&nbsp;<span style="background:#e67e22;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">変更</span>':'');
     var dotMemo = hasExtra ? ((extraTypes[shop][dk][type]&&extraTypes[shop][dk][type].memo)||'')
                 : hasChange ? ((memoData[shop].time[dk]&&memoData[shop].time[dk][type])||'')
                 : (memoData[shop].fixed[type]||'');
