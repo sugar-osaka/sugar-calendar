@@ -1530,7 +1530,7 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     var dotMemo = hasExtra ? ((extraTypes[shop][dk][type]&&extraTypes[shop][dk][type].memo)||'')
                 : hasChange ? ((memoData[shop].time[dk]&&memoData[shop].time[dk][type])||'')
                 : (memoData[shop].fixed[type]||'');
-    showPopup(DOTCLS[type],SVG[type],color,name,hrsHTML,dot,rurl,undefined,dotMemo,type==='マフィン');
+    showPopup(DOTCLS[type],SVG[type],color,name,hrsHTML,dot,rurl,undefined,dotMemo,type==='muffin');
     return;
   }
   var band=e.target.closest('[data-popup="event"]');
