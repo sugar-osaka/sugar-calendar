@@ -485,7 +485,7 @@ function parseDate(str) {
   return new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
 }
 
-function formatDateJP(d) { return (d.getMonth()+1)+'/'+d.getDate(); }
+function formatDateJP(d) { var w=['日','月','火','水','木','金','土']; return (d.getMonth()+1)+'/'+d.getDate()+'('+w[d.getDay()]+')'; }
 
 function makeDotHTML(e, hrs, dk) {
   if (e.type === 'sugar') return ''; // sugar帯は別途描画
@@ -643,8 +643,10 @@ function parseAndApplyCSV(text) {
       if (reserveUrl && target) reserveUrls[shopName][target] = reserveUrl;
 
     } else if (kind === 'closed') {
-      var periodText = formatDateJP(startD);
-      if (startD.toDateString() !== endD.toDateString()) periodText += '〜'+formatDateJP(endD);
+      var isSingleDay = startD.toDateString() === endD.toDateString();
+      var periodText = '【期間】' + formatDateJP(startD);
+      if (!isSingleDay) periodText += '〜'+formatDateJP(endD);
+      else periodText += ' のみ';
       var cur = new Date(startD);
       while (cur <= endD) {
         var ck = dateKey(cur);
@@ -670,8 +672,10 @@ function parseAndApplyCSV(text) {
       if (reserveUrl && target) reserveUrls[shopName][target] = reserveUrl;
 
     } else if (kind === 'event') {
-      var periodText = formatDateJP(startD);
-      if (startD.toDateString() !== endD.toDateString()) periodText += '〜'+formatDateJP(endD);
+      var isSingleDay = startD.toDateString() === endD.toDateString();
+      var periodText = '【期間】' + formatDateJP(startD);
+      if (!isSingleDay) periodText += '〜'+formatDateJP(endD);
+      else periodText += ' のみ';
       var cur = new Date(startD);
       while (cur <= endD) {
         var ck = dateKey(cur);
@@ -1432,11 +1436,9 @@ function showPopup(iconCls,iconSVG,iconColor,name,hoursText,anchorEl,reserveUrl,
   var memoEl=document.getElementById('popup-memo');
   if(memo){
     memoEl.textContent='';
-    var lines = memo.split('|');
-    while(lines.length && lines[lines.length-1].trim() === '') lines.pop();
-    lines.forEach(function(line, i){
+    memo.split('|').map(function(s){return s.trim();}).filter(Boolean).forEach(function(line, i){
       if(i > 0) memoEl.appendChild(document.createElement('br'));
-      memoEl.appendChild(document.createTextNode(line.trim()));
+      memoEl.appendChild(document.createTextNode(line));
     });
     memoEl.classList.add('has-memo');
     if(safeUrl){
