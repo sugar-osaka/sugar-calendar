@@ -671,7 +671,7 @@ function parseAndApplyCSV(text) {
       }
       if (rDays.length) {
         var rDayLabel = daysRaw.split('').filter(function(c){ return dayMap2[c]!==undefined; }).join('・');
-        var rPeriodText = '【定休日】' + formatDateJP(startD) + '〜' + formatDateJP(endD) + ' 毎週' + rDayLabel + '曜日';
+        var rPeriodText = rDayLabel + '曜日';
         var rCur = new Date(startD);
         while (rCur <= endD) {
           if (rDays.indexOf(rCur.getDay()) !== -1) {
