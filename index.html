@@ -41,12 +41,12 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .shop-info-top .info-row{display:flex;align-items:center;flex-wrap:wrap}
 .shop-info-top .info-icon{flex:0 0 22px;width:22px;display:flex;align-items:center}
 .shop-info-top .info-icon svg{width:18px;height:18px}
-.shop-info-top .info-name{white-space:nowrap;padding-right:6px}
+.shop-info-top .info-name{display:inline-block;min-width:90px;white-space:nowrap;padding-right:6px}
 .shop-info-top .info-days{padding-right:4px;white-space:nowrap}
 .shop-info-top .info-hours{word-break:break-word;overflow-wrap:break-word}
-.shop-info-top .info-detail-row{display:flex;align-items:center;flex-wrap:wrap;padding-left:26px}
-.shop-info-top .info-detail-period{padding-right:8px;white-space:nowrap}
-.shop-info-top .info-detail-dots{padding-right:8px}
+.shop-info-top .info-detail-row{display:flex;align-items:center;flex-wrap:wrap;padding-left:22px}
+.shop-info-top .info-detail-period{display:inline-block;min-width:90px;padding-right:6px;white-space:nowrap}
+.shop-info-top .info-detail-dots{padding-right:4px}
 .shop-info-top .info-detail-hours{white-space:nowrap}
 .shop-info-top b{font-weight:400}
 .day-dots{display:inline-flex;gap:3px;align-items:center;vertical-align:middle;margin:0 2px}
@@ -1385,9 +1385,9 @@ function render() {
     var c=COLORS[r.type];
     if(r.kind==='detail'){
       infoHTML+='<div class="info-detail-row">';
-      infoHTML+='<span class="info-detail-period" style="color:'+c+'">'+(r.dateLabel||'')+'</span>';
+      infoHTML+='<span class="info-detail-period" style="color:'+c+'">'+(r.dateLabel?'（'+r.dateLabel+'）':'')+'</span>';
       infoHTML+='<span class="info-detail-dots">'+r.dots+'</span>';
-      infoHTML+='<span class="info-detail-hours" style="color:'+c+'">'+r.hours+'</span>';
+      infoHTML+='<span class="info-detail-hours" style="color:'+c+'">/ '+r.hours+'</span>';
       infoHTML+='</div>';
       return;
     }
