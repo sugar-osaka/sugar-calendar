@@ -37,13 +37,17 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .tab:first-child{border-right:1.5px solid var(--theme-soft)}
 .tab.active{background:var(--theme);color:#fff}
 .shop-info-top{padding:4px 0;margin-bottom:1rem;font-size:11px;color:#432f2f;font-family:'Yomogi',cursive;line-height:2}
-.shop-info-top .info-rows{display:table;width:100%}
-.shop-info-top .info-row{display:table-row}
-.shop-info-top .info-icon{display:table-cell;width:22px;vertical-align:top;padding-right:4px}
-.shop-info-top .info-icon svg{width:18px;height:18px;vertical-align:middle}
-.shop-info-top .info-name{display:table-cell;white-space:nowrap;vertical-align:top;padding-right:6px}
-.shop-info-top .info-days{display:table-cell;vertical-align:top;padding-right:4px;white-space:nowrap}
-.shop-info-top .info-hours{display:table-cell;vertical-align:top;word-break:break-word;overflow-wrap:break-word;padding-left:1em;text-indent:-1em}
+.shop-info-top .info-rows{display:flex;flex-direction:column}
+.shop-info-top .info-row{display:flex;align-items:center;flex-wrap:wrap}
+.shop-info-top .info-icon{flex:0 0 22px;width:22px;display:flex;align-items:center}
+.shop-info-top .info-icon svg{width:18px;height:18px}
+.shop-info-top .info-name{white-space:nowrap;padding-right:6px}
+.shop-info-top .info-days{padding-right:4px;white-space:nowrap}
+.shop-info-top .info-hours{word-break:break-word;overflow-wrap:break-word}
+.shop-info-top .info-detail-row{display:flex;align-items:center;flex-wrap:wrap;padding-left:26px}
+.shop-info-top .info-detail-period{padding-right:8px;white-space:nowrap}
+.shop-info-top .info-detail-dots{padding-right:8px}
+.shop-info-top .info-detail-hours{white-space:nowrap}
 .shop-info-top b{font-weight:400}
 .day-dots{display:inline-flex;gap:3px;align-items:center;vertical-align:middle;margin:0 2px}
 .day-dot{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid #ddd;font-size:9px;color:#ccc;font-family:'Yomogi',cursive;line-height:1}
@@ -1000,17 +1004,18 @@ var shops = {
           var g = groups[0];
           var days = g ? g.days : [];
           var hours = (g && g.hours) || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
-          rows.push({type:item.type, name:item.name, dots:daysToDotsHTML(days, color), hours:hours, continuation:false});
+          rows.push({kind:'simple', type:item.type, name:item.name, dots:daysToDotsHTML(days, color), hours:hours});
         } else {
-          groups.forEach(function(g, idx) {
+          rows.push({kind:'header', type:item.type, name:item.name});
+          groups.forEach(function(g) {
             var hours = g.hours || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
             var dateLabel = g.ranges.map(function(r){ return formatShortRange(r.start, r.end); }).join('・');
             rows.push({
+              kind: 'detail',
               type: item.type,
-              name: idx === 0 ? item.name : '',
+              dateLabel: dateLabel,
               dots: daysToDotsHTML(g.days, color),
-              hours: dateLabel + '<br>' + hours,
-              continuation: idx > 0
+              hours: hours
             });
           });
         }
@@ -1070,17 +1075,18 @@ var shops = {
           var g = groups[0];
           var days = g ? g.days : [];
           var hours = (g && g.hours) || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
-          rows.push({type:item.type, name:item.name, dots:daysToDotsHTML(days, color), hours:hours, continuation:false});
+          rows.push({kind:'simple', type:item.type, name:item.name, dots:daysToDotsHTML(days, color), hours:hours});
         } else {
-          groups.forEach(function(g, idx) {
+          rows.push({kind:'header', type:item.type, name:item.name});
+          groups.forEach(function(g) {
             var hours = g.hours || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
             var dateLabel = g.ranges.map(function(r){ return formatShortRange(r.start, r.end); }).join('・');
             rows.push({
+              kind: 'detail',
               type: item.type,
-              name: idx === 0 ? item.name : '',
+              dateLabel: dateLabel,
               dots: daysToDotsHTML(g.days, color),
-              hours: dateLabel + '<br>' + hours,
-              continuation: idx > 0
+              hours: hours
             });
           });
         }
@@ -1377,18 +1383,26 @@ function render() {
   var infoHTML='<div class="info-rows">';
   shops[shop].getInfoRows().forEach(function(r){
     var c=COLORS[r.type];
+    if(r.kind==='detail'){
+      infoHTML+='<div class="info-detail-row">';
+      infoHTML+='<span class="info-detail-period" style="color:'+c+'">'+(r.dateLabel||'')+'</span>';
+      infoHTML+='<span class="info-detail-dots">'+r.dots+'</span>';
+      infoHTML+='<span class="info-detail-hours" style="color:'+c+'">'+r.hours+'</span>';
+      infoHTML+='</div>';
+      return;
+    }
     infoHTML+='<div class="info-row">';
-    if(r.continuation){
-      infoHTML+='<div class="info-icon"></div>';
-    } else if(r.type==='sugar'){
+    if(r.type==='sugar'){
       infoHTML+='<div class="info-icon"><div style="background:linear-gradient(90deg,#C8956C,#A63F52);border-radius:4px;padding:1px 5px;font-size:10px;font-family:Caveat Brush,cursive;color:#fff;display:inline-block">sugar</div></div>';
     } else {
       var sv=SVG[r.type].replace('stroke="currentColor"','stroke="'+c+'"');
       infoHTML+='<div class="info-icon" style="color:'+c+'">'+sv+'</div>';
     }
     infoHTML+='<div class="info-name" style="color:'+c+'">'+r.name+'</div>';
-    infoHTML+='<div class="info-days">'+r.dots+'</div>';
-    infoHTML+='<div class="info-hours" style="color:'+c+'">/ '+r.hours+'</div>';
+    if(r.kind==='simple'){
+      infoHTML+='<div class="info-days">'+r.dots+'</div>';
+      infoHTML+='<div class="info-hours" style="color:'+c+'">/ '+r.hours+'</div>';
+    }
     infoHTML+='</div>';
   });
   infoHTML+='</div>';
