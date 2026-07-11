@@ -552,7 +552,7 @@ function parseAndApplyCSV(text) {
 
     // 種別マッピング
     var kindMap = {
-      '固定営業':'fixed', '臨時休業':'closed', '非表示':'off', '営業時間変更':'time',
+      '固定営業':'fixed', '臨時休業':'closed', '定休日':'regular_closed', '非表示':'off', '営業時間変更':'time',
       '臨時営業&イベント(アイコン表示)':'extra',
       'イベント(帯表示)':'event',
       // 旧種別も念のため対応
@@ -660,6 +660,33 @@ function parseAndApplyCSV(text) {
           memo: memo || ''
         };
         cur.setDate(cur.getDate()+1);
+      }
+
+    } else if (kind === 'regular_closed') {
+      // 定休日：期間内で指定した曜日だけを毎週休みにする
+      var dayMap2 = {'日':0,'月':1,'火':2,'水':3,'木':4,'金':5,'土':6};
+      var rDays = [];
+      for (var rci = 0; rci < daysRaw.length; rci++) {
+        if (dayMap2[daysRaw[rci]] !== undefined) rDays.push(dayMap2[daysRaw[rci]]);
+      }
+      if (rDays.length) {
+        var rDayLabel = daysRaw.split('').filter(function(c){ return dayMap2[c]!==undefined; }).join('・');
+        var rPeriodText = '【定休日】' + formatDateJP(startD) + '〜' + formatDateJP(endD) + ' 毎週' + rDayLabel + '曜日';
+        var rCur = new Date(startD);
+        while (rCur <= endD) {
+          if (rDays.indexOf(rCur.getDay()) !== -1) {
+            var rk = dateKey(rCur);
+            closedBands[shopName][rk] = {
+              label: eventName || '定休日',
+              period: rPeriodText,
+              isStart: true,
+              isEnd: true,
+              single: true,
+              memo: memo || ''
+            };
+          }
+          rCur.setDate(rCur.getDate()+1);
+        }
       }
 
     } else if (kind === 'extra') {
@@ -844,7 +871,7 @@ var shops = {
         {cls:'dot-crepe', svg:SVG['crepe'], label:'クレープ'}
       ];
       return dotItems.concat([
-        {closed:true, label:'臨時休業'},
+        {closed:true, label:'定休日・臨時休業'},
         {pill:'#fcc800', label:'イベント'}
       ]);
     },
@@ -896,7 +923,7 @@ var shops = {
         {cls:'dot-muffin',  svg:SVG['muffin'],  label:'マフィン'}
       ];
       return dotItems.concat([
-        {closed:true, label:'臨時休業'},
+        {closed:true, label:'定休日・臨時休業'},
         {pill:'#fcc800', label:'イベント'}
       ]);
     },
