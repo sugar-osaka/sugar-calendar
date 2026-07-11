@@ -41,11 +41,11 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .shop-info-top .info-row{display:flex;align-items:center;flex-wrap:wrap}
 .shop-info-top .info-icon{flex:0 0 22px;width:22px;display:flex;align-items:center}
 .shop-info-top .info-icon svg{width:18px;height:18px}
-.shop-info-top .info-name{display:inline-block;min-width:90px;white-space:nowrap;padding-right:6px}
+.shop-info-top .info-name{display:inline-block;white-space:nowrap;padding-right:6px}
 .shop-info-top .info-days{padding-right:4px;white-space:nowrap}
 .shop-info-top .info-hours{word-break:break-word;overflow-wrap:break-word}
 .shop-info-top .info-detail-row{display:flex;align-items:center;flex-wrap:wrap;padding-left:22px}
-.shop-info-top .info-detail-period{display:inline-block;min-width:90px;padding-right:6px;white-space:nowrap}
+.shop-info-top .info-detail-period{display:inline-block;padding-right:6px;white-space:nowrap}
 .shop-info-top .info-detail-dots{padding-right:4px}
 .shop-info-top .info-detail-hours{white-space:nowrap}
 .shop-info-top b{font-weight:400}
@@ -988,6 +988,18 @@ function daysToDotsHTML(days, color) {
   return html;
 }
 
+// 種別名・期間ラベルのうち実際に表示中で一番幅が広いものに合わせて、曜日の開始位置を揃える
+function alignInfoColumns() {
+  var container = document.getElementById('shop-info-top');
+  if (!container) return;
+  var labels = container.querySelectorAll('.info-name, .info-detail-period');
+  if (!labels.length) return;
+  labels.forEach(function(el){ el.style.minWidth = '0'; });
+  var maxW = 0;
+  labels.forEach(function(el){ maxW = Math.max(maxW, el.offsetWidth); });
+  labels.forEach(function(el){ el.style.minWidth = maxW + 'px'; });
+}
+
 var shops = {
   sagisu: {
     getInfoRows: function() {
@@ -1009,7 +1021,7 @@ var shops = {
           rows.push({kind:'header', type:item.type, name:item.name});
           groups.forEach(function(g) {
             var hours = g.hours || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
-            var dateLabel = g.ranges.map(function(r){ return formatShortRange(r.start, r.end); }).join('・');
+            var dateLabel = g.ranges.map(function(r){ return formatShortRange(r.start, r.end); }).join('、');
             rows.push({
               kind: 'detail',
               type: item.type,
@@ -1080,7 +1092,7 @@ var shops = {
           rows.push({kind:'header', type:item.type, name:item.name});
           groups.forEach(function(g) {
             var hours = g.hours || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
-            var dateLabel = g.ranges.map(function(r){ return formatShortRange(r.start, r.end); }).join('・');
+            var dateLabel = g.ranges.map(function(r){ return formatShortRange(r.start, r.end); }).join('、');
             rows.push({
               kind: 'detail',
               type: item.type,
@@ -1407,6 +1419,7 @@ function render() {
   });
   infoHTML+='</div>';
   document.getElementById('shop-info-top').innerHTML=infoHTML;
+  alignInfoColumns();
 
   var legendHTML='';
   shops[shop].getLegend().forEach(function(l){
