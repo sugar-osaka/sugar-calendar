@@ -482,6 +482,12 @@ function loadHolidays() {
 }
 
 function dateKey(d) { return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(); }
+function dkToDate(dk) {
+  if (!dk) return null;
+  var p = dk.split('-');
+  if (p.length < 3) return null;
+  return new Date(parseInt(p[0],10), parseInt(p[1],10), parseInt(p[2],10));
+}
 
 function parseDate(str) {
   if (!str) return null;
@@ -565,6 +571,20 @@ function formatShortRange(s, e) {
   var a = (s.getMonth() + 1) + '/' + s.getDate();
   var b = (e.getMonth() + 1) + '/' + e.getDate();
   return a === b ? a : (a + '〜' + b);
+}
+
+// 曜日・時間が完全に同じセグメントは、離れていても1グループにまとめる（行数を最小化）
+function groupSegmentsBySignature(segments) {
+  var groups = [];
+  segments.forEach(function(seg) {
+    var g = groups.filter(function(x) { return x.sig === seg.sig; })[0];
+    if (!g) {
+      g = { sig: seg.sig, days: seg.days, hours: seg.hours, ranges: [] };
+      groups.push(g);
+    }
+    g.ranges.push({ start: seg.start, end: seg.end });
+  });
+  return groups;
 }
 
 // 臨時休業：カレンダーの表示範囲（今月〜来月）に入っている分をまとめて「7/5・7/9・8/4」のように一覧化する
@@ -701,15 +721,15 @@ function parseAndApplyCSV(text) {
         start: pStart,
         end: pEnd,
         days: days,
-        hours: hoursRaw || ''
+        hours: hoursRaw || '',
+        memo: memo || '',
+        reserveUrl: reserveUrl || ''
       });
 
       var existing = shopItems[shopName].findIndex(function(item){ return item.type === target; });
       if (existing === -1) {
         shopItems[shopName].push({type:target, name:targetRaw});
       }
-      if (reserveUrl) reserveUrls[shopName][target] = reserveUrl;
-      if (memo) memoData[shopName].fixed[target] = memo;
       continue;
     }
 
@@ -965,19 +985,20 @@ var shops = {
       items.forEach(function(item) {
         var color = COLORS[item.type] || '#432f2f';
         var segments = getMonthSegments('sagisu', item.type, year, month);
-        if (segments.length <= 1) {
-          var seg = segments[0];
-          var days = seg ? seg.days : [];
-          var hours = (seg && seg.hours) || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
+        var groups = groupSegmentsBySignature(segments);
+        if (groups.length <= 1) {
+          var g = groups[0];
+          var days = g ? g.days : [];
+          var hours = (g && g.hours) || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
           rows.push({type:item.type, name:item.name, dots:daysToDotsHTML(days, color), hours:hours, continuation:false});
         } else {
-          segments.forEach(function(seg, idx) {
-            var hours = seg.hours || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
-            var dateLabel = formatShortRange(seg.start, seg.end);
+          groups.forEach(function(g, idx) {
+            var hours = g.hours || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
+            var dateLabel = g.ranges.map(function(r){ return formatShortRange(r.start, r.end); }).join('・');
             rows.push({
               type: item.type,
               name: idx === 0 ? item.name : '',
-              dots: daysToDotsHTML(seg.days, color),
+              dots: daysToDotsHTML(g.days, color),
               hours: dateLabel + '　' + hours,
               continuation: idx > 0
             });
@@ -1034,19 +1055,20 @@ var shops = {
       items.forEach(function(item) {
         var color = COLORS[item.type] || '#432f2f';
         var segments = getMonthSegments('ebie', item.type, year, month);
-        if (segments.length <= 1) {
-          var seg = segments[0];
-          var days = seg ? seg.days : [];
-          var hours = (seg && seg.hours) || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
+        var groups = groupSegmentsBySignature(segments);
+        if (groups.length <= 1) {
+          var g = groups[0];
+          var days = g ? g.days : [];
+          var hours = (g && g.hours) || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
           rows.push({type:item.type, name:item.name, dots:daysToDotsHTML(days, color), hours:hours, continuation:false});
         } else {
-          segments.forEach(function(seg, idx) {
-            var hours = seg.hours || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
-            var dateLabel = formatShortRange(seg.start, seg.end);
+          groups.forEach(function(g, idx) {
+            var hours = g.hours || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
+            var dateLabel = g.ranges.map(function(r){ return formatShortRange(r.start, r.end); }).join('・');
             rows.push({
               type: item.type,
               name: idx === 0 ? item.name : '',
-              dots: daysToDotsHTML(seg.days, color),
+              dots: daysToDotsHTML(g.days, color),
               hours: dateLabel + '　' + hours,
               continuation: idx > 0
             });
@@ -1688,13 +1710,15 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     var name='sugar';
     var sugarItem = shopItems[shop] ? shopItems[shop].find(function(item){return item.type==='sugar';}) : null;
     if (sugarItem) name = sugarItem.name;
-    var rurl=reserveUrls[shop]['sugar']||'';
     var color=COLORS['sugar']||'#B8860B';
     var dk=sugarBand.getAttribute('data-dk')||'';
+    var cellDate=dkToDate(dk);
+    var sugarPeriod=cellDate?findFixedPeriod(shop,type,cellDate):null;
+    var rurl=(sugarPeriod&&sugarPeriod.reserveUrl)||reserveUrls[shop]['sugar']||'';
     var hasExtra=dk&&extraTypes[shop][dk]&&(extraTypes[shop][dk][type]!==undefined);
     if(hasExtra && extraTypes[shop][dk][type] && extraTypes[shop][dk][type].label) name=extraTypes[shop][dk][type].label;
     var hrsHTML=(hrs?'【営業時間】':'')+hrs+(hasExtra?'&nbsp;<span style="background:#2980b9;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">★</span>':'');
-    var sugarMemo = (hasExtra && extraTypes[shop][dk] && extraTypes[shop][dk][type]) ? (extraTypes[shop][dk][type].memo||'') : (memoData[shop].fixed['sugar']||'');
+    var sugarMemo = (hasExtra && extraTypes[shop][dk] && extraTypes[shop][dk][type]) ? (extraTypes[shop][dk][type].memo||'') : ((sugarPeriod&&sugarPeriod.memo)||'');
     showPopup(DOTCLS[type],SVG[type],color,name,hrsHTML,sugarBand,rurl,undefined,sugarMemo);
     return;
   }
@@ -1704,10 +1728,12 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     var type=dot.getAttribute('data-type');
     var hrs=dot.getAttribute('data-hours')||(TYPE_INFO[type]?TYPE_INFO[type].hours:'');
     var name=TYPE_INFO[type]?TYPE_INFO[type].name:type;
-    var rurl=reserveUrls[shop][type]||'';
     var color=COLORS[type]||'#432f2f';
     var tdEl=dot.closest('td');
     var dk=tdEl?tdEl.getAttribute('data-dk'):'';
+    var cellDate=dkToDate(dk);
+    var fixedPeriod=cellDate?findFixedPeriod(shop,type,cellDate):null;
+    var rurl=(fixedPeriod&&fixedPeriod.reserveUrl)||reserveUrls[shop][type]||'';
     var hasExtra=dk&&extraTypes[shop][dk]&&(extraTypes[shop][dk][type]!==undefined);
     var hasChange=!hasExtra&&dk&&timeOverrides[shop][dk]&&timeOverrides[shop][dk][type];
     // 臨時営業の場合は対象名（ラベル）を優先表示
@@ -1717,8 +1743,7 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     var hrsHTML=(hrs?'【営業時間】':'')+hrs+(hasExtra?'&nbsp;<span style="background:#2980b9;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">★</span>':hasChange?'&nbsp;<span style="background:#e67e22;color:#fff;font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;vertical-align:middle;line-height:1.4">変更</span>':'');
     var dotMemo = hasExtra ? ((extraTypes[shop][dk][type]&&extraTypes[shop][dk][type].memo)||'')
                 : hasChange ? ((memoData[shop].time[dk]&&memoData[shop].time[dk][type])||'')
-                : (memoData[shop].fixed[type]||'');
-    console.log('DEBUG type:', type, 'showInsta:', type==='muffin');
+                : ((fixedPeriod&&fixedPeriod.memo)||'');
     showPopup(DOTCLS[type],SVG[type],color,name,hrsHTML,dot,rurl,undefined,dotMemo,type==='muffin');
     return;
   }
