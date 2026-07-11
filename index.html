@@ -431,13 +431,17 @@ var specialEvents  = {sagisu:{}, ebie:{}};
 var eventBands     = {sagisu:{}, ebie:{}};
 var closedBands    = {sagisu:{}, ebie:{}};
 var closedEventsList = {sagisu:[], ebie:[]}; // 臨時休業（不定期）の生の期間リスト（ポップアップの一覧表示用）
+// 定休日：期間ルールのリスト（日付を全展開せず、表示日ごとに判定する）
+// regularClosedPeriods[shop] = [{start, end, days, label, periodText, memo}, ...]
+var regularClosedPeriods = {sagisu:[], ebie:[]};
 var offTypes       = {sagisu:{}, ebie:{}};
 var timeOverrides  = {sagisu:{}, ebie:{}};
 // 予約URL: reserveUrls[shop][type] = 'https://...' または reserveUrls[shop]['event-dateKey'] = 'https://...'
 var reserveUrls    = {sagisu:{}, ebie:{}};
-// 営業曜日設定 dayOverrides[shop][type] = [0,1,2,...] (0=日,1=月,...,6=土)
-var dayOverrides   = {sagisu:{}, ebie:{}};
-// 固定営業対象: shopItems[shop] = [{type, name, days, hours, reserveUrl}]
+// 固定営業の期間別スケジュール: fixedPeriods[shop][type] = [{start, end, days, hours}, ...]
+// start/endはDateまたはnull（null=期間の制限なし）
+var fixedPeriods   = {sagisu:{}, ebie:{}};
+// 固定営業対象: shopItems[shop] = [{type, name}]
 var shopItems      = {sagisu:[], ebie:[]};
 // 臨時営業: extraTypes[shop][dk] = {whole_cake:'13:00-14:00', crepe:''}
 var extraTypes     = {sagisu:{}, ebie:{}};
@@ -490,6 +494,51 @@ function parseDate(str) {
 function formatDateJP(d) { var w=['日','月','火','水','木','金','土']; return (d.getMonth()+1)+'/'+d.getDate()+'('+w[d.getDay()]+')'; }
 function formatDateShort(d) { return (d.getMonth()+1)+'/'+d.getDate(); }
 
+// 定休日：指定日dが期間ルールのいずれかに該当するか判定（複数該当時は後の行を優先）
+function findRegularClosedPeriod(shopKey, d) {
+  var periods = regularClosedPeriods[shopKey];
+  if (!periods || !periods.length) return null;
+  var w = d.getDay();
+  var found = null;
+  for (var i = 0; i < periods.length; i++) {
+    var p = periods[i];
+    if ((p.start === null || d >= p.start) && (p.end === null || d <= p.end) && p.days.indexOf(w) !== -1) found = p;
+  }
+  return found;
+}
+
+// 「休」表示の元データを一本化：臨時休業（closedBands）を優先し、なければ定休日（期間ルール）を動的に判定
+function getClosedInfoForDate(shopKey, d) {
+  var dk = dateKey(d);
+  if (closedBands[shopKey][dk]) return closedBands[shopKey][dk];
+  var p = findRegularClosedPeriod(shopKey, d);
+  if (p) {
+    return {
+      label: p.label,
+      period: p.periodText,
+      isStart: true,
+      isEnd: true,
+      single: true,
+      memo: p.memo || '',
+      reserveUrl: p.reserveUrl || '',
+      type: 'regular'
+    };
+  }
+  return null;
+}
+
+// 固定営業：指定日dに該当する期間設定を探す（複数該当する場合は後から書かれた行を優先＝スプシの下の行が優先）
+function findFixedPeriod(shopKey, type, d) {
+  var periods = fixedPeriods[shopKey] && fixedPeriods[shopKey][type];
+  if (!periods || !periods.length) return null;
+  var found = null;
+  for (var i = 0; i < periods.length; i++) {
+    var p = periods[i];
+    if ((p.start === null || d >= p.start) && (p.end === null || d <= p.end)) found = p;
+  }
+  return found;
+}
+
 // 臨時休業：カレンダーの表示範囲（今月〜来月）に入っている分をまとめて「7/5・7/9・8/4」のように一覧化する
 function getIrregularClosedSummary(shopKey) {
   var winStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -540,9 +589,10 @@ function parseAndApplyCSV(text) {
   eventBands     = {sagisu:{}, ebie:{}};
   closedBands    = {sagisu:{}, ebie:{}};
   closedEventsList = {sagisu:[], ebie:[]};
+  regularClosedPeriods = {sagisu:[], ebie:[]};
   offTypes       = {sagisu:{}, ebie:{}};
   timeOverrides  = {sagisu:{}, ebie:{}};
-  dayOverrides   = {sagisu:{}, ebie:{}};
+  fixedPeriods   = {sagisu:{}, ebie:{}};
   shopItems      = {sagisu:[], ebie:[]};
   extraTypes     = {sagisu:{}, ebie:{}};
   memoData       = {sagisu:{fixed:{}, event:{}, closed:{}, time:{}, extra:{}}, ebie:{fixed:{}, event:{}, closed:{}, time:{}, extra:{}}};
@@ -606,7 +656,7 @@ function parseAndApplyCSV(text) {
     if (keyNorm[target]) target = keyNorm[target];
 
     // ==============================
-    // 固定営業（曜日＋時間を1行で）
+    // 固定営業（曜日＋時間を1行で／期間指定も可能）
     // ==============================
     if (kind === 'fixed' && target) {
       var dayMap = {'日':0,'月':1,'火':2,'水':3,'木':4,'金':5,'土':6};
@@ -614,19 +664,52 @@ function parseAndApplyCSV(text) {
       for (var ci = 0; ci < daysRaw.length; ci++) {
         if (dayMap[daysRaw[ci]] !== undefined) days.push(dayMap[daysRaw[ci]]);
       }
-      if (days.length) dayOverrides[shopName][target] = days;
-      if (hoursRaw && TYPE_INFO[target]) TYPE_INFO[target].hours = hoursRaw;
+      // A列（開始日）が空欄なら期間制限なし。B列（終了日）が空欄なら「開始日以降ずっと」の意味にする
+      var pStart = parseDate(dateStr);
+      var pEnd   = parseDate(endDateStr); // 終了日なしはnullのまま＝上限なし
+
+      if (!fixedPeriods[shopName][target]) fixedPeriods[shopName][target] = [];
+      fixedPeriods[shopName][target].push({
+        start: pStart,
+        end: pEnd,
+        days: days,
+        hours: hoursRaw || ''
+      });
 
       var existing = shopItems[shopName].findIndex(function(item){ return item.type === target; });
       if (existing === -1) {
-        shopItems[shopName].push({type:target, name:targetRaw, days:days, hours:hoursRaw||'', reserveUrl:reserveUrl||''});
-      } else {
-        if (days.length) shopItems[shopName][existing].days = days;
-        if (hoursRaw) shopItems[shopName][existing].hours = hoursRaw;
-        if (reserveUrl) shopItems[shopName][existing].reserveUrl = reserveUrl;
+        shopItems[shopName].push({type:target, name:targetRaw});
       }
       if (reserveUrl) reserveUrls[shopName][target] = reserveUrl;
       if (memo) memoData[shopName].fixed[target] = memo;
+      continue;
+    }
+
+    // ==============================
+    // 定休日（曜日パターン／期間指定は任意）
+    // ==============================
+    if (kind === 'regular_closed') {
+      var dayMap2 = {'日':0,'月':1,'火':2,'水':3,'木':4,'金':5,'土':6};
+      var rDays = [];
+      for (var rci = 0; rci < daysRaw.length; rci++) {
+        if (dayMap2[daysRaw[rci]] !== undefined) rDays.push(dayMap2[daysRaw[rci]]);
+      }
+      if (rDays.length) {
+        var rDayLabel = daysRaw.split('').filter(function(c){ return dayMap2[c]!==undefined; }).join('・');
+        // A列（開始日）が空欄なら期間制限なし。B列（終了日）が空欄なら「開始日以降ずっと」の意味にする
+        var rStart = parseDate(dateStr);
+        var rEnd   = parseDate(endDateStr);
+        if (!regularClosedPeriods[shopName]) regularClosedPeriods[shopName] = [];
+        regularClosedPeriods[shopName].push({
+          start: rStart,
+          end: rEnd,
+          days: rDays,
+          label: eventName || '定休日',
+          periodText: rDayLabel + '曜日',
+          memo: memo || '',
+          reserveUrl: reserveUrl || ''
+        });
+      }
       continue;
     }
 
@@ -676,37 +759,10 @@ function parseAndApplyCSV(text) {
           isEnd:   cur.toDateString() === endD.toDateString(),
           single:  startD.toDateString() === endD.toDateString(),
           memo: memo || '',
+          reserveUrl: reserveUrl || '',
           type: 'irregular'
         };
         cur.setDate(cur.getDate()+1);
-      }
-
-    } else if (kind === 'regular_closed') {
-      // 定休日：期間内で指定した曜日だけを毎週休みにする
-      var dayMap2 = {'日':0,'月':1,'火':2,'水':3,'木':4,'金':5,'土':6};
-      var rDays = [];
-      for (var rci = 0; rci < daysRaw.length; rci++) {
-        if (dayMap2[daysRaw[rci]] !== undefined) rDays.push(dayMap2[daysRaw[rci]]);
-      }
-      if (rDays.length) {
-        var rDayLabel = daysRaw.split('').filter(function(c){ return dayMap2[c]!==undefined; }).join('・');
-        var rPeriodText = rDayLabel + '曜日';
-        var rCur = new Date(startD);
-        while (rCur <= endD) {
-          if (rDays.indexOf(rCur.getDay()) !== -1) {
-            var rk = dateKey(rCur);
-            closedBands[shopName][rk] = {
-              label: eventName || '定休日',
-              period: rPeriodText,
-              isStart: true,
-              isEnd: true,
-              single: true,
-              memo: memo || '',
-              type: 'regular'
-            };
-          }
-          rCur.setDate(rCur.getDate()+1);
-        }
       }
 
     } else if (kind === 'extra') {
@@ -826,6 +882,8 @@ function getHours(type, d) {
   if (ex && ex[type]) return ex[type].hours !== undefined ? ex[type].hours : ex[type];
   var ov = timeOverrides[shop][dk];
   if (ov && ov[type]) return ov[type];
+  var period = findFixedPeriod(shop, type, d);
+  if (period && period.hours) return period.hours;
   return TYPE_INFO[type] ? TYPE_INFO[type].hours : '';
 }
 
@@ -875,10 +933,12 @@ var shops = {
       if (!items || items.length === 0) {
         return [];
       }
+      var refDate = (year === now.getFullYear() && month === now.getMonth()) ? today : new Date(year, month, 1);
       return items.map(function(item) {
-        var days = dayOverrides['sagisu'][item.type] || item.days || [];
+        var period = findFixedPeriod('sagisu', item.type, refDate);
+        var days = period ? period.days : [];
         var color = COLORS[item.type] || '#432f2f';
-        var hours = (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '') || item.hours || '';
+        var hours = (period && period.hours) || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
         return {type:item.type, name:item.name, dots:daysToDotsHTML(days, color), hours:hours};
       });
     },
@@ -902,7 +962,8 @@ var shops = {
       var items = shopItems['sagisu'];
       if (items && items.length > 0) {
         items.forEach(function(item) {
-          var days = dayOverrides['sagisu'][item.type] || item.days || [];
+          var period = findFixedPeriod('sagisu', item.type, d);
+          var days = period ? period.days : [];
           if (days.indexOf(w) !== -1) evs.push({type:item.type});
         });
       } else {
@@ -925,10 +986,12 @@ var shops = {
       if (!items || items.length === 0) {
         return [];
       }
+      var refDate = (year === now.getFullYear() && month === now.getMonth()) ? today : new Date(year, month, 1);
       return items.map(function(item) {
-        var days = dayOverrides['ebie'][item.type] || item.days || [];
+        var period = findFixedPeriod('ebie', item.type, refDate);
+        var days = period ? period.days : [];
         var color = COLORS[item.type] || '#432f2f';
-        var hours = (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '') || item.hours || '';
+        var hours = (period && period.hours) || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
         return {type:item.type, name:item.name, dots:daysToDotsHTML(days, color), hours:hours};
       });
     },
@@ -954,7 +1017,8 @@ var shops = {
       var items = shopItems['ebie'];
       if (items && items.length > 0) {
         items.forEach(function(item) {
-          var days = dayOverrides['ebie'][item.type] || item.days || [];
+          var period = findFixedPeriod('ebie', item.type, d);
+          var days = period ? period.days : [];
           if (days.indexOf(w) !== -1) evs.push({type:item.type});
         });
       } else {
@@ -1281,14 +1345,14 @@ function render() {
         var sp=specialEvents[shop][dk];
         var bands=eventBands[shop][dk];
         var band=bands && bands.length ? bands[0] : null;
+        var cb=getClosedInfoForDate(shop, d);
 
         if(sp){
           sp.forEach(function(e){
             if(e.type==='closed') html+='<div class="pill-closed" data-popup="closed" data-label="'+(e.label||'臨時休業')+'">'+(e.label||'臨時休業')+'</div>';
           });
-        } else if(closedBands[shop][dk] && band){
+        } else if(cb && band){
           // イベント帯を上に、休アイコンをその下に（複数帯対応）
-          var cb=closedBands[shop][dk];
           bands.forEach(function(b, bi){
             var bc='event-band';
             var styleStr = bi > 0 ? ' style="top:'+(32 + bi * 23)+'px"' : '';
@@ -1303,11 +1367,10 @@ function render() {
           // 帯の本数に応じて「休」の位置を下にずらす
           var bandCount = bands.length;
           var closedMargin = bandCount > 1 ? (24 + (bandCount-1)*23) : 24;
-          html+='<div class="dot-row-below" style="margin-top:'+closedMargin+'px"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-closed-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
-        } else if(closedBands[shop][dk]){
-          // 臨時休業アイコン（休）のみ
-          var cb=closedBands[shop][dk];
-          html+='<div class="dot-row"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-closed-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
+          html+='<div class="dot-row-below" style="margin-top:'+closedMargin+'px"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-reserve="'+(cb.reserveUrl||'')+'" data-closed-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
+        } else if(cb){
+          // 臨時休業・定休日アイコン（休）のみ
+          html+='<div class="dot-row"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-reserve="'+(cb.reserveUrl||'')+'" data-closed-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
 
         } else if(band){
           // 複数イベント帯対応：1本目は通常、2本目以降は下にずらす
@@ -1615,12 +1678,15 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
     var ctype=closed.getAttribute('data-closed-type')||'irregular';
     if(ctype==='irregular'){
       var summary=getIrregularClosedSummary(shop);
-      showPopup('dot-closed','','#AF011C','臨時休業',summary?'<span>'+summary+'</span>':'',closed,'',undefined,'');
+      var tappedMemo=closed.getAttribute('data-memo')||'';
+      var tappedUrl=closed.getAttribute('data-reserve')||'';
+      showPopup('dot-closed','','#AF011C','臨時休業',summary?'<span>'+summary+'</span>':'',closed,tappedUrl,'詳細を確認',tappedMemo);
     } else {
       var clabel=closed.getAttribute('data-label')||'定休日';
       var cperiod=closed.getAttribute('data-period')||'';
       var closedMemo=closed.getAttribute('data-memo')||'';
-      showPopup('dot-closed','','#AF011C',clabel,cperiod?'<span>'+cperiod+'</span>':'',closed,'',undefined,closedMemo);
+      var closedUrl=closed.getAttribute('data-reserve')||'';
+      showPopup('dot-closed','','#AF011C',clabel,cperiod?'<span>'+cperiod+'</span>':'',closed,closedUrl,'詳細を確認',closedMemo);
     }
   }
 });
