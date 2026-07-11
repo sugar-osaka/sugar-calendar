@@ -1303,11 +1303,11 @@ function render() {
           // 帯の本数に応じて「休」の位置を下にずらす
           var bandCount = bands.length;
           var closedMargin = bandCount > 1 ? (24 + (bandCount-1)*23) : 24;
-          html+='<div class="dot-row-below" style="margin-top:'+closedMargin+'px"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
+          html+='<div class="dot-row-below" style="margin-top:'+closedMargin+'px"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-closed-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
         } else if(closedBands[shop][dk]){
           // 臨時休業アイコン（休）のみ
           var cb=closedBands[shop][dk];
-          html+='<div class="dot-row"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
+          html+='<div class="dot-row"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-closed-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
 
         } else if(band){
           // 複数イベント帯対応：1本目は通常、2本目以降は下にずらす
@@ -1612,7 +1612,7 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
   var closed=e.target.closest('[data-popup="closed"]');
   if(closed){
     e.stopPropagation();
-    var ctype=closed.getAttribute('data-type')||'irregular';
+    var ctype=closed.getAttribute('data-closed-type')||'irregular';
     if(ctype==='irregular'){
       var summary=getIrregularClosedSummary(shop);
       showPopup('dot-closed','','#AF011C','臨時休業',summary?'<span>'+summary+'</span>':'',closed,'',undefined,'');
