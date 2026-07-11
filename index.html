@@ -430,6 +430,7 @@ var TYPE_INFO = {
 var specialEvents  = {sagisu:{}, ebie:{}};
 var eventBands     = {sagisu:{}, ebie:{}};
 var closedBands    = {sagisu:{}, ebie:{}};
+var closedEventsList = {sagisu:[], ebie:[]}; // 臨時休業（不定期）の生の期間リスト（ポップアップの一覧表示用）
 var offTypes       = {sagisu:{}, ebie:{}};
 var timeOverrides  = {sagisu:{}, ebie:{}};
 // 予約URL: reserveUrls[shop][type] = 'https://...' または reserveUrls[shop]['event-dateKey'] = 'https://...'
@@ -487,6 +488,21 @@ function parseDate(str) {
 }
 
 function formatDateJP(d) { var w=['日','月','火','水','木','金','土']; return (d.getMonth()+1)+'/'+d.getDate()+'('+w[d.getDay()]+')'; }
+function formatDateShort(d) { return (d.getMonth()+1)+'/'+d.getDate(); }
+
+// 臨時休業：カレンダーの表示範囲（今月〜来月）に入っている分をまとめて「7/5・7/9・8/4」のように一覧化する
+function getIrregularClosedSummary(shopKey) {
+  var winStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  var winEnd = new Date(maxYear, maxMonth + 1, 0); // 来月末日
+  var list = (closedEventsList[shopKey] || []).filter(function(ev) {
+    return ev.end >= winStart && ev.start <= winEnd;
+  }).slice().sort(function(a, b) { return a.start - b.start; });
+  if (!list.length) return '';
+  return list.map(function(ev) {
+    var isSame = ev.start.toDateString() === ev.end.toDateString();
+    return isSame ? formatDateShort(ev.start) : (formatDateShort(ev.start) + '〜' + formatDateShort(ev.end));
+  }).join('・');
+}
 
 function makeDotHTML(e, hrs, dk) {
   if (e.type === 'sugar') return ''; // sugar帯は別途描画
@@ -523,6 +539,7 @@ function parseAndApplyCSV(text) {
   specialEvents  = {sagisu:{}, ebie:{}};
   eventBands     = {sagisu:{}, ebie:{}};
   closedBands    = {sagisu:{}, ebie:{}};
+  closedEventsList = {sagisu:[], ebie:[]};
   offTypes       = {sagisu:{}, ebie:{}};
   timeOverrides  = {sagisu:{}, ebie:{}};
   dayOverrides   = {sagisu:{}, ebie:{}};
@@ -648,6 +665,7 @@ function parseAndApplyCSV(text) {
       var periodText = '【期間】' + formatDateJP(startD);
       if (!isSingleDay) periodText += '〜'+formatDateJP(endD);
       else periodText += ' のみ';
+      closedEventsList[shopName].push({start: new Date(startD), end: new Date(endD)});
       var cur = new Date(startD);
       while (cur <= endD) {
         var ck = dateKey(cur);
@@ -657,7 +675,8 @@ function parseAndApplyCSV(text) {
           isStart: cur.toDateString() === startD.toDateString(),
           isEnd:   cur.toDateString() === endD.toDateString(),
           single:  startD.toDateString() === endD.toDateString(),
-          memo: memo || ''
+          memo: memo || '',
+          type: 'irregular'
         };
         cur.setDate(cur.getDate()+1);
       }
@@ -682,7 +701,8 @@ function parseAndApplyCSV(text) {
               isStart: true,
               isEnd: true,
               single: true,
-              memo: memo || ''
+              memo: memo || '',
+              type: 'regular'
             };
           }
           rCur.setDate(rCur.getDate()+1);
@@ -1283,11 +1303,11 @@ function render() {
           // 帯の本数に応じて「休」の位置を下にずらす
           var bandCount = bands.length;
           var closedMargin = bandCount > 1 ? (24 + (bandCount-1)*23) : 24;
-          html+='<div class="dot-row-below" style="margin-top:'+closedMargin+'px"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" role="button" tabindex="0">休</div></div>';
+          html+='<div class="dot-row-below" style="margin-top:'+closedMargin+'px"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
         } else if(closedBands[shop][dk]){
           // 臨時休業アイコン（休）のみ
           var cb=closedBands[shop][dk];
-          html+='<div class="dot-row"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" role="button" tabindex="0">休</div></div>';
+          html+='<div class="dot-row"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
 
         } else if(band){
           // 複数イベント帯対応：1本目は通常、2本目以降は下にずらす
@@ -1592,10 +1612,16 @@ document.querySelector('.cal-wrap').addEventListener('click',function(e){
   var closed=e.target.closest('[data-popup="closed"]');
   if(closed){
     e.stopPropagation();
-    var clabel=closed.getAttribute('data-label')||'臨時休業';
-    var cperiod=closed.getAttribute('data-period')||'';
-    var closedMemo=closed.getAttribute('data-memo')||'';
-    showPopup('dot-closed','','#AF011C',clabel,cperiod?'<span>'+cperiod+'</span>':'',closed,'',undefined,closedMemo);
+    var ctype=closed.getAttribute('data-type')||'irregular';
+    if(ctype==='irregular'){
+      var summary=getIrregularClosedSummary(shop);
+      showPopup('dot-closed','','#AF011C','臨時休業',summary?'<span>'+summary+'</span>':'',closed,'',undefined,'');
+    } else {
+      var clabel=closed.getAttribute('data-label')||'定休日';
+      var cperiod=closed.getAttribute('data-period')||'';
+      var closedMemo=closed.getAttribute('data-memo')||'';
+      showPopup('dot-closed','','#AF011C',clabel,cperiod?'<span>'+cperiod+'</span>':'',closed,'',undefined,closedMemo);
+    }
   }
 });
 
