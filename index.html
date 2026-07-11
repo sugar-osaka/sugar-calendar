@@ -37,13 +37,13 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .tab:first-child{border-right:1.5px solid var(--theme-soft)}
 .tab.active{background:var(--theme);color:#fff}
 .shop-info-top{padding:4px 0;margin-bottom:1rem;font-size:11px;color:#432f2f;font-family:'Yomogi',cursive;line-height:2}
-.shop-info-top .info-rows{display:table}
-.shop-info-top .info-row{display:table-row}
-.shop-info-top .info-icon{display:table-cell;width:22px;vertical-align:middle;padding-right:4px}
-.shop-info-top .info-icon svg{width:18px;height:18px;vertical-align:middle}
-.shop-info-top .info-name{display:table-cell;white-space:nowrap;vertical-align:middle;padding-right:6px}
-.shop-info-top .info-days{display:table-cell;vertical-align:middle;padding-right:4px}
-.shop-info-top .info-hours{display:table-cell;vertical-align:middle;white-space:nowrap}
+.shop-info-top .info-rows{display:flex;flex-direction:column;gap:2px}
+.shop-info-top .info-row{display:flex;align-items:center;flex-wrap:wrap;row-gap:0}
+.shop-info-top .info-icon{flex:0 0 22px;width:22px;display:flex;align-items:center;justify-content:flex-start}
+.shop-info-top .info-icon svg{width:18px;height:18px}
+.shop-info-top .info-name{flex:0 0 auto;white-space:nowrap;padding-right:6px}
+.shop-info-top .info-days{flex:0 0 auto;white-space:nowrap;padding-right:4px}
+.shop-info-top .info-hours{flex:1 1 140px;min-width:140px;word-break:break-word;overflow-wrap:break-word}
 .shop-info-top b{font-weight:400}
 .day-dots{display:inline-flex;gap:3px;align-items:center;vertical-align:middle;margin:0 2px}
 .day-dot{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid #ddd;font-size:9px;color:#ccc;font-family:'Yomogi',cursive;line-height:1}
