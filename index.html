@@ -539,6 +539,34 @@ function findFixedPeriod(shopKey, type, d) {
   return found;
 }
 
+// 表示中の月を曜日/時間が同じ塊ごとに分割する。月内で変化がなければ1個だけ返る
+function getMonthSegments(shopKey, type, y, m) {
+  var first = new Date(y, m, 1);
+  var last = new Date(y, m + 1, 0);
+  var segments = [];
+  var cur = new Date(first);
+  while (cur <= last) {
+    var period = findFixedPeriod(shopKey, type, cur);
+    var days = period ? period.days : [];
+    var hours = period ? period.hours : '';
+    var sig = days.join(',') + '|' + hours;
+    var lastSeg = segments[segments.length - 1];
+    if (lastSeg && lastSeg.sig === sig) {
+      lastSeg.end = new Date(cur);
+    } else {
+      segments.push({ sig: sig, days: days, hours: hours, start: new Date(cur), end: new Date(cur) });
+    }
+    cur.setDate(cur.getDate() + 1);
+  }
+  return segments;
+}
+
+function formatShortRange(s, e) {
+  var a = (s.getMonth() + 1) + '/' + s.getDate();
+  var b = (e.getMonth() + 1) + '/' + e.getDate();
+  return a === b ? a : (a + '〜' + b);
+}
+
 // 臨時休業：カレンダーの表示範囲（今月〜来月）に入っている分をまとめて「7/5・7/9・8/4」のように一覧化する
 function getIrregularClosedSummary(shopKey) {
   var winStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -933,14 +961,30 @@ var shops = {
       if (!items || items.length === 0) {
         return [];
       }
-      var refDate = (year === now.getFullYear() && month === now.getMonth()) ? today : new Date(year, month, 1);
-      return items.map(function(item) {
-        var period = findFixedPeriod('sagisu', item.type, refDate);
-        var days = period ? period.days : [];
+      var rows = [];
+      items.forEach(function(item) {
         var color = COLORS[item.type] || '#432f2f';
-        var hours = (period && period.hours) || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
-        return {type:item.type, name:item.name, dots:daysToDotsHTML(days, color), hours:hours};
+        var segments = getMonthSegments('sagisu', item.type, year, month);
+        if (segments.length <= 1) {
+          var seg = segments[0];
+          var days = seg ? seg.days : [];
+          var hours = (seg && seg.hours) || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
+          rows.push({type:item.type, name:item.name, dots:daysToDotsHTML(days, color), hours:hours, continuation:false});
+        } else {
+          segments.forEach(function(seg, idx) {
+            var hours = seg.hours || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
+            var dateLabel = formatShortRange(seg.start, seg.end);
+            rows.push({
+              type: item.type,
+              name: idx === 0 ? item.name : '',
+              dots: daysToDotsHTML(seg.days, color),
+              hours: dateLabel + '　' + hours,
+              continuation: idx > 0
+            });
+          });
+        }
       });
+      return rows;
     },
     getLegend: function() {
       var items = shopItems['sagisu'];
@@ -986,14 +1030,30 @@ var shops = {
       if (!items || items.length === 0) {
         return [];
       }
-      var refDate = (year === now.getFullYear() && month === now.getMonth()) ? today : new Date(year, month, 1);
-      return items.map(function(item) {
-        var period = findFixedPeriod('ebie', item.type, refDate);
-        var days = period ? period.days : [];
+      var rows = [];
+      items.forEach(function(item) {
         var color = COLORS[item.type] || '#432f2f';
-        var hours = (period && period.hours) || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
-        return {type:item.type, name:item.name, dots:daysToDotsHTML(days, color), hours:hours};
+        var segments = getMonthSegments('ebie', item.type, year, month);
+        if (segments.length <= 1) {
+          var seg = segments[0];
+          var days = seg ? seg.days : [];
+          var hours = (seg && seg.hours) || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
+          rows.push({type:item.type, name:item.name, dots:daysToDotsHTML(days, color), hours:hours, continuation:false});
+        } else {
+          segments.forEach(function(seg, idx) {
+            var hours = seg.hours || (TYPE_INFO[item.type] ? TYPE_INFO[item.type].hours : '');
+            var dateLabel = formatShortRange(seg.start, seg.end);
+            rows.push({
+              type: item.type,
+              name: idx === 0 ? item.name : '',
+              dots: daysToDotsHTML(seg.days, color),
+              hours: dateLabel + '　' + hours,
+              continuation: idx > 0
+            });
+          });
+        }
       });
+      return rows;
     },
     getLegend: function() {
       var items = shopItems['ebie'];
@@ -1286,7 +1346,9 @@ function render() {
   shops[shop].getInfoRows().forEach(function(r){
     var c=COLORS[r.type];
     infoHTML+='<div class="info-row">';
-    if(r.type==='sugar'){
+    if(r.continuation){
+      infoHTML+='<div class="info-icon"></div>';
+    } else if(r.type==='sugar'){
       infoHTML+='<div class="info-icon"><div style="background:linear-gradient(90deg,#C8956C,#A63F52);border-radius:4px;padding:1px 5px;font-size:10px;font-family:Caveat Brush,cursive;color:#fff;display:inline-block">sugar</div></div>';
     } else {
       var sv=SVG[r.type].replace('stroke="currentColor"','stroke="'+c+'"');
