@@ -39,11 +39,11 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .shop-info-top{padding:4px 0;margin-bottom:1rem;font-size:11px;color:#432f2f;font-family:'Yomogi',cursive;line-height:2}
 .shop-info-top .info-rows{display:table;width:100%}
 .shop-info-top .info-row{display:table-row}
-.shop-info-top .info-icon{display:table-cell;width:22px;vertical-align:middle;padding-right:4px}
+.shop-info-top .info-icon{display:table-cell;width:22px;vertical-align:top;padding-right:4px}
 .shop-info-top .info-icon svg{width:18px;height:18px;vertical-align:middle}
-.shop-info-top .info-name{display:table-cell;white-space:nowrap;vertical-align:middle;padding-right:6px}
-.shop-info-top .info-days{display:table-cell;vertical-align:middle;padding-right:4px;white-space:nowrap}
-.shop-info-top .info-hours{display:table-cell;vertical-align:middle;word-break:break-word;overflow-wrap:break-word}
+.shop-info-top .info-name{display:table-cell;white-space:nowrap;vertical-align:top;padding-right:6px}
+.shop-info-top .info-days{display:table-cell;vertical-align:top;padding-right:4px;white-space:nowrap}
+.shop-info-top .info-hours{display:table-cell;vertical-align:top;word-break:break-word;overflow-wrap:break-word;padding-left:1em;text-indent:-1em}
 .shop-info-top b{font-weight:400}
 .day-dots{display:inline-flex;gap:3px;align-items:center;vertical-align:middle;margin:0 2px}
 .day-dot{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid #ddd;font-size:9px;color:#ccc;font-family:'Yomogi',cursive;line-height:1}
@@ -567,9 +567,19 @@ function getMonthSegments(shopKey, type, y, m) {
   return segments;
 }
 
+function isLastDayOfMonth(d) {
+  var next = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+  return next.getMonth() !== d.getMonth();
+}
+
 function formatShortRange(s, e) {
+  var startIsDay1 = s.getDate() === 1;
+  var endIsLast = isLastDayOfMonth(e);
   var a = (s.getMonth() + 1) + '/' + s.getDate();
   var b = (e.getMonth() + 1) + '/' + e.getDate();
+  if (startIsDay1 && endIsLast) return '';
+  if (startIsDay1) return '〜' + b;
+  if (endIsLast) return a + '〜';
   return a === b ? a : (a + '〜' + b);
 }
 
