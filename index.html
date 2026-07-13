@@ -36,6 +36,11 @@ body{background:#fafaf8;min-height:100vh;padding:0 0 40px}
 .tab{padding:8px 22px;font-size:15px;cursor:pointer;background:#fff;color:#ccc;border:none;transition:all 0.15s;font-family:'Caveat Brush',cursive}
 .tab:first-child{border-right:1.5px solid var(--theme-soft)}
 .tab.active{background:var(--theme);color:#fff}
+.regular-closed-top{margin-bottom:0.6rem}
+.regular-closed-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11px;color:#AF011C;font-family:'Yomogi',cursive;line-height:1.8}
+.regular-closed-icon{flex:0 0 22px;width:22px;height:22px;border-radius:6px;background:#AF011C;color:#fcebed;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;font-family:'Yomogi',cursive}
+.regular-closed-label{white-space:nowrap;padding-right:4px}
+.regular-closed-days{word-break:break-word;overflow-wrap:break-word;opacity:0.85}
 .shop-info-top{padding:4px 0;margin-bottom:1rem;font-size:11px;color:#432f2f;font-family:'Yomogi',cursive;line-height:2}
 .shop-info-top .info-rows{display:flex;flex-direction:column}
 .shop-info-top .info-row{display:flex;align-items:center;flex-wrap:wrap}
@@ -276,6 +281,7 @@ html.popup-open,body.popup-open{overflow:hidden;overscroll-behavior:none}
     <div class="month" id="month-label"></div>
     <button id="nav-next" onclick="changeMonth(1)">&#8250;</button>
   </div>
+  <div class="regular-closed-top" id="regular-closed-top"></div>
   <div class="shop-info-top" id="shop-info-top"></div>
   <p style="font-size:11px;color:#b09a8a;text-align:left;margin-bottom:0.6rem;font-family:'Yomogi',cursive;text-shadow:0 0 0.2px #b09a8a">✦ アイコンを押すと詳細を確認できます</p>
   <div class="cal-wrap">
@@ -1394,6 +1400,20 @@ function render() {
   var isMaxMonth = (year === maxYear && month === maxMonth);
   document.getElementById('nav-prev').style.visibility = isCurrentMonth ? 'hidden' : 'visible';
   document.getElementById('nav-next').style.visibility = isMaxMonth ? 'hidden' : 'visible';
+
+  var monthStart = new Date(year, month, 1);
+  var monthEnd = new Date(year, month+1, 0);
+  var closedTopHTML='';
+  (regularClosedPeriods[shop]||[]).forEach(function(p){
+    var overlaps = (p.start===null || p.start<=monthEnd) && (p.end===null || p.end>=monthStart);
+    if(!overlaps) return;
+    closedTopHTML += '<div class="regular-closed-row">';
+    closedTopHTML += '<div class="regular-closed-icon">休</div>';
+    closedTopHTML += '<div class="regular-closed-label">'+p.label+'</div>';
+    closedTopHTML += '<div class="regular-closed-days">'+p.periodText+'</div>';
+    closedTopHTML += '</div>';
+  });
+  document.getElementById('regular-closed-top').innerHTML = closedTopHTML;
 
   var infoHTML='<div class="info-rows">';
   shops[shop].getInfoRows().forEach(function(r){
