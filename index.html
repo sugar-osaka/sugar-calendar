@@ -577,14 +577,17 @@ function isLastDayOfMonth(d) {
 }
 
 function formatShortRange(s, e) {
+  var now = new Date();
+  var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  var startIsToday = s.getFullYear() === today.getFullYear() && s.getMonth() === today.getMonth() && s.getDate() === today.getDate();
   var startIsDay1 = s.getDate() === 1;
   var endIsLast = isLastDayOfMonth(e);
   var a = (s.getMonth() + 1) + '/' + s.getDate();
   var b = (e.getMonth() + 1) + '/' + e.getDate();
   if (startIsDay1 && endIsLast) return '';
   if (startIsDay1) return '〜' + b;
-  if (endIsLast) return a + '〜';
-  return a === b ? a : (a + '〜' + b);
+  if (endIsLast) return startIsToday ? '〜' : (a + '〜');
+  return a === b ? a : (startIsToday ? ('〜' + b) : (a + '〜' + b));
 }
 
 // 曜日・時間が完全に同じセグメントは、離れていても1グループにまとめる（行数を最小化）
@@ -1205,7 +1208,7 @@ function switchEbieTab(tab) {
 
 function setShop(s) {
   shop = s;
-  history.replaceState(null, '', s === 'ebie' ? '?shop=ebie' : '?');
+  try{ history.replaceState(null, '', s === 'ebie' ? '?shop=ebie' : '?'); }catch(e){}
   var wrap = document.getElementById('wrap');
   wrap.classList.remove('shop-sagisu','shop-ebie');
   wrap.classList.add('shop-'+s);
@@ -1846,7 +1849,7 @@ if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then =
 } else {
   loadHolidays().then(function(){ loadCSV(); }).catch(function(){ loadCSV(); });
 }
-if(shop === 'ebie') setShop('ebie');
+setShop(shop);
 window.addEventListener('load', function() {
   var link = document.querySelector('.ebie-tab-btn.is-link');
   if (!link) return;
