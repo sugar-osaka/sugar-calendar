@@ -1506,7 +1506,7 @@ function render() {
           });
           // 帯の本数に応じて「休」の位置を下にずらす
           var bandCount = bands.length;
-          var closedMargin = (bandCount > 1 ? (24 + (bandCount-1)*23) : 24) + holidayShift;
+          var closedMargin = bandCount > 1 ? (24 + (bandCount-1)*23) : 24;
           html+='<div class="dot-row-below" style="margin-top:'+closedMargin+'px"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-reserve="'+(cb.reserveUrl||'')+'" data-closed-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
         } else if(cb){
           // 臨時休業・定休日アイコン（休）のみ
@@ -1533,7 +1533,7 @@ function render() {
           var evs=shops[shop].getEvents(d);
           if(evs.length){
             var bandCount = bands.length;
-            var belowMargin = (bandCount > 1 ? (24 + (bandCount-1)*23) : (needsShift ? 48 : 24)) + holidayShift;
+            var belowMargin = bandCount > 1 ? (24 + (bandCount-1)*23) : (needsShift ? 48 : 24);
             html+='<div class="dot-row-below" style="margin-top:'+belowMargin+'px">';
             evs.forEach(function(e){
               var hrs=getHours(e.type,d);
