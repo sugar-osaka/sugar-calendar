@@ -1529,7 +1529,7 @@ function render() {
           // 帯の本数に応じて「休」の位置を下にずらす（帯と同じくセル上端からの絶対位置で指定）
           var bandCount = bands.length;
           var closedTop = 32 + (bandCount > 1 ? (bandCount-1)*23 : 0) + holidayShift + 23;
-          html+='<div class="dot-row-below" style="position:absolute;top:'+closedTop+'px;left:0;right:0"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-reserve="'+(cb.reserveUrl||'')+'" data-closed-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
+          html+='<div class="dot-row-below" style="position:absolute;margin-top:0;top:'+closedTop+'px;left:0;right:0"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-reserve="'+(cb.reserveUrl||'')+'" data-closed-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
         } else if(cb){
           // 臨時休業・定休日アイコン（休）のみ
           var closedRowStyle = cellHolidayShift ? ' style="margin-top:'+(4 + cellHolidayShift)+'px"' : '';
@@ -1558,7 +1558,7 @@ function render() {
             var bandCount = bands.length;
             var belowBaseTop = bandCount > 1 ? (32 + (bandCount-1)*23) : (needsShift ? 55 : 32);
             var belowTop = belowBaseTop + holidayShift + 23;
-            html+='<div class="dot-row-below" style="position:absolute;top:'+belowTop+'px;left:0;right:0">';
+            html+='<div class="dot-row-below" style="position:absolute;margin-top:0;top:'+belowTop+'px;left:0;right:0">';
             evs.forEach(function(e){
               var hrs=getHours(e.type,d);
               html+=makeDotHTML(e,hrs,dk);
@@ -1580,7 +1580,7 @@ function render() {
           if (nonSugar.length) {
             var belowCls = hasSugar ? 'dot-row-below' : 'dot-row';
             // sugar帯がある日は帯と同じセル上端からの絶対位置、それ以外は祝日の日だけ個別にシフト
-            var rowStyle = hasSugar ? ' style="position:absolute;top:'+((rowHasHoliday?55:32)+23)+'px;left:0;right:0"' : (cellHolidayShift ? ' style="margin-top:'+(4 + cellHolidayShift)+'px"' : '');
+            var rowStyle = hasSugar ? ' style="position:absolute;margin-top:0;top:'+((rowHasHoliday?55:32)+23)+'px;left:0;right:0"' : (cellHolidayShift ? ' style="margin-top:'+(4 + cellHolidayShift)+'px"' : '');
             html+='<div class="'+belowCls+'"'+rowStyle+'>';
             nonSugar.forEach(function(e){
               var hrs=getHours(e.type,d);
