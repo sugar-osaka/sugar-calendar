@@ -1460,7 +1460,7 @@ function render() {
       var hk = hd.getFullYear()+'-'+(hd.getMonth()+1)+'-'+hd.getDate();
       if(holidayData[hk]){ rowHasHoliday = true; break; }
     }
-    var holidayShift = rowHasHoliday ? 14 : 0;
+    var rowHolidayShift = rowHasHoliday ? 14 : 0;
     for(var col=0;col<7;col++){
       var d=new Date(year,month,day);
       var isOther=day<1||day>last.getDate();
@@ -1468,6 +1468,8 @@ function render() {
       var holidayKey = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
       var holidayName = !isOther ? (holidayData[holidayKey]||'') : '';
       var isHoliday = !!holidayName;
+      var holidayShift = rowHolidayShift; // 帯がある週：行全体で同じ高さに揃える用
+      var cellHolidayShift = isHoliday ? 14 : 0; // 帯がない日：その日だけ下げる用
       var cls='';
       if(isOther) cls+=' other';
       if(isToday) cls+=' today';
@@ -1510,7 +1512,8 @@ function render() {
           html+='<div class="dot-row-below" style="margin-top:'+closedMargin+'px"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-reserve="'+(cb.reserveUrl||'')+'" data-closed-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
         } else if(cb){
           // 臨時休業・定休日アイコン（休）のみ
-          html+='<div class="dot-row"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-reserve="'+(cb.reserveUrl||'')+'" data-closed-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
+          var closedRowStyle = cellHolidayShift ? ' style="margin-top:'+(4 + cellHolidayShift)+'px"' : '';
+          html+='<div class="dot-row"'+closedRowStyle+'><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-reserve="'+(cb.reserveUrl||'')+'" data-closed-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
 
         } else if(band){
           // 複数イベント帯対応：1本目は通常、2本目以降は下にずらす
@@ -1555,7 +1558,9 @@ function render() {
           var nonSugar = evs.filter(function(e){return e.type!=='sugar';});
           if (nonSugar.length) {
             var belowCls = hasSugar ? 'dot-row-below' : 'dot-row';
-            html+='<div class="'+belowCls+'">';
+            // sugar帯がある日は帯と同じ行全体シフト、それ以外は祝日の日だけ個別にシフト
+            var rowStyle = hasSugar ? ' style="margin-top:'+(24 + holidayShift)+'px"' : (cellHolidayShift ? ' style="margin-top:'+(4 + cellHolidayShift)+'px"' : '');
+            html+='<div class="'+belowCls+'"'+rowStyle+'>';
             nonSugar.forEach(function(e){
               var hrs=getHours(e.type,d);
               html+=makeDotHTML(e,hrs,dk);
