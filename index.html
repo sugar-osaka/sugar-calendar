@@ -1407,8 +1407,8 @@ function render() {
   });
   if(regPeriods.length){
     regPeriods.forEach(function(p, idx){
-      var text = p.label+'：毎週'+p.periodText;
-      if(idx===0 && irregularDaysText) text += ' / '+(month+1)+'月臨時休業日：'+irregularDaysText;
+      var text = '【'+p.label+'】毎週'+p.periodText;
+      if(idx===0 && irregularDaysText) text += ' / 【'+(month+1)+'月臨時休業日】'+irregularDaysText;
       closedTopHTML += '<div class="regular-closed-row">';
       closedTopHTML += '<div class="regular-closed-icon-wrap"><div class="regular-closed-icon">休</div></div>';
       closedTopHTML += '<div class="regular-closed-days">'+text+'</div>';
@@ -1417,7 +1417,7 @@ function render() {
   } else if(irregularDaysText){
     closedTopHTML += '<div class="regular-closed-row">';
     closedTopHTML += '<div class="regular-closed-icon-wrap"><div class="regular-closed-icon">休</div></div>';
-    closedTopHTML += '<div class="regular-closed-days">'+(month+1)+'月臨時休業日：'+irregularDaysText+'</div>';
+    closedTopHTML += '<div class="regular-closed-days">【'+(month+1)+'月臨時休業日】'+irregularDaysText+'</div>';
     closedTopHTML += '</div>';
   }
   document.getElementById('regular-closed-top').innerHTML = closedTopHTML;
