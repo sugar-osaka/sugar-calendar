@@ -1390,16 +1390,36 @@ function render() {
 
   var monthStart = new Date(year, month, 1);
   var monthEnd = new Date(year, month+1, 0);
+
+  // 臨時休業（不定期）のうち、表示中の月に該当する日をまとめる
+  var irregularList = (closedEventsList[shop]||[]).filter(function(ev){
+    return ev.end >= monthStart && ev.start <= monthEnd;
+  }).slice().sort(function(a,b){ return a.start - b.start; });
+  var irregularDaysText = irregularList.map(function(ev){
+    var s = ev.start < monthStart ? monthStart : ev.start;
+    var e = ev.end > monthEnd ? monthEnd : ev.end;
+    return s.toDateString()===e.toDateString() ? (s.getDate()+'日') : (s.getDate()+'〜'+e.getDate()+'日');
+  }).join('・');
+
   var closedTopHTML='';
-  (regularClosedPeriods[shop]||[]).forEach(function(p){
-    var overlaps = (p.start===null || p.start<=monthEnd) && (p.end===null || p.end>=monthStart);
-    if(!overlaps) return;
+  var regPeriods = (regularClosedPeriods[shop]||[]).filter(function(p){
+    return (p.start===null || p.start<=monthEnd) && (p.end===null || p.end>=monthStart);
+  });
+  if(regPeriods.length){
+    regPeriods.forEach(function(p, idx){
+      var text = p.label+'：毎週'+p.periodText;
+      if(idx===0 && irregularDaysText) text += ' / '+(month+1)+'月臨時休業日：'+irregularDaysText;
+      closedTopHTML += '<div class="regular-closed-row">';
+      closedTopHTML += '<div class="regular-closed-icon-wrap"><div class="regular-closed-icon">休</div></div>';
+      closedTopHTML += '<div class="regular-closed-days">'+text+'</div>';
+      closedTopHTML += '</div>';
+    });
+  } else if(irregularDaysText){
     closedTopHTML += '<div class="regular-closed-row">';
     closedTopHTML += '<div class="regular-closed-icon-wrap"><div class="regular-closed-icon">休</div></div>';
-    closedTopHTML += '<div class="regular-closed-label">'+p.label+'</div>';
-    closedTopHTML += '<div class="regular-closed-days">'+p.periodText+'</div>';
+    closedTopHTML += '<div class="regular-closed-days">'+(month+1)+'月臨時休業日：'+irregularDaysText+'</div>';
     closedTopHTML += '</div>';
-  });
+  }
   document.getElementById('regular-closed-top').innerHTML = closedTopHTML;
 
   var infoHTML='<div class="info-rows">';
@@ -1506,10 +1526,10 @@ function render() {
             var labelPart=showELabel0?'<span class="event-band-label">'+b.name+'</span>':'';
             html+='<div class="'+bc+'"'+styleStr+' data-popup="event" data-name="'+b.name+'" data-period="'+b.period+'" data-hours="'+b.hours+'" data-reserve="'+(b.reserveUrl||'')+'" data-memo="'+(b.memo||'')+'">'+labelPart+'</div>';
           });
-          // 帯の本数に応じて「休」の位置を下にずらす
+          // 帯の本数に応じて「休」の位置を下にずらす（帯と同じくセル上端からの絶対位置で指定）
           var bandCount = bands.length;
-          var closedMargin = (bandCount > 1 ? (24 + (bandCount-1)*23) : 24) + holidayShift;
-          html+='<div class="dot-row-below" style="margin-top:'+closedMargin+'px"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-reserve="'+(cb.reserveUrl||'')+'" data-closed-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
+          var closedTop = 32 + (bandCount > 1 ? (bandCount-1)*23 : 0) + holidayShift + 23;
+          html+='<div class="dot-row-below" style="position:absolute;top:'+closedTop+'px;left:0;right:0"><div class="dot dot-closed" data-popup="closed" data-label="'+cb.label+'" data-period="'+cb.period+'" data-memo="'+(cb.memo||'')+'" data-reserve="'+(cb.reserveUrl||'')+'" data-closed-type="'+(cb.type||'irregular')+'" role="button" tabindex="0">休</div></div>';
         } else if(cb){
           // 臨時休業・定休日アイコン（休）のみ
           var closedRowStyle = cellHolidayShift ? ' style="margin-top:'+(4 + cellHolidayShift)+'px"' : '';
@@ -1532,12 +1552,13 @@ function render() {
             html+='<div class="'+bc+'"'+styleStr+' data-popup="event" data-name="'+b.name+'" data-period="'+b.period+'" data-hours="'+b.hours+'" data-reserve="'+(b.reserveUrl||'')+'" data-memo="'+(b.memo||'')+'">'+labelPart+'</div>';
           });
 
-          // 通常アイコンも表示
+          // 通常アイコンも表示（帯と同じくセル上端からの絶対位置で指定）
           var evs=shops[shop].getEvents(d);
           if(evs.length){
             var bandCount = bands.length;
-            var belowMargin = (bandCount > 1 ? (24 + (bandCount-1)*23) : (needsShift ? 48 : 24)) + holidayShift;
-            html+='<div class="dot-row-below" style="margin-top:'+belowMargin+'px">';
+            var belowBaseTop = bandCount > 1 ? (32 + (bandCount-1)*23) : (needsShift ? 55 : 32);
+            var belowTop = belowBaseTop + holidayShift + 23;
+            html+='<div class="dot-row-below" style="position:absolute;top:'+belowTop+'px;left:0;right:0">';
             evs.forEach(function(e){
               var hrs=getHours(e.type,d);
               html+=makeDotHTML(e,hrs,dk);
@@ -1558,8 +1579,8 @@ function render() {
           var nonSugar = evs.filter(function(e){return e.type!=='sugar';});
           if (nonSugar.length) {
             var belowCls = hasSugar ? 'dot-row-below' : 'dot-row';
-            // sugar帯がある日は帯と同じ行全体シフト、それ以外は祝日の日だけ個別にシフト
-            var rowStyle = hasSugar ? ' style="margin-top:'+(24 + holidayShift)+'px"' : (cellHolidayShift ? ' style="margin-top:'+(4 + cellHolidayShift)+'px"' : '');
+            // sugar帯がある日は帯と同じセル上端からの絶対位置、それ以外は祝日の日だけ個別にシフト
+            var rowStyle = hasSugar ? ' style="position:absolute;top:'+((rowHasHoliday?55:32)+23)+'px;left:0;right:0"' : (cellHolidayShift ? ' style="margin-top:'+(4 + cellHolidayShift)+'px"' : '');
             html+='<div class="'+belowCls+'"'+rowStyle+'>';
             nonSugar.forEach(function(e){
               var hrs=getHours(e.type,d);
