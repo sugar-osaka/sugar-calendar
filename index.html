@@ -606,18 +606,19 @@ function groupSegmentsBySignature(segments) {
   return groups;
 }
 
-// 臨時休業：カレンダーの表示範囲（今月〜来月）に入っている分をまとめて「7/5・7/9・8/4」のように一覧化する
+// 臨時休業：カレンダーで今表示している月に1日でもかかっている分を「【7月】7/1・8/3〜8/5」のように一覧化する（期間は月をまたいでもそのまま表示）
 function getIrregularClosedSummary(shopKey) {
-  var winStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  var winEnd = new Date(maxYear, maxMonth + 1, 0); // 来月末日
+  var monthStart = new Date(year, month, 1);
+  var monthEnd = new Date(year, month + 1, 0);
   var list = (closedEventsList[shopKey] || []).filter(function(ev) {
-    return ev.end >= winStart && ev.start <= winEnd;
+    return ev.end >= monthStart && ev.start <= monthEnd;
   }).slice().sort(function(a, b) { return a.start - b.start; });
   if (!list.length) return '';
-  return list.map(function(ev) {
+  var days = list.map(function(ev) {
     var isSame = ev.start.toDateString() === ev.end.toDateString();
     return isSame ? formatDateShort(ev.start) : (formatDateShort(ev.start) + '〜' + formatDateShort(ev.end));
   }).join('・');
+  return '【' + (month + 1) + '月】' + days;
 }
 
 function makeDotHTML(e, hrs, dk) {
