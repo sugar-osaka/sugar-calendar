@@ -505,6 +505,12 @@ function parseDate(str) {
 
 function formatDateJP(d) { var w=['日','月','火','水','木','金','土']; return (d.getMonth()+1)+'/'+d.getDate()+'('+w[d.getDay()]+')'; }
 function formatDateShort(d) { return (d.getMonth()+1)+'/'+d.getDate(); }
+// 日にち＋曜日（表示中の月と同じ月なら「3日(月)」、違う月なら「7/3(月)」のように月を補う）
+function formatDayWithWeekday(d, includeMonth) {
+  var w=['日','月','火','水','木','金','土'];
+  var s = includeMonth ? ((d.getMonth()+1)+'/'+d.getDate()) : (d.getDate()+'日');
+  return s+'('+w[d.getDay()]+')';
+}
 
 // 定休日：指定日dが期間ルールのいずれかに該当するか判定（複数該当時は後の行を優先）
 function findRegularClosedPeriod(shopKey, d) {
@@ -606,7 +612,7 @@ function groupSegmentsBySignature(segments) {
   return groups;
 }
 
-// 臨時休業：カレンダーで今表示している月に1日でもかかっている分を「【7月】7/1・8/3〜8/5」のように一覧化する（期間は月をまたいでもそのまま表示）
+// 臨時休業：カレンダーで今表示している月に1日でもかかっている分を「【8月】3日(月)・10日(木)」のように一覧化する（期間は月をまたいでもそのまま表示）
 function getIrregularClosedSummary(shopKey) {
   var monthStart = new Date(year, month, 1);
   var monthEnd = new Date(year, month + 1, 0);
@@ -616,7 +622,13 @@ function getIrregularClosedSummary(shopKey) {
   if (!list.length) return '';
   var days = list.map(function(ev) {
     var isSame = ev.start.toDateString() === ev.end.toDateString();
-    return isSame ? formatDateShort(ev.start) : (formatDateShort(ev.start) + '〜' + formatDateShort(ev.end));
+    if (isSame) {
+      var sameMonth = (ev.start.getFullYear() === year && ev.start.getMonth() === month);
+      return formatDayWithWeekday(ev.start, !sameMonth);
+    }
+    var startInMonth = (ev.start.getFullYear() === year && ev.start.getMonth() === month);
+    var endInMonth = (ev.end.getFullYear() === year && ev.end.getMonth() === month);
+    return formatDayWithWeekday(ev.start, !startInMonth) + '〜' + formatDayWithWeekday(ev.end, !endInMonth);
   }).join('・');
   return '【' + (month + 1) + '月】' + days;
 }
